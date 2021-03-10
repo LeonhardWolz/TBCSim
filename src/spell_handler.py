@@ -84,6 +84,12 @@ class SpellHandler:
         value = self.get_effect_strength(spell_info, effect_slot)
         aura_id = spell_info[DB.spell_column_info["EffectApplyAuraName" + str(effect_slot)]]
         misc_value = spell_info[DB.spell_column_info["EffectMiscValue" + str(effect_slot)]]
+
+        # Increase clearcasting crit chance from Arcane Potency
+        if spell_info[0] == 12536 and aura_id == 57:
+            for aura in [aura for aura in self.active_auras if aura.spell_id in [31571, 31572, 31573]]:
+                value += aura.value
+
         affected_spell_school = spell_info[DB.spell_column_info["SchoolMask"]]
         affected_spell_family_mask = DB.get_spell_family_affected(spell_info[0])
 
@@ -187,17 +193,17 @@ class SpellHandler:
             spell_power_coefficient = self.char.spell_power_coefficient(spell_info[0])
             spell_damage_multiplier = self.char.spell_dmg_multiplier(spell_info[0])
 
-            spell_damage = (spell_base_damage + spell_spell_power * spell_power_coefficient) * spell_damage_multiplier
+            spell_damage = round((spell_base_damage + spell_spell_power * spell_power_coefficient)
+                                 * spell_damage_multiplier)
 
             if self.spell_crit(spell_info[0]):
                 spell_damage *= self.char.spell_crit_dmg_multiplier(spell_info[0])
-                self.char.process_on_spell_crit(spell_info[0])
                 spell_damage = round(spell_damage)
+                self.process_on_spell_crit(spell_info[0], spell_damage)
                 self.logg(DB.get_spell_name(spell_info[0]) + " critical damage: " + str(spell_damage))
                 self.results.damage_spell_crit(spell_info[0], spell_damage)
             else:
-                self.char.process_on_spell_hit(spell_info[0])
-                spell_damage = round(spell_damage)
+                self.process_on_spell_hit(spell_info[0])
                 self.logg(DB.get_spell_name(spell_info[0]) + " damage: " + str(spell_damage))
                 self.results.damage_spell_hit(spell_info[0], spell_damage)
             self.on_damage(spell_info)
@@ -253,3 +259,68 @@ class SpellHandler:
 
     def get_spell_gcd(self, spell_id):
         return DB.get_spell_gcd(spell_id)
+
+    def get_mod_auras(self, spell_id):
+        mod_auras = []
+        for aura in self.active_auras:
+            if self.aura_applies_to_spell(aura, spell_id):
+                mod_auras.append(aura)
+        return mod_auras
+
+    def aura_applies_to_spell(self, aura, spell_id):
+        if aura.affected_spell_family_mask & self.spell_family_mask(spell_id) != 0 or \
+                aura.affected_spell_school == self.spell_school(spell_id) or \
+                aura.affected_spell_family_mask == 0:
+            return True
+        else:
+            return False
+
+    def process_on_spell_hit(self, spell_id):
+        for aura in self.get_procable_auras(proc_flag=65536):
+            if self.aura_applies_to_spell(aura, spell_id):
+                if aura.proc[1] > random.randint(0, 100):
+                    self.handle_aura_proc(aura)
+
+    def process_on_spell_crit(self, spell_id, damage=0):
+        for aura in self.get_procable_auras(proc_flag=65536):
+            if self.aura_applies_to_spell(aura, spell_id):
+                if aura.spell_id == 11129:
+                    self.proc_aura_charge(aura)
+                if aura.proc[1] > random.randint(0, 100):
+                    self.handle_aura_proc(aura)
+                if aura.spell_id in [11119, 11120, 12846, 12847, 12848]:
+                    self.handle_ignite(aura.spell_id, damage)
+
+    def handle_aura_proc(self, aura):
+        # proc trigger spell
+        if aura.aura_id == 42:
+            self.apply_spell_effect(aura.trigger_spell)
+
+        # trigger combustion aura
+        if aura.spell_id == 11129:
+            self.apply_spell_effect(28682)
+
+    def get_procable_auras(self, proc_flag):
+        procced_auras = []
+        for aura in self.active_auras:
+            if aura.proc[0] & proc_flag:
+                procced_auras.append(aura)
+        return procced_auras
+
+    def handle_ignite(self, spell_id, damage):
+        ignite = list(DB.get_spell(12654))
+        ignite_dmg_pct = 0
+        if spell_id == 11119:
+            ignite_dmg_pct = 8
+        elif spell_id == 11120:
+            ignite_dmg_pct = 16
+        elif spell_id == 12846:
+            ignite_dmg_pct = 24
+        elif spell_id == 12847:
+            ignite_dmg_pct = 32
+        elif spell_id == 12848:
+            ignite_dmg_pct = 40
+
+        ignite[DB.spell_column_info["EffectBasePoints1"]] = round(damage * (ignite_dmg_pct / 100) - 1)
+
+        self.process_dot_damage_spell(ignite, 1)

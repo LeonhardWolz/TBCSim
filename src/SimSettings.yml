@@ -33,7 +33,7 @@ character:
     - 31660
     - 16766
     - 11124
-    #- 11129
+    - 11119
 enemy:
   boss: Yes
   level: 73
