@@ -346,7 +346,6 @@ class Character:
         for aura in self.spell_handler.active_auras:
             if self.aura_applies_to_spell(aura, spell_id):
                 mod_auras.append(aura)
-
         return mod_auras
 
     def aura_applies_to_spell(self, aura, spell_id):

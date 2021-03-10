@@ -68,7 +68,7 @@ def get_spell_family_affected(spell_id):
     else:
         try:
             tbcdb_cursor.execute("SELECT * FROM simdata.spell_affect WHERE entry={}".format(spell_id))
-            spell_affected_cache[spell_id] = tbcdb_cursor.fetchone()# if tbcdb_cursor.description is not None else 0
+            spell_affected_cache[spell_id] = tbcdb_cursor.fetchone()
             return spell_affected_cache[spell_id]
         except mysql.connector.Error as ex:
             logging.critical("DB Error during spell affected family retrieval: {}".format(ex))
@@ -137,7 +137,7 @@ try:
         user="root",
         password="root"
     )
-    tbcdb_cursor = tbcdb.cursor()
+    tbcdb_cursor = tbcdb.cursor(buffered=True)
     create_helper_dicts()
 except mysql.connector.Error as err:
     logging.critical("DB Error during startup: {}".format(err))
