@@ -3,6 +3,7 @@ import unittest
 from src.character import Character as Char
 
 
+@unittest.skip("Not yet implemented")
 class TestArcaneSubtlety(unittest.TestCase):
     rank1 = 11210
     rank2 = 12592
@@ -106,11 +107,12 @@ class TestArcaneConcentration(unittest.TestCase):
 
     def test_arcane_concentration(self):
         self.assertEqual(30, self.char.spell_resource_cost(133, True))
-        self.char.spell_handler.process_on_spell_hit(133)
+        self.char.spell_handler.on_spell_hit(133)
         self.assertEqual(0, self.char.spell_resource_cost(133, True))
         self.assertEqual(30, self.char.spell_resource_cost(133, True))
 
 
+@unittest.skip("Not yet implemented")
 class TestMagicAttunement(unittest.TestCase):
     magic_attunement_rank1 = 11247
     magic_attunement_rank2 = 12606
@@ -148,6 +150,7 @@ class TestArcaneImpact(unittest.TestCase):
         self.assertEqual(0, self.char.spell_crit_chance_spell(133))
 
 
+@unittest.skip("Not yet implemented")
 class TestArcaneFortitude(unittest.TestCase):
     arcane_fortitude_rank1 = 28574
 
@@ -159,6 +162,7 @@ class TestArcaneFortitude(unittest.TestCase):
         self.assertEqual(True, False)
 
 
+@unittest.skip("Not yet implemented")
 class TestImprovedManaShield(unittest.TestCase):
     improved_mana_shield_rank1 = 11252
     improved_mana_shield_rank2 = 12605
@@ -171,6 +175,7 @@ class TestImprovedManaShield(unittest.TestCase):
         self.assertEqual(True, False)
 
 
+@unittest.skip("Not yet implemented")
 class TestImprovedCounterspell(unittest.TestCase):
     improved_counterspell_rank1 = 11255
     improved_counterspell_rank2 = 12598
@@ -206,6 +211,7 @@ class TestArcaneMeditation(unittest.TestCase):
         self.assertEqual(37.5 * 0.3, self.char.mp5_while_casting())
 
 
+@unittest.skip("Not yet implemented")
 class TestImprovedBlink(unittest.TestCase):
     improved_blink_rank1 = 31569
     improved_blink_rank2 = 31570
@@ -262,6 +268,7 @@ class TestArcaneMind(unittest.TestCase):
         self.assertEqual(115, self.char.total_intellect)
 
 
+@unittest.skip("Not yet implemented")
 class TestPrismaticCloak(unittest.TestCase):
     prismatic_cloak_rank1 = 31574
     prismatic_cloak_rank2 = 31575
