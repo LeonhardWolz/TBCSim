@@ -7,6 +7,7 @@ class Enemy(object):
                            "nature_resistance": 0,
                            "arcane_resistance": 0,
                            "shadow_resistance": 0}
+        self.active_auras = []
 
         self.level = 0
         self.boss = 0

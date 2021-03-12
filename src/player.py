@@ -16,6 +16,7 @@ class Player(object):
 
         while True:
             self.char.spell_handler.remove_expired_auras()
+            self.char.spell_handler.recover_cooldowns()
             while self.env.now < self.char.gcd_end_time:
                 yield self.env.timeout(1)
 
@@ -30,6 +31,7 @@ class Player(object):
             yield self.env.timeout(self.time_padding)
 
     def get_spell_to_cast(self):
+        # TODO check spell cooldown
         #return 30451
         # TODO Implement next spell
         if self.env.now == 0:
@@ -66,6 +68,7 @@ class Player(object):
         self.five_second_rule()
         self.results.spell_cast(spell_id)
         self.char.cast_mana_spell(spell_id)
+        self.char.spell_handler.spell_start_cooldown(spell_id)
         self.char.spell_handler.apply_spell_effect(spell_id)
 
     def start_gcd(self, spell_id):

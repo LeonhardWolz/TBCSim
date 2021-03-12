@@ -8,6 +8,9 @@ from src.dot import Dot
 
 
 class SpellHandler:
+    cooldown_spell_id = {}
+    cooldown_family_mask = {}
+
     def __init__(self, char):
         self.char = char
         self.active_auras = []
@@ -37,17 +40,9 @@ class SpellHandler:
                 # Apply Dummy Aura to character
                 self.apply_aura_to_character(spell_info, j)
 
-            elif spell_info[DB.spell_column_info["Effect" + str(j)]] == 6 and \
-                    spell_info[DB.spell_column_info["EffectImplicitTargetA" + str(j)]] == 6:
+            elif spell_info[DB.spell_column_info["Effect" + str(j)]] == 6:
 
-                # Apply Aura to enemy
-                self.apply_aura_to_enemy(spell_info, j)
-
-            elif spell_info[DB.spell_column_info["Effect" + str(j)]] == 6 and \
-                    spell_info[DB.spell_column_info["EffectImplicitTargetA" + str(j)]] == 1:
-
-                # Apply Aura to character
-                self.apply_aura_to_character(spell_info, j)
+                self.apply_passive_auras(spell_info, j)
 
             elif spell_info[DB.spell_column_info["Effect" + str(j)]] == 64 and \
                     spell_info[DB.spell_column_info["EffectImplicitTargetA" + str(j)]] == 1:
@@ -58,13 +53,16 @@ class SpellHandler:
             elif spell_info[DB.spell_column_info["Effect" + str(j)]] != 0:
                 logging.warning("Effect " + str(j) + " of Spell could not be handled: " + str(spell_info))
 
-    def apply_passive_auras_to_character(self, spell_info):
-        for j in range(1, 4):
-            effect_type = spell_info[DB.spell_column_info["Effect" + str(j)]]
-            if effect_type == 6:
-                self.apply_aura_to_character(spell_info, j)
-            elif effect_type != 0:
-                logging.warning("Effect type " + str(effect_type) + " for spell " + str(spell_info[0]) + " unknown")
+    def apply_passive_auras(self, spell_info, effect_slot):
+
+        if spell_info[DB.spell_column_info["EffectImplicitTargetA" + str(effect_slot)]] == 1:
+            self.apply_aura_to_character(spell_info, effect_slot)
+        elif spell_info[DB.spell_column_info["EffectImplicitTargetA" + str(effect_slot)]] == 6:
+            if spell_info[DB.spell_column_info["EffectApplyAuraName" + str(effect_slot)]] == 3:
+                # Apply periodic damage
+                self.process_dot_damage_spell(spell_info, effect_slot)
+            else:
+                self.apply_aura_to_enemy(spell_info, effect_slot)
 
     def apply_aura_to_character(self, spell_info, effect_slot):
         modified_aura = False
@@ -79,6 +77,20 @@ class SpellHandler:
 
         if not modified_aura:
             self.active_auras.append(self.get_aura(spell_info, effect_slot))
+
+    def apply_aura_to_enemy(self, spell_info, effect_slot):
+        modified_aura = False
+        for aura in self.enemy.active_auras:
+            if aura.spell_id == spell_info[0] and \
+                    aura.aura_id == spell_info[DB.spell_column_info["EffectApplyAuraName" + str(effect_slot)]] and \
+                    aura.misc_value == spell_info[DB.spell_column_info["EffectMiscValue" + str(effect_slot)]]:
+                if aura.stack_limit is not aura.curr_stacks:
+                    aura.curr_stacks += 1
+                    aura.create_time = self.env.now
+                modified_aura = True
+
+        if not modified_aura:
+            self.enemy.active_auras.append(self.get_aura(spell_info, effect_slot))
 
     def get_aura(self, spell_info, effect_slot):
         value = self.get_effect_strength(spell_info, effect_slot)
@@ -180,12 +192,6 @@ class SpellHandler:
     def spell_crit(self, spell_id):
         return random.uniform(0.00, 100.00) < self.char.spell_crit_chance_spell(spell_id)
 
-    def apply_aura_to_enemy(self, spell_info, effect_slot):
-        # TODO implement other auras
-        if spell_info[DB.spell_column_info["EffectApplyAuraName" + str(effect_slot)]] == 3:
-            # Apply periodic damage
-            self.process_dot_damage_spell(spell_info, effect_slot)
-
     def process_direct_damage_spell(self, spell_info, effect_slot):
         if self.spell_does_hit(spell_info[0]):
             spell_base_damage = self.get_effect_strength(spell_info, effect_slot)
@@ -199,11 +205,11 @@ class SpellHandler:
             if self.spell_crit(spell_info[0]):
                 spell_damage *= self.char.spell_crit_dmg_multiplier(spell_info[0])
                 spell_damage = round(spell_damage)
-                self.process_on_spell_crit(spell_info[0], spell_damage)
+                self.on_spell_crit(spell_info[0], spell_damage)
                 self.logg(DB.get_spell_name(spell_info[0]) + " critical damage: " + str(spell_damage))
                 self.results.damage_spell_crit(spell_info[0], spell_damage)
             else:
-                self.process_on_spell_hit(spell_info[0])
+                self.on_spell_hit(spell_info[0])
                 self.logg(DB.get_spell_name(spell_info[0]) + " damage: " + str(spell_damage))
                 self.results.damage_spell_hit(spell_info[0], spell_damage)
             self.on_damage(spell_info)
@@ -215,16 +221,28 @@ class SpellHandler:
         # TODO Consider all Character Stats for damage
         if self.spell_does_hit(spell_info[0]):
             dot_duration, dot_interval = self.spell_dot_behaviour(spell_info, effect_slot)
+            dot_damage = round(self.get_effect_strength(spell_info, effect_slot) *
+                               self.enemy_damage_taken_mod(spell_info[0]))
+
             self.env.process(Dot(self.env,
                                  self,
                                  spell_info[0],
-                                 self.get_effect_strength(spell_info, effect_slot),
+                                 dot_damage,
                                  dot_interval,
                                  dot_duration,
                                  self.results).ticking())
         else:
             self.logg(DB.get_spell_name(spell_info[0]) + " dot resisted")
             self.results.dot_spell_resisted(spell_info[0])
+
+    def enemy_damage_taken_mod(self, spell_id):
+        dmg_taken_mod = 0
+        for aura in self.get_enemy_mod_auras(spell_id):
+            if aura.aura_id == 87 and \
+                    aura.affected_spell_school & DB.get_spell(spell_id)[DB.spell_column_info["SchoolMask"]]:
+                dmg_taken_mod += aura.value * aura.curr_stacks
+
+        return 1 + dmg_taken_mod / 100
 
     def curr_sim_time_str(self):
         return str(self.env.now / 1000)
@@ -260,41 +278,56 @@ class SpellHandler:
     def get_spell_gcd(self, spell_id):
         return DB.get_spell_gcd(spell_id)
 
-    def get_mod_auras(self, spell_id):
+    def get_character_mod_auras(self, spell_id):
         mod_auras = []
         for aura in self.active_auras:
             if self.aura_applies_to_spell(aura, spell_id):
                 mod_auras.append(aura)
         return mod_auras
 
+    def get_enemy_mod_auras(self, spell_id):
+        mod_auras = []
+        for aura in self.enemy.active_auras:
+            if self.aura_applies_to_spell(aura, spell_id):
+                mod_auras.append(aura)
+        return mod_auras
+
     def aura_applies_to_spell(self, aura, spell_id):
         if aura.affected_spell_family_mask & self.spell_family_mask(spell_id) != 0 or \
-                aura.affected_spell_school == self.spell_school(spell_id) or \
-                aura.affected_spell_family_mask == 0:
+                aura.affected_spell_school == self.spell_school(spell_id) or aura.affected_spell_family_mask == 0:
             return True
         else:
             return False
 
-    def process_on_spell_hit(self, spell_id):
+    def on_spell_hit(self, spell_id):
         for aura in self.get_procable_auras(proc_flag=65536):
             if self.aura_applies_to_spell(aura, spell_id):
                 if aura.proc[1] > random.randint(0, 100):
                     self.handle_aura_proc(aura)
 
-    def process_on_spell_crit(self, spell_id, damage=0):
+    def on_spell_crit(self, spell_id, damage=0):
         for aura in self.get_procable_auras(proc_flag=65536):
             if self.aura_applies_to_spell(aura, spell_id):
                 if aura.spell_id == 11129:
                     self.proc_aura_charge(aura)
+                elif aura.spell_id in [11119, 11120, 12846, 12847, 12848]:
+                    self.handle_ignite(aura.spell_id, damage)
+                elif aura.spell_id in [29074, 29075, 29076]:
+                    self.char.current_mana += DB.get_spell(spell_id)[DB.spell_column_info["ManaCost"]] * \
+                                              (aura.value * aura.curr_stacks)/100
+
                 if aura.proc[1] > random.randint(0, 100):
                     self.handle_aura_proc(aura)
-                if aura.spell_id in [11119, 11120, 12846, 12847, 12848]:
-                    self.handle_ignite(aura.spell_id, damage)
 
     def handle_aura_proc(self, aura):
         # proc trigger spell
         if aura.aura_id == 42:
             self.apply_spell_effect(aura.trigger_spell)
+
+        # scorch proc
+        if aura.spell_id in (11095, 12872, 12873):
+            if aura.value > random.randint(0, 100):
+                self.apply_spell_effect(aura.trigger_spell)
 
         # trigger combustion aura
         if aura.spell_id == 11129:
@@ -303,7 +336,7 @@ class SpellHandler:
     def get_procable_auras(self, proc_flag):
         procced_auras = []
         for aura in self.active_auras:
-            if aura.proc[0] & proc_flag:
+            if aura.proc[0] & proc_flag or aura.proc[1] == 101:
                 procced_auras.append(aura)
         return procced_auras
 
@@ -324,3 +357,42 @@ class SpellHandler:
         ignite[DB.spell_column_info["EffectBasePoints1"]] = round(damage * (ignite_dmg_pct / 100) - 1)
 
         self.process_dot_damage_spell(ignite, 1)
+
+    def get_recovery_time_mod(self, spell_id):
+        recovery_time_mod = 0
+        for aura in self.get_character_mod_auras(spell_id):
+            if aura.aura_id == 107 and aura.misc_value == 11:
+                recovery_time_mod += aura.value * aura.curr_stacks
+        return recovery_time_mod
+
+    def spell_start_cooldown(self, spell_id):
+        if self.spell_family_mask(spell_id) == 0 and \
+                DB.get_spell(spell_id)[DB.spell_column_info["RecoveryTime"]] != 0:
+
+            ready_time = self.env.now + \
+                         DB.get_spell(spell_id)[DB.spell_column_info["RecoveryTime"]] + \
+                         self.get_recovery_time_mod(spell_id)
+
+            self.cooldown_spell_id[spell_id] = ready_time
+        elif self.spell_family_mask(spell_id) != 0 and \
+                DB.get_spell(spell_id)[DB.spell_column_info["CategoryRecoveryTime"]]:
+
+            ready_time = self.env.now + \
+                         DB.get_spell(spell_id)[DB.spell_column_info["CategoryRecoveryTime"]] + \
+                         self.get_recovery_time_mod(spell_id)
+
+            self.cooldown_family_mask[self.spell_family_mask(spell_id)] = ready_time
+
+    def spell_on_cooldown(self, spell_id):
+        if spell_id in self.cooldown_spell_id.keys() or \
+                self.spell_family_mask(spell_id) in self.cooldown_family_mask.keys():
+            return True
+        return False
+
+    def recover_cooldowns(self):
+        for entry in dict(self.cooldown_spell_id).items():
+            if entry[1] <= self.env.now:
+                del self.cooldown_spell_id[entry[0]]
+        for entry in dict(self.cooldown_family_mask).items():
+            if entry[1] <= self.env.now:
+                del self.cooldown_family_mask[entry[0]]

@@ -1,5 +1,4 @@
 import logging
-import random
 
 from src.spell_handler import SpellHandler
 
@@ -163,7 +162,7 @@ class Character:
                 stat_pct_mod += aura.value * aura.curr_stacks
                 if proc_auras:
                     self.spell_handler.proc_aura_charge(aura)
-        return stat_pct_mod/100
+        return stat_pct_mod / 100
 
     def modify_stat(self, stat_type, value):
         if stat_type == 0:
@@ -251,7 +250,7 @@ class Character:
                 if proc_auras:
                     self.spell_handler.proc_aura_charge(aura)
             elif aura.aura_id == 174 and aura.misc_value == 126:
-                spell_power += self.total_intellect * (aura.value * aura.curr_stacks/100)
+                spell_power += self.total_intellect * (aura.value * aura.curr_stacks / 100)
                 if proc_auras:
                     self.spell_handler.proc_aura_charge(aura)
         return spell_power
@@ -276,7 +275,7 @@ class Character:
 
     def spell_hit_chance_spell(self, spell_id, proc_auras=True):
         hit_chance_mod = 0
-        for aura in self.spell_handler.get_mod_auras(spell_id):
+        for aura in self.spell_handler.get_character_mod_auras(spell_id):
             if aura.aura_id == 107 and aura.misc_value == 16:
                 hit_chance_mod += aura.value * aura.curr_stacks
                 if proc_auras:
@@ -285,18 +284,23 @@ class Character:
 
     def spell_crit_chance_spell(self, spell_id, proc_auras=True):
         crit_chance_mod = 0
-        for aura in self.spell_handler.get_mod_auras(spell_id):
+        for aura in self.spell_handler.get_character_mod_auras(spell_id):
             if aura.aura_id == 107 and aura.misc_value == 7 or \
                     aura.aura_id == 71 and aura.misc_value == 126 or \
                     aura.aura_id == 57:
-                crit_chance_mod = aura.value * aura.curr_stacks
-                if proc_auras:
-                    self.spell_handler.proc_aura_charge(aura)
+
+                # If aura not mage incineration talent or only apply incineration to scorch and fire blast
+                if aura.spell_id not in (18459, 18460) or \
+                        self.spell_handler.spell_family_mask(spell_id) & 2 or \
+                        self.spell_handler.spell_family_mask(spell_id) & 16:
+                    crit_chance_mod = aura.value * aura.curr_stacks
+                    if proc_auras:
+                        self.spell_handler.proc_aura_charge(aura)
         return self.spell_crit_chance + crit_chance_mod
 
     def spell_crit_dmg_multiplier(self, spell_id, proc_auras=True):
         crit_damage_mod = 0
-        for aura in self.spell_handler.get_mod_auras(spell_id):
+        for aura in self.spell_handler.get_character_mod_auras(spell_id):
             if aura.aura_id == 108 and aura.misc_value == 15:
                 crit_damage_mod += aura.value * aura.curr_stacks
                 if proc_auras:
@@ -305,7 +309,7 @@ class Character:
 
     def spell_dmg_multiplier(self, spell_id, proc_auras=True):
         spell_damage_mod = 1
-        for aura in self.spell_handler.get_mod_auras(spell_id):
+        for aura in self.spell_handler.get_character_mod_auras(spell_id):
             if aura.aura_id == 108 and aura.misc_value == 22 or \
                     aura.aura_id == 79 and aura.misc_value == 126:
                 spell_damage_mod *= aura.value * aura.curr_stacks
@@ -315,7 +319,7 @@ class Character:
 
     def spell_cast_time(self, spell_id, proc_auras=True):
         cast_time_mod = 0
-        for aura in self.spell_handler.get_mod_auras(spell_id):
+        for aura in self.spell_handler.get_character_mod_auras(spell_id):
             if aura.aura_id == 107 and aura.misc_value == 10:
                 cast_time_mod += aura.value * aura.curr_stacks
                 if proc_auras:
@@ -328,7 +332,7 @@ class Character:
     def spell_resource_cost(self, spell_id, proc_auras=True):
         resource_cost = self.spell_handler.spell_mana_cost(spell_id)
 
-        for aura in self.spell_handler.get_mod_auras(spell_id):
+        for aura in self.spell_handler.get_character_mod_auras(spell_id):
             if (aura.aura_id == 108 and aura.misc_value == 14) or (aura.aura_id == 72 and aura.misc_value == 20):
                 resource_cost += resource_cost * (aura.value * aura.curr_stacks / 100)
                 if proc_auras:
@@ -349,7 +353,7 @@ class Character:
 
     def spell_power_coefficient(self, spell_id, proc_auras=True):
         coefficient_mod = 0
-        for aura in self.spell_handler.get_mod_auras(spell_id):
+        for aura in self.spell_handler.get_character_mod_auras(spell_id):
             if aura.aura_id == 107 and aura.misc_value == 24:
                 coefficient_mod += aura.value * aura.curr_stacks
                 if proc_auras:
