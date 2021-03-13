@@ -52,6 +52,14 @@ class SpellHandler:
                 # Trigger Spell on character
                 self.apply_spell_effect(spell_info[DB.spell_column_info["EffectTriggerSpell" + str(j)]])
 
+            elif spell_info[DB.spell_column_info["Effect" + str(j)]] == 3 and \
+                    spell_info[DB.spell_column_info["EffectImplicitTargetA" + str(j)]] == 1:
+                # Apply dummy aura to character
+
+                # cold snap
+                if spell_id == 11958:
+                    self.cold_snap()
+
             elif spell_info[DB.spell_column_info["Effect" + str(j)]] != 0:
                 logging.warning("Effect " + str(j) + " of Spell could not be handled: " + str(spell_info))
 
@@ -369,20 +377,20 @@ class SpellHandler:
     def get_recovery_time_mod(self, spell_id):
         recovery_time_mod = 0
         for aura in self.get_character_mod_auras(spell_id):
-            if aura.aura_id == 107 and aura.misc_value == 11:
+            if aura.aura_id == 107 and aura.misc_value == 11 and \
+                    (aura.spell_id not in [11078, 11080, 12342] or DB.get_spell_family(spell_id) & 2):
                 recovery_time_mod += aura.value * aura.curr_stacks
         return recovery_time_mod
 
     def get_recovery_time_multiplier(self, spell_id):
         recovery_time_multiplier = 1
         for aura in self.get_character_mod_auras(spell_id):
-            if aura.aura_id == 108 and aura.misc_value == 11:
+            if aura.aura_id == 108 and aura.misc_value == 11 and \
+                    (aura.spell_id not in [11078, 11080, 12342] or DB.get_spell_family(spell_id) & 2):
                 recovery_time_multiplier *= 1 + (aura.value * aura.curr_stacks / 100)
         return recovery_time_multiplier
 
     def spell_start_cooldown(self, spell_id):
-        # if self.spell_family_mask(spell_id) == 0 and \
-        #         DB.get_spell(spell_id)[DB.spell_column_info["RecoveryTime"]] != 0:
         if DB.get_spell(spell_id)[DB.spell_column_info["RecoveryTime"]] != 0:
 
             ready_time = self.env.now + \
@@ -390,9 +398,8 @@ class SpellHandler:
                          self.get_recovery_time_multiplier(spell_id) + \
                          self.get_recovery_time_mod(spell_id)
 
-            self.cooldown_spell_id[spell_id] = ready_time
-        # elif self.spell_family_mask(spell_id) != 0 and \
-        #         DB.get_spell(spell_id)[DB.spell_column_info["CategoryRecoveryTime"]]:
+            self.cooldown_spell_id[spell_id] = (ready_time, DB.get_spell_school(spell_id))
+
         elif DB.get_spell(spell_id)[DB.spell_column_info["CategoryRecoveryTime"]] != 0:
 
             ready_time = self.env.now + \
@@ -400,7 +407,7 @@ class SpellHandler:
                          self.get_recovery_time_multiplier(spell_id) + \
                          self.get_recovery_time_mod(spell_id)
 
-            self.cooldown_family_mask[self.spell_family_mask(spell_id)] = ready_time
+            self.cooldown_family_mask[self.spell_family_mask(spell_id)] = (ready_time, DB.get_spell_school(spell_id))
 
     def spell_on_cooldown(self, spell_id):
         if spell_id in self.cooldown_spell_id.keys() or \
@@ -410,8 +417,16 @@ class SpellHandler:
 
     def recover_cooldowns(self):
         for entry in dict(self.cooldown_spell_id).items():
-            if entry[1] <= self.env.now:
+            if entry[1][0] <= self.env.now:
                 del self.cooldown_spell_id[entry[0]]
         for entry in dict(self.cooldown_family_mask).items():
-            if entry[1] <= self.env.now:
+            if entry[1][0] <= self.env.now:
+                del self.cooldown_family_mask[entry[0]]
+
+    def cold_snap(self):
+        for entry in dict(self.cooldown_spell_id).items():
+            if entry[1][1] & 16:
+                del self.cooldown_spell_id[entry[0]]
+        for entry in dict(self.cooldown_family_mask).items():
+            if entry[1][1] & 16:
                 del self.cooldown_family_mask[entry[0]]

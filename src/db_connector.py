@@ -57,7 +57,7 @@ def get_spell_school(spell_id):
     else:
         try:
             tbcdb_cursor.execute("SELECT SchoolMask FROM simdata.spell_template WHERE id={}".format(spell_id))
-            return str(tbcdb_cursor.fetchone()[0])
+            return tbcdb_cursor.fetchone()[0]
         except mysql.connector.Error as ex:
             logging.critical("DB Error during spell school mask retrieval: {}".format(ex))
 

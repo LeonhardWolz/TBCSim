@@ -288,11 +288,15 @@ class Character:
     def spell_crit_chance_spell(self, spell_id, proc_auras=True):
         crit_chance_mod = 0
         for aura in self.spell_handler.get_character_mod_auras(spell_id):
-            if aura.aura_id == 107 and aura.misc_value == 7 or \
+            if aura.aura_id == 107 and aura.misc_value == 7 and \
+                    (aura.spell_id not in [31682, 31683, 31684, 31685, 31686] or
+                     aura.affected_spell_school & DB.get_spell_school(spell_id) or
+                     aura.affected_spell_family_mask & DB.get_spell_family(spell_id)) and \
+                    (aura.spell_id not in [11108, 12349, 12350] or DB.get_spell_family(spell_id) & 4) or \
                     aura.aura_id == 71 and aura.misc_value == 126 or \
                     aura.aura_id == 71 and aura.misc_value == DB.get_spell_school(spell_id) or \
                     aura.aura_id == 57:
-
+                
                 # Apply spell crit modifier from mage incineration talent only if spell scorch or fire blast
                 if aura.spell_id not in (18459, 18460) or \
                         self.spell_handler.spell_family_mask(spell_id) & 2 or \
@@ -334,6 +338,7 @@ class Character:
             if aura.aura_id == 108 and aura.misc_value == 22 or \
                     aura.aura_id == 108 and aura.affected_spell_school == DB.get_spell_school(spell_id) or \
                     aura.aura_id == 79 and aura.misc_value == 126 or \
+                    aura.aura_id == 79 and aura.misc_value == DB.get_spell_school(spell_id) or \
                     aura.spell_id in [11190, 12489, 12490] and DB.get_spell_family(spell_id) & 512 or \
                     aura.spell_id in [31679, 31680] and self.spell_handler.enemy.in_execute_range:
 
