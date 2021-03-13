@@ -88,6 +88,7 @@ class TestIgnite(unittest.TestCase):
     def setUp(self) -> None:
         self.char = Char()
         self.char.player_class = "Mage"
+        self.char.spell_handler.enemy = Enemy()
         self.char.spell_handler.env = Mock()
         self.char.spell_handler.env.process = Mock(side_effect=process)
         self.char.spell_handler.spell_does_hit = Mock(side_effect=spell_does_hit)
@@ -159,6 +160,7 @@ class TestIncineration(unittest.TestCase):
     def setUp(self) -> None:
         self.char = Char()
         self.char.player_class = "Mage"
+        self.char.spell_handler.enemy = Enemy()
 
     def test_incineration_rank1(self):
         self.char.spell_handler.apply_spell_effect(self.incineration_rank1)
@@ -187,6 +189,7 @@ class TestImprovedFlamestrike(unittest.TestCase):
     def setUp(self) -> None:
         self.char = Char()
         self.char.player_class = "Mage"
+        self.char.spell_handler.enemy = Enemy()
 
     def test_improved_flamestrike_rank1(self):
         self.char.spell_handler.apply_spell_effect(self.improved_flamestrike_rank1)
@@ -351,6 +354,265 @@ class TestPlayingWithFire(unittest.TestCase):
     def test_playing_with_fire_rank3_damage_caused(self):
         self.char.spell_handler.apply_spell_effect(self.playing_with_fire_rank3)
         self.assertEqual(1.03, self.char.spell_dmg_multiplier(self.fireball_rank1))
+
+
+class TestCriticalMass(unittest.TestCase):
+    critical_mass_rank1 = 11115
+    critical_mass_rank2 = 11367
+    critical_mass_rank3 = 11368
+
+    fireball_rank1 = 133
+    frostbolt_rank1 = 116
+
+    def setUp(self) -> None:
+        self.char = Char()
+        self.char.player_class = "Mage"
+        self.char.spell_handler.enemy = Enemy()
+
+    def test_critical_mass_rank1(self):
+        self.char.spell_handler.apply_spell_effect(self.critical_mass_rank1)
+        self.assertEqual(2, self.char.spell_crit_chance_spell(self.fireball_rank1))
+        self.assertEqual(0, self.char.spell_crit_chance_spell(self.frostbolt_rank1))
+
+    def test_critical_mass_rank2(self):
+        self.char.spell_handler.apply_spell_effect(self.critical_mass_rank2)
+        self.assertEqual(4, self.char.spell_crit_chance_spell(self.fireball_rank1))
+        self.assertEqual(0, self.char.spell_crit_chance_spell(self.frostbolt_rank1))
+
+    def test_critical_mass_rank3(self):
+        self.char.spell_handler.apply_spell_effect(self.critical_mass_rank3)
+        self.assertEqual(6, self.char.spell_crit_chance_spell(self.fireball_rank1))
+        self.assertEqual(0, self.char.spell_crit_chance_spell(self.frostbolt_rank1))
+
+
+@unittest.skip("Not yet implemented")
+class TestBlastWave(unittest.TestCase):
+    pass
+
+
+@unittest.skip("Not yet implemented")
+class TestBlazingSpeed(unittest.TestCase):
+    pass
+
+
+class TestFirePower(unittest.TestCase):
+    fire_power_rank1 = 11124
+    fire_power_rank2 = 12378
+    fire_power_rank3 = 12398
+    fire_power_rank4 = 12399
+    fire_power_rank5 = 12400
+
+    fireball_rank1 = 133
+    frostbolt_rank1 = 116
+
+    def setUp(self) -> None:
+        self.char = Char()
+        self.char.player_class = "Mage"
+
+    def test_fire_power_rank1(self):
+        self.char.spell_handler.apply_spell_effect(self.fire_power_rank1)
+        self.assertEqual(1.02, self.char.spell_dmg_multiplier(self.fireball_rank1))
+        self.assertEqual(1, self.char.spell_dmg_multiplier(self.frostbolt_rank1))
+
+    def test_fire_power_rank2(self):
+        self.char.spell_handler.apply_spell_effect(self.fire_power_rank2)
+        self.assertEqual(1.04, self.char.spell_dmg_multiplier(self.fireball_rank1))
+        self.assertEqual(1, self.char.spell_dmg_multiplier(self.frostbolt_rank1))
+
+    def test_fire_power_rank3(self):
+        self.char.spell_handler.apply_spell_effect(self.fire_power_rank3)
+        self.assertEqual(1.06, self.char.spell_dmg_multiplier(self.fireball_rank1))
+        self.assertEqual(1, self.char.spell_dmg_multiplier(self.frostbolt_rank1))
+
+    def test_fire_power_rank4(self):
+        self.char.spell_handler.apply_spell_effect(self.fire_power_rank4)
+        self.assertEqual(1.08, self.char.spell_dmg_multiplier(self.fireball_rank1))
+        self.assertEqual(1, self.char.spell_dmg_multiplier(self.frostbolt_rank1))
+
+    def test_fire_power_rank5(self):
+        self.char.spell_handler.apply_spell_effect(self.fire_power_rank5)
+        self.assertEqual(1.1, self.char.spell_dmg_multiplier(self.fireball_rank1))
+        self.assertEqual(1, self.char.spell_dmg_multiplier(self.frostbolt_rank1))
+
+
+class TestPyromaniac(unittest.TestCase):
+    pyromaniac_rank1 = 34293
+    pyromaniac_rank2 = 34295
+    pyromaniac_rank3 = 34296
+
+    fireball_rank14 = 38692
+    fireball_rank14_mana_cost = 465
+
+    frostbolt_rank14 = 38697
+    frostbolt_rank14_mana_cost = 345
+
+    def setUp(self) -> None:
+        self.char = Char()
+        self.char.player_class = "Mage"
+        self.char.spell_handler.enemy = Enemy()
+
+    def test_pyromaniac_rank1(self):
+        self.char.spell_handler.apply_spell_effect(self.pyromaniac_rank1)
+        self.assertEqual(1, self.char.spell_crit_chance_spell(self.fireball_rank14))
+        self.assertEqual(0, self.char.spell_crit_chance_spell(self.frostbolt_rank14))
+
+        self.assertEqual(round(self.fireball_rank14_mana_cost * 0.99),
+                         self.char.spell_resource_cost(self.fireball_rank14))
+        self.assertEqual(self.frostbolt_rank14_mana_cost, self.char.spell_resource_cost(self.frostbolt_rank14))
+
+    def test_pyromaniac_rank2(self):
+        self.char.spell_handler.apply_spell_effect(self.pyromaniac_rank2)
+        self.assertEqual(2, self.char.spell_crit_chance_spell(self.fireball_rank14))
+        self.assertEqual(0, self.char.spell_crit_chance_spell(self.frostbolt_rank14))
+
+        self.assertEqual(round(self.fireball_rank14_mana_cost * 0.98),
+                         self.char.spell_resource_cost(self.fireball_rank14))
+        self.assertEqual(self.frostbolt_rank14_mana_cost, self.char.spell_resource_cost(self.frostbolt_rank14))
+
+    def test_pyromaniac_rank3(self):
+        self.char.spell_handler.apply_spell_effect(self.pyromaniac_rank3)
+        self.assertEqual(3, self.char.spell_crit_chance_spell(self.fireball_rank14))
+        self.assertEqual(0, self.char.spell_crit_chance_spell(self.frostbolt_rank14))
+
+        self.assertEqual(round(self.fireball_rank14_mana_cost * 0.97),
+                         self.char.spell_resource_cost(self.fireball_rank14))
+        self.assertEqual(self.frostbolt_rank14_mana_cost, self.char.spell_resource_cost(self.frostbolt_rank14))
+
+
+class TestCombustion(unittest.TestCase):
+    combustion = 11129
+
+    fireball_rank14 = 38692
+    fireball_rank14_mana_cost = 465
+
+    frostbolt_rank14 = 38697
+    frostbolt_rank14_mana_cost = 345
+
+    def setUp(self) -> None:
+        self.char = Char()
+        self.char.player_class = "Mage"
+        self.char.spell_handler.env = Mock()
+        self.char.spell_handler.env.now = 0
+        self.char.spell_handler.enemy = Enemy()
+
+    def test_combustion(self):
+        self.char.spell_handler.apply_spell_effect(self.combustion)
+        self.assertEqual(10, self.char.spell_crit_chance_spell(self.fireball_rank14))
+        self.assertEqual(0, self.char.spell_crit_chance_spell(self.frostbolt_rank14))
+
+        self.char.spell_handler.on_spell_hit(self.fireball_rank14)
+        self.assertEqual(20, self.char.spell_crit_chance_spell(self.fireball_rank14))
+        self.assertEqual(0, self.char.spell_crit_chance_spell(self.frostbolt_rank14))
+
+        self.char.spell_handler.on_spell_hit(self.frostbolt_rank14)
+        self.assertEqual(20, self.char.spell_crit_chance_spell(self.fireball_rank14))
+        self.assertEqual(0, self.char.spell_crit_chance_spell(self.frostbolt_rank14))
+
+        self.char.spell_handler.on_spell_crit(self.fireball_rank14)
+        self.assertEqual(30, self.char.spell_crit_chance_spell(self.fireball_rank14))
+        self.assertEqual(0, self.char.spell_crit_chance_spell(self.frostbolt_rank14))
+
+        self.char.spell_handler.on_spell_crit(self.fireball_rank14)
+        self.assertEqual(40, self.char.spell_crit_chance_spell(self.fireball_rank14))
+        self.assertEqual(0, self.char.spell_crit_chance_spell(self.frostbolt_rank14))
+
+        self.char.spell_handler.on_spell_hit(self.fireball_rank14)
+        self.assertEqual(50, self.char.spell_crit_chance_spell(self.fireball_rank14))
+        self.assertEqual(0, self.char.spell_crit_chance_spell(self.frostbolt_rank14))
+
+        self.char.spell_handler.on_spell_crit(self.frostbolt_rank14)
+        self.assertEqual(50, self.char.spell_crit_chance_spell(self.fireball_rank14))
+        self.assertEqual(0, self.char.spell_crit_chance_spell(self.frostbolt_rank14))
+
+        self.char.spell_handler.on_spell_crit(self.fireball_rank14)
+        self.assertEqual(0, self.char.spell_crit_chance_spell(self.fireball_rank14))
+        self.assertEqual(0, self.char.spell_crit_chance_spell(self.frostbolt_rank14))
+
+
+class TestMoltenFury(unittest.TestCase):
+    molten_fury_rank1 = 31679
+    molten_fury_rank2 = 31680
+
+    fireball_rank1 = 133
+    frostbolt_rank1 = 116
+
+    def setUp(self) -> None:
+        self.char = Char()
+        self.char.player_class = "Mage"
+        self.char.spell_handler.enemy = Mock()
+        self.char.spell_handler.enemy.in_execute_range = False
+
+    def test_molten_fury_rank1(self):
+        self.char.spell_handler.apply_spell_effect(self.molten_fury_rank1)
+        self.assertEqual(1, self.char.spell_dmg_multiplier(self.fireball_rank1))
+        self.assertEqual(1, self.char.spell_dmg_multiplier(self.frostbolt_rank1))
+
+        self.char.spell_handler.enemy.in_execute_range = True
+        self.assertEqual(1.1, self.char.spell_dmg_multiplier(self.fireball_rank1))
+        self.assertEqual(1.1, self.char.spell_dmg_multiplier(self.frostbolt_rank1))
+
+    def test_molten_fury_rank2(self):
+        self.char.spell_handler.apply_spell_effect(self.molten_fury_rank2)
+        self.assertEqual(1, self.char.spell_dmg_multiplier(self.fireball_rank1))
+        self.assertEqual(1, self.char.spell_dmg_multiplier(self.frostbolt_rank1))
+        self.char.spell_handler.enemy.in_execute_range = True
+        self.assertEqual(1.2, self.char.spell_dmg_multiplier(self.fireball_rank1))
+        self.assertEqual(1.2, self.char.spell_dmg_multiplier(self.frostbolt_rank1))
+
+
+class TestEmpoweredFireball(unittest.TestCase):
+    empowered_fireball_rank1 = 31656
+    empowered_fireball_rank2 = 31657
+    empowered_fireball_rank3 = 31658
+    empowered_fireball_rank4 = 31659
+    empowered_fireball_rank5 = 31660
+
+    fireball_rank14 = 38692
+    frostbolt_rank14 = 38697
+
+    def setUp(self) -> None:
+        self.char = Char()
+        self.char.player_class = "Mage"
+
+    def test_empowered_fireball_rank1(self):
+        self.char.spell_handler.apply_spell_effect(self.empowered_fireball_rank1)
+        self.assertEqual(self.char.spell_handler.spell_power_coefficient(self.fireball_rank14) + 0.03,
+                         self.char.spell_power_coefficient(self.fireball_rank14))
+        self.assertEqual(self.char.spell_handler.spell_power_coefficient(self.frostbolt_rank14),
+                         self.char.spell_power_coefficient(self.frostbolt_rank14))
+
+    def test_empowered_fireball_rank2(self):
+        self.char.spell_handler.apply_spell_effect(self.empowered_fireball_rank2)
+        self.assertEqual(self.char.spell_handler.spell_power_coefficient(self.fireball_rank14) + 0.06,
+                         self.char.spell_power_coefficient(self.fireball_rank14))
+        self.assertEqual(self.char.spell_handler.spell_power_coefficient(self.frostbolt_rank14),
+                         self.char.spell_power_coefficient(self.frostbolt_rank14))
+
+    def test_empowered_fireball_rank3(self):
+        self.char.spell_handler.apply_spell_effect(self.empowered_fireball_rank3)
+        self.assertEqual(self.char.spell_handler.spell_power_coefficient(self.fireball_rank14) + 0.09,
+                         self.char.spell_power_coefficient(self.fireball_rank14))
+        self.assertEqual(self.char.spell_handler.spell_power_coefficient(self.frostbolt_rank14),
+                         self.char.spell_power_coefficient(self.frostbolt_rank14))
+
+    def test_empowered_fireball_rank4(self):
+        self.char.spell_handler.apply_spell_effect(self.empowered_fireball_rank4)
+        self.assertEqual(self.char.spell_handler.spell_power_coefficient(self.fireball_rank14) + 0.12,
+                         self.char.spell_power_coefficient(self.fireball_rank14))
+        self.assertEqual(self.char.spell_handler.spell_power_coefficient(self.frostbolt_rank14),
+                         self.char.spell_power_coefficient(self.frostbolt_rank14))
+
+    def test_empowered_fireball_rank5(self):
+        self.char.spell_handler.apply_spell_effect(self.empowered_fireball_rank5)
+        self.assertEqual(self.char.spell_handler.spell_power_coefficient(self.fireball_rank14) + 0.15,
+                         self.char.spell_power_coefficient(self.fireball_rank14))
+        self.assertEqual(self.char.spell_handler.spell_power_coefficient(self.frostbolt_rank14),
+                         self.char.spell_power_coefficient(self.frostbolt_rank14))
+
+
+@unittest.skip("Not yet implemented")
+class TestDragonsBreath(unittest.TestCase):
+    pass
 
 
 if __name__ == '__main__':

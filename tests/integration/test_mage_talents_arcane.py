@@ -1,6 +1,7 @@
 import unittest
 
 from src.character import Character as Char
+from src.enemy import Enemy
 
 
 @unittest.skip("Not yet implemented")
@@ -133,6 +134,7 @@ class TestArcaneImpact(unittest.TestCase):
     def setUp(self) -> None:
         self.char = Char()
         self.char.player_class = "Mage"
+        self.char.spell_handler.enemy = Enemy()
 
     def test_arcane_impact_rank1(self):
         self.char.spell_handler.apply_spell_effect(self.arcane_impact_rank1)
@@ -286,24 +288,37 @@ class TestArcaneInstability(unittest.TestCase):
     arcane_instability_rank2 = 15059
     arcane_instability_rank3 = 15060
 
+    fireball_rank1 = 133
+    frostbolt_rank1 = 116
+
     def setUp(self) -> None:
         self.char = Char()
         self.char.player_class = "Mage"
+        self.char.spell_handler.enemy = Enemy()
 
     def test_arcane_instability_rank1(self):
         self.char.spell_handler.apply_spell_effect(self.arcane_instability_rank1)
-        self.assertEqual(1.01, self.char.spell_dmg_multiplier(133))
-        self.assertEqual(1, self.char.spell_crit_chance_spell(133))
+        self.assertEqual(1.01, self.char.spell_dmg_multiplier(self.fireball_rank1))
+        self.assertEqual(1, self.char.spell_crit_chance_spell(self.fireball_rank1))
+
+        self.assertEqual(1.01, self.char.spell_dmg_multiplier(self.frostbolt_rank1))
+        self.assertEqual(1, self.char.spell_crit_chance_spell(self.frostbolt_rank1))
 
     def test_arcane_instability_rank2(self):
         self.char.spell_handler.apply_spell_effect(self.arcane_instability_rank2)
-        self.assertEqual(1.02, self.char.spell_dmg_multiplier(133))
-        self.assertEqual(2, self.char.spell_crit_chance_spell(133))
+        self.assertEqual(1.02, self.char.spell_dmg_multiplier(self.fireball_rank1))
+        self.assertEqual(2, self.char.spell_crit_chance_spell(self.fireball_rank1))
+
+        self.assertEqual(1.02, self.char.spell_dmg_multiplier(self.frostbolt_rank1))
+        self.assertEqual(2, self.char.spell_crit_chance_spell(self.frostbolt_rank1))
 
     def test_arcane_instability_rank3(self):
         self.char.spell_handler.apply_spell_effect(self.arcane_instability_rank3)
-        self.assertEqual(1.03, self.char.spell_dmg_multiplier(133))
-        self.assertEqual(3, self.char.spell_crit_chance_spell(133))
+        self.assertEqual(1.03, self.char.spell_dmg_multiplier(self.fireball_rank1))
+        self.assertEqual(3, self.char.spell_crit_chance_spell(self.fireball_rank1))
+
+        self.assertEqual(1.03, self.char.spell_dmg_multiplier(self.frostbolt_rank1))
+        self.assertEqual(3, self.char.spell_crit_chance_spell(self.frostbolt_rank1))
 
 
 class TestArcanePotency(unittest.TestCase):
@@ -314,6 +329,7 @@ class TestArcanePotency(unittest.TestCase):
     def setUp(self) -> None:
         self.char = Char()
         self.char.player_class = "Mage"
+        self.char.spell_handler.enemy = Enemy()
 
     def test_arcane_potency_rank1(self):
         self.char.spell_handler.apply_spell_effect(self.arcane_potency_rank1)
