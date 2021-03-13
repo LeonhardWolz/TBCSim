@@ -1,5 +1,5 @@
 import unittest
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock
 
 from src import character
 from src import aura
@@ -140,6 +140,8 @@ class AuraSpellModTest(unittest.TestCase):
         self.char.spell_handler.spell_family_mask = MagicMock(side_effect=spell_family_flags)
         self.char.spell_handler.spell_school = MagicMock(side_effect=spell_school)
         self.char.spell_handler.spell_power_coefficient = MagicMock(side_effect=spell_power_coeff)
+        self.char.spell_handler.enemy = MagicMock()
+        self.char.spell_handler.enemy.active_auras = {}
         self.char.player_class = "Mage"
 
         self.cast_time_mod = -200

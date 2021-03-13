@@ -211,13 +211,13 @@ class TestImprovedFrostNova(unittest.TestCase):
         self.char.spell_handler.apply_spell_effect(self.improved_frost_nova_rank1)
         self.char.spell_handler.spell_start_cooldown(self.frost_nova_rank5)
 
-        self.assertEqual(23000, self.char.spell_handler.cooldown_family_mask[524352])
+        self.assertEqual(23000, self.char.spell_handler.cooldown_family_mask[524352][0])
 
     def test_improved_frost_nova_rank2(self):
         self.char.spell_handler.apply_spell_effect(self.improved_frost_nova_rank2)
         self.char.spell_handler.spell_start_cooldown(self.frost_nova_rank5)
 
-        self.assertEqual(21000, self.char.spell_handler.cooldown_family_mask[524352])
+        self.assertEqual(21000, self.char.spell_handler.cooldown_family_mask[524352][0])
 
 
 @unittest.skip("Not yet implemented")
@@ -422,12 +422,40 @@ class TestFrozenCore(unittest.TestCase):
 class TestColdSnap(unittest.TestCase):
     cold_snap = 11958
 
+    cone_of_cold_rank1 = 120
+    ice_barrier_rank1 = 11426
+    ice_block = 45438
+    frost_nova_rank5 = 27088
+
+    fire_blast_rank9 = 27079
+
     def setUp(self) -> None:
         self.char = Char()
         self.char.player_class = "Mage"
 
+        self.char.spell_handler.env = Mock()
+        self.char.spell_handler.env.now = 0
+
     def test_cold_snap(self):
-        self.assertTrue(False)
+        self.char.spell_handler.spell_start_cooldown(self.cone_of_cold_rank1)
+        self.char.spell_handler.spell_start_cooldown(self.ice_barrier_rank1)
+        self.char.spell_handler.spell_start_cooldown(self.ice_block)
+        self.char.spell_handler.spell_start_cooldown(self.frost_nova_rank5)
+        self.char.spell_handler.spell_start_cooldown(self.fire_blast_rank9)
+
+        self.assertTrue(self.char.spell_handler.spell_on_cooldown(self.cone_of_cold_rank1))
+        self.assertTrue(self.char.spell_handler.spell_on_cooldown(self.ice_barrier_rank1))
+        self.assertTrue(self.char.spell_handler.spell_on_cooldown(self.ice_block))
+        self.assertTrue(self.char.spell_handler.spell_on_cooldown(self.frost_nova_rank5))
+        self.assertTrue(self.char.spell_handler.spell_on_cooldown(self.fire_blast_rank9))
+
+        self.char.spell_handler.apply_spell_effect(self.cold_snap)
+
+        self.assertFalse(self.char.spell_handler.spell_on_cooldown(self.cone_of_cold_rank1))
+        self.assertFalse(self.char.spell_handler.spell_on_cooldown(self.ice_barrier_rank1))
+        self.assertFalse(self.char.spell_handler.spell_on_cooldown(self.ice_block))
+        self.assertFalse(self.char.spell_handler.spell_on_cooldown(self.frost_nova_rank5))
+        self.assertTrue(self.char.spell_handler.spell_on_cooldown(self.fire_blast_rank9))
 
 
 class TestImprovedConeOfCold(unittest.TestCase):
@@ -488,11 +516,11 @@ class TestIceFloes(unittest.TestCase):
         self.char.spell_handler.spell_start_cooldown(self.ice_block)
         self.char.spell_handler.spell_start_cooldown(self.frost_nova_rank5)
 
-        self.assertEqual(480000 * 0.9, self.char.spell_handler.cooldown_spell_id[self.cold_snap])
-        self.assertEqual(10000 * 0.9, self.char.spell_handler.cooldown_family_mask[1573376])
-        self.assertEqual(30000 * 0.9, self.char.spell_handler.cooldown_family_mask[4294967296])
-        self.assertEqual(300000 * 0.9, self.char.spell_handler.cooldown_family_mask[554050781184])
-        self.assertEqual(25000, self.char.spell_handler.cooldown_family_mask[524352])
+        self.assertEqual(480000 * 0.9, self.char.spell_handler.cooldown_spell_id[self.cold_snap][0])
+        self.assertEqual(10000 * 0.9, self.char.spell_handler.cooldown_family_mask[1573376][0])
+        self.assertEqual(30000 * 0.9, self.char.spell_handler.cooldown_family_mask[4294967296][0])
+        self.assertEqual(300000 * 0.9, self.char.spell_handler.cooldown_family_mask[554050781184][0])
+        self.assertEqual(25000, self.char.spell_handler.cooldown_family_mask[524352][0])
 
     def test_ice_floes_rank2(self):
         self.char.spell_handler.apply_spell_effect(self.ice_floes_rank2)
@@ -503,11 +531,11 @@ class TestIceFloes(unittest.TestCase):
         self.char.spell_handler.spell_start_cooldown(self.ice_block)
         self.char.spell_handler.spell_start_cooldown(self.frost_nova_rank5)
 
-        self.assertEqual(480000 * 0.8, self.char.spell_handler.cooldown_spell_id[self.cold_snap])
-        self.assertEqual(10000 * 0.8, self.char.spell_handler.cooldown_family_mask[1573376])
-        self.assertEqual(30000 * 0.8, self.char.spell_handler.cooldown_family_mask[4294967296])
-        self.assertEqual(300000 * 0.8, self.char.spell_handler.cooldown_family_mask[554050781184])
-        self.assertEqual(25000, self.char.spell_handler.cooldown_family_mask[524352])
+        self.assertEqual(480000 * 0.8, self.char.spell_handler.cooldown_spell_id[self.cold_snap][0])
+        self.assertEqual(10000 * 0.8, self.char.spell_handler.cooldown_family_mask[1573376][0])
+        self.assertEqual(30000 * 0.8, self.char.spell_handler.cooldown_family_mask[4294967296][0])
+        self.assertEqual(300000 * 0.8, self.char.spell_handler.cooldown_family_mask[554050781184][0])
+        self.assertEqual(25000, self.char.spell_handler.cooldown_family_mask[524352][0])
 
 
 def spell_does_hit(spell_id):
@@ -576,6 +604,135 @@ class TestWintersChill(unittest.TestCase):
         self.assertEqual(2, self.char.spell_crit_chance_spell(self.frostbolt_rank14))
         self.assertEqual(0, self.char.spell_crit_chance_spell(self.fireball_rank14))
 
+
+@unittest.skip("Not yet implemented")
+class TestIceBarrier(unittest.TestCase):
+    ice_barrier_rank1 = 11426
+
+    def setUp(self) -> None:
+        self.char = Char()
+        self.char.player_class = "Mage"
+
+    def test_ice_barrier(self):
+        self.assertTrue(False)
+
+
+class TestArcticWinds(unittest.TestCase):
+    arctic_winds_rank1 = 31674
+    arctic_winds_rank2 = 31675
+    arctic_winds_rank3 = 31676
+    arctic_winds_rank4 = 31677
+    arctic_winds_rank5 = 31678
+
+    fireball_rank14 = 38692
+    frostbolt_rank14 = 38697
+
+    def setUp(self) -> None:
+        self.char = Char()
+        self.char.player_class = "Mage"
+
+    def test_arctic_winds_rank1(self):
+        self.char.spell_handler.apply_spell_effect(self.arctic_winds_rank1)
+
+        self.assertEqual(1.01, self.char.spell_dmg_multiplier(self.frostbolt_rank14))
+        self.assertEqual(1, self.char.spell_dmg_multiplier(self.fireball_rank14))
+
+    def test_arctic_winds_rank2(self):
+        self.char.spell_handler.apply_spell_effect(self.arctic_winds_rank2)
+
+        self.assertEqual(1.02, self.char.spell_dmg_multiplier(self.frostbolt_rank14))
+        self.assertEqual(1, self.char.spell_dmg_multiplier(self.fireball_rank14))
+
+    def test_arctic_winds_rank3(self):
+        self.char.spell_handler.apply_spell_effect(self.arctic_winds_rank3)
+
+        self.assertEqual(1.03, self.char.spell_dmg_multiplier(self.frostbolt_rank14))
+        self.assertEqual(1, self.char.spell_dmg_multiplier(self.fireball_rank14))
+
+    def test_arctic_winds_rank4(self):
+        self.char.spell_handler.apply_spell_effect(self.arctic_winds_rank4)
+
+        self.assertEqual(1.04, self.char.spell_dmg_multiplier(self.frostbolt_rank14))
+        self.assertEqual(1, self.char.spell_dmg_multiplier(self.fireball_rank14))
+
+    def test_arctic_winds_rank5(self):
+        self.char.spell_handler.apply_spell_effect(self.arctic_winds_rank5)
+
+        self.assertEqual(1.05, self.char.spell_dmg_multiplier(self.frostbolt_rank14))
+        self.assertEqual(1, self.char.spell_dmg_multiplier(self.fireball_rank14))
+
+
+class TestEmpoweredFrostbolt(unittest.TestCase):
+    empowered_frostbolt_rank1 = 31682
+    empowered_frostbolt_rank2 = 31683
+    empowered_frostbolt_rank3 = 31684
+    empowered_frostbolt_rank4 = 31685
+    empowered_frostbolt_rank5 = 31686
+
+    fireball_rank14 = 38692
+    frostbolt_rank14 = 38697
+
+    def setUp(self) -> None:
+        self.char = Char()
+        self.char.player_class = "Mage"
+        self.char.spell_handler.enemy = Enemy()
+
+    def test_empowered_frostbolt_rank1(self):
+        self.char.spell_handler.apply_spell_effect(self.empowered_frostbolt_rank1)
+        self.assertEqual(self.char.spell_handler.spell_power_coefficient(self.frostbolt_rank14) + 0.02,
+                         self.char.spell_power_coefficient(self.frostbolt_rank14))
+        self.assertEqual(self.char.spell_handler.spell_power_coefficient(self.fireball_rank14),
+                         self.char.spell_power_coefficient(self.fireball_rank14))
+        self.assertEqual(1, self.char.spell_crit_chance_spell(self.frostbolt_rank14))
+        self.assertEqual(0, self.char.spell_crit_chance_spell(self.fireball_rank14))
+
+    def test_empowered_frostbolt_rank2(self):
+        self.char.spell_handler.apply_spell_effect(self.empowered_frostbolt_rank2)
+        self.assertEqual(self.char.spell_handler.spell_power_coefficient(self.frostbolt_rank14) + 0.04,
+                         self.char.spell_power_coefficient(self.frostbolt_rank14))
+        self.assertEqual(self.char.spell_handler.spell_power_coefficient(self.fireball_rank14),
+                         self.char.spell_power_coefficient(self.fireball_rank14))
+        self.assertEqual(2, self.char.spell_crit_chance_spell(self.frostbolt_rank14))
+        self.assertEqual(0, self.char.spell_crit_chance_spell(self.fireball_rank14))
+
+    def test_empowered_frostbolt_rank3(self):
+        self.char.spell_handler.apply_spell_effect(self.empowered_frostbolt_rank3)
+        self.assertEqual(self.char.spell_handler.spell_power_coefficient(self.frostbolt_rank14) + 0.06,
+                         self.char.spell_power_coefficient(self.frostbolt_rank14))
+        self.assertEqual(self.char.spell_handler.spell_power_coefficient(self.fireball_rank14),
+                         self.char.spell_power_coefficient(self.fireball_rank14))
+        self.assertEqual(3, self.char.spell_crit_chance_spell(self.frostbolt_rank14))
+        self.assertEqual(0, self.char.spell_crit_chance_spell(self.fireball_rank14))
+
+    def test_empowered_frostbolt_rank4(self):
+        self.char.spell_handler.apply_spell_effect(self.empowered_frostbolt_rank4)
+        self.assertEqual(self.char.spell_handler.spell_power_coefficient(self.frostbolt_rank14) + 0.08,
+                         self.char.spell_power_coefficient(self.frostbolt_rank14))
+        self.assertEqual(self.char.spell_handler.spell_power_coefficient(self.fireball_rank14),
+                         self.char.spell_power_coefficient(self.fireball_rank14))
+        self.assertEqual(4, self.char.spell_crit_chance_spell(self.frostbolt_rank14))
+        self.assertEqual(0, self.char.spell_crit_chance_spell(self.fireball_rank14))
+
+    def test_empowered_frostbolt_rank5(self):
+        self.char.spell_handler.apply_spell_effect(self.empowered_frostbolt_rank5)
+        self.assertEqual(self.char.spell_handler.spell_power_coefficient(self.frostbolt_rank14) + 0.1,
+                         self.char.spell_power_coefficient(self.frostbolt_rank14))
+        self.assertEqual(self.char.spell_handler.spell_power_coefficient(self.fireball_rank14),
+                         self.char.spell_power_coefficient(self.fireball_rank14))
+        self.assertEqual(5, self.char.spell_crit_chance_spell(self.frostbolt_rank14))
+        self.assertEqual(0, self.char.spell_crit_chance_spell(self.fireball_rank14))
+
+
+@unittest.skip("Not yet implemented")
+class TestSummonWaterElemental(unittest.TestCase):
+    summon_water_elemental = 31687
+
+    def setUp(self) -> None:
+        self.char = Char()
+        self.char.player_class = "Mage"
+
+    def test_summon_water_elemental(self):
+        self.assertTrue(False)
 
 if __name__ == '__main__':
     unittest.main()

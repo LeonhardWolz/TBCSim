@@ -120,6 +120,7 @@ class TestImprovedFireBlast(unittest.TestCase):
     improved_fire_blast_rank3 = 12342
 
     fire_blast_rank9 = 27079
+    cone_of_cold_rank1 = 120
 
     def setUp(self) -> None:
         self.char = Char()
@@ -132,20 +133,26 @@ class TestImprovedFireBlast(unittest.TestCase):
     def test_improved_fire_blast_rank1(self):
         self.char.spell_handler.apply_spell_effect(self.improved_fire_blast_rank1)
         self.char.spell_handler.spell_start_cooldown(self.fire_blast_rank9)
+        self.char.spell_handler.spell_start_cooldown(self.cone_of_cold_rank1)
 
-        self.assertEqual(7500, self.char.spell_handler.cooldown_family_mask[2])
+        self.assertEqual(7500, self.char.spell_handler.cooldown_family_mask[2][0])
+        self.assertEqual(10000, self.char.spell_handler.cooldown_family_mask[1573376][0])
 
     def test_improved_fire_blast_rank2(self):
         self.char.spell_handler.apply_spell_effect(self.improved_fire_blast_rank2)
         self.char.spell_handler.spell_start_cooldown(self.fire_blast_rank9)
+        self.char.spell_handler.spell_start_cooldown(self.cone_of_cold_rank1)
 
-        self.assertEqual(7000, self.char.spell_handler.cooldown_family_mask[2])
+        self.assertEqual(7000, self.char.spell_handler.cooldown_family_mask[2][0])
+        self.assertEqual(10000, self.char.spell_handler.cooldown_family_mask[1573376][0])
 
     def test_improved_fire_blast_rank3(self):
         self.char.spell_handler.apply_spell_effect(self.improved_fire_blast_rank3)
         self.char.spell_handler.spell_start_cooldown(self.fire_blast_rank9)
+        self.char.spell_handler.spell_start_cooldown(self.cone_of_cold_rank1)
 
-        self.assertEqual(6500, self.char.spell_handler.cooldown_family_mask[2])
+        self.assertEqual(6500, self.char.spell_handler.cooldown_family_mask[2][0])
+        self.assertEqual(10000, self.char.spell_handler.cooldown_family_mask[1573376][0])
 
 
 class TestIncineration(unittest.TestCase):
@@ -185,6 +192,8 @@ class TestImprovedFlamestrike(unittest.TestCase):
     improved_flamestrike_rank3 = 12350
 
     flamestrike_rank1 = 2120
+    fireball_rank1 = 133
+    frostbolt_rank1 = 116
 
     def setUp(self) -> None:
         self.char = Char()
@@ -194,17 +203,23 @@ class TestImprovedFlamestrike(unittest.TestCase):
     def test_improved_flamestrike_rank1(self):
         self.char.spell_handler.apply_spell_effect(self.improved_flamestrike_rank1)
 
-        self.assertEqual(5, self.char.spell_crit_chance_spell(self.flamestrike_rank1))
+        self.assertEqual(5, self.char.spell_crit_chance_spell(self.flamestrike_rank1, proc_auras=False))
+        self.assertEqual(0, self.char.spell_crit_chance_spell(self.fireball_rank1, proc_auras=False))
+        self.assertEqual(0, self.char.spell_crit_chance_spell(self.frostbolt_rank1, proc_auras=False))
 
     def test_improved_flamestrike_rank2(self):
         self.char.spell_handler.apply_spell_effect(self.improved_flamestrike_rank2)
 
-        self.assertEqual(10, self.char.spell_crit_chance_spell(self.flamestrike_rank1))
+        self.assertEqual(10, self.char.spell_crit_chance_spell(self.flamestrike_rank1, proc_auras=False))
+        self.assertEqual(0, self.char.spell_crit_chance_spell(self.fireball_rank1, proc_auras=False))
+        self.assertEqual(0, self.char.spell_crit_chance_spell(self.frostbolt_rank1, proc_auras=False))
 
     def test_improved_flamestrike_rank3(self):
         self.char.spell_handler.apply_spell_effect(self.improved_flamestrike_rank3)
 
-        self.assertEqual(15, self.char.spell_crit_chance_spell(self.flamestrike_rank1))
+        self.assertEqual(15, self.char.spell_crit_chance_spell(self.flamestrike_rank1, proc_auras=False))
+        self.assertEqual(0, self.char.spell_crit_chance_spell(self.fireball_rank1, proc_auras=False))
+        self.assertEqual(0, self.char.spell_crit_chance_spell(self.frostbolt_rank1, proc_auras=False))
 
 
 class TestPyroblast(unittest.TestCase):
@@ -338,6 +353,7 @@ class TestPlayingWithFire(unittest.TestCase):
     playing_with_fire_rank3 = 31640
 
     fireball_rank1 = 133
+    frostbolt_rank1 = 116
 
     def setUp(self) -> None:
         self.char = Char()
@@ -346,14 +362,17 @@ class TestPlayingWithFire(unittest.TestCase):
     def test_playing_with_fire_rank1_damage_caused(self):
         self.char.spell_handler.apply_spell_effect(self.playing_with_fire_rank1)
         self.assertEqual(1.01, self.char.spell_dmg_multiplier(self.fireball_rank1))
+        self.assertEqual(1.01, self.char.spell_dmg_multiplier(self.frostbolt_rank1))
 
     def test_playing_with_fire_rank2_damage_caused(self):
         self.char.spell_handler.apply_spell_effect(self.playing_with_fire_rank2)
         self.assertEqual(1.02, self.char.spell_dmg_multiplier(self.fireball_rank1))
+        self.assertEqual(1.02, self.char.spell_dmg_multiplier(self.frostbolt_rank1))
 
     def test_playing_with_fire_rank3_damage_caused(self):
         self.char.spell_handler.apply_spell_effect(self.playing_with_fire_rank3)
         self.assertEqual(1.03, self.char.spell_dmg_multiplier(self.fireball_rank1))
+        self.assertEqual(1.03, self.char.spell_dmg_multiplier(self.frostbolt_rank1))
 
 
 class TestCriticalMass(unittest.TestCase):
