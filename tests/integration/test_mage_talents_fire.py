@@ -1,8 +1,12 @@
 import unittest
+from datetime import datetime
 from unittest.mock import MagicMock, Mock
+
+import simpy
 
 from src.character import Character as Char
 from src.enemy import Enemy
+from src.sim_results import SimResult
 
 
 class TestImprovedFireball(unittest.TestCase):
@@ -85,20 +89,72 @@ class TestIgnite(unittest.TestCase):
     ignite_rank4 = 12847
     ignite_rank5 = 12848
 
+    sim_length = 5000
+
+    crit_damage = 12800
+
     def setUp(self) -> None:
         self.char = Char()
         self.char.player_class = "Mage"
         self.char.spell_handler.enemy = Enemy()
-        self.char.spell_handler.env = Mock()
-        self.char.spell_handler.env.process = Mock(side_effect=process)
+        self.char.spell_handler.results = SimResult(sim_length=self.sim_length, start_time=datetime.now())
+        self.char.spell_handler.env = simpy.Environment()
         self.char.spell_handler.spell_does_hit = Mock(side_effect=spell_does_hit)
 
     def test_ignite_rank1(self):
         self.char.spell_handler.apply_spell_effect(self.ignite_rank1)
-        self.char.spell_handler.on_spell_crit(38692, 100)
-        # TODO assert dot has correct dmg%
-        print(dir(my_dot))
-        self.assertEqual(8, my_dot)
+        self.char.spell_handler.on_spell_crit(38692, self.crit_damage)
+
+        for i in range(1, self.sim_length):
+            self.char.spell_handler.env.run(until=i)
+
+        self.assertTrue(
+            any(spell_cast.spell_id == 12654 and spell_cast.dot_damage_dealt == round(self.crit_damage * 0.08 / 3) * 3
+                for spell_cast in self.char.spell_handler.results.cast_spells.values()))
+
+    def test_ignite_rank2(self):
+        self.char.spell_handler.apply_spell_effect(self.ignite_rank2)
+        self.char.spell_handler.on_spell_crit(38692, self.crit_damage)
+
+        for i in range(1, self.sim_length):
+            self.char.spell_handler.env.run(until=i)
+
+        self.assertTrue(
+            any(spell_cast.spell_id == 12654 and spell_cast.dot_damage_dealt == round(self.crit_damage * 0.16 / 3) * 3
+                for spell_cast in self.char.spell_handler.results.cast_spells.values()))
+
+    def test_ignite_rank3(self):
+        self.char.spell_handler.apply_spell_effect(self.ignite_rank3)
+        self.char.spell_handler.on_spell_crit(38692, self.crit_damage)
+
+        for i in range(1, self.sim_length):
+            self.char.spell_handler.env.run(until=i)
+
+        self.assertTrue(
+            any(spell_cast.spell_id == 12654 and spell_cast.dot_damage_dealt == round(self.crit_damage * 0.24 / 3) * 3
+                for spell_cast in self.char.spell_handler.results.cast_spells.values()))
+
+    def test_ignite_rank4(self):
+        self.char.spell_handler.apply_spell_effect(self.ignite_rank4)
+        self.char.spell_handler.on_spell_crit(38692, self.crit_damage)
+
+        for i in range(1, self.sim_length):
+            self.char.spell_handler.env.run(until=i)
+
+        self.assertTrue(
+            any(spell_cast.spell_id == 12654 and spell_cast.dot_damage_dealt == round(self.crit_damage * 0.32 / 3) * 3
+                for spell_cast in self.char.spell_handler.results.cast_spells.values()))
+
+    def test_ignite_rank5(self):
+        self.char.spell_handler.apply_spell_effect(self.ignite_rank5)
+        self.char.spell_handler.on_spell_crit(38692, self.crit_damage)
+
+        for i in range(1, self.sim_length):
+            self.char.spell_handler.env.run(until=i)
+
+        self.assertTrue(
+            any(spell_cast.spell_id == 12654 and spell_cast.dot_damage_dealt == round(self.crit_damage * 0.4 / 3) * 3
+                for spell_cast in self.char.spell_handler.results.cast_spells.values()))
 
 
 @unittest.skip("Not yet implemented")
@@ -224,13 +280,26 @@ class TestImprovedFlamestrike(unittest.TestCase):
 
 class TestPyroblast(unittest.TestCase):
     pyroblast_rank1 = 11366
+    sim_length = 13000
 
     def setUp(self) -> None:
         self.char = Char()
         self.char.player_class = "Mage"
+        self.char.spell_handler.enemy = Enemy()
+        self.char.spell_handler.results = SimResult(sim_length=self.sim_length, start_time=datetime.now())
+        self.char.spell_handler.env = simpy.Environment()
+        self.char.spell_handler.spell_does_hit = Mock(side_effect=spell_does_hit)
 
     def test_pyroblast_rank1(self):
-        self.assertEqual(True, False)
+        self.char.spell_handler.apply_spell_effect(self.pyroblast_rank1)
+
+        for i in range(1, self.sim_length):
+            self.char.spell_handler.env.run(until=i)
+
+        self.assertTrue(
+            any(spell_cast.spell_id == self.pyroblast_rank1 and
+                spell_cast.damage_dealt != 0 and spell_cast.dot_damage_dealt != 0
+                for spell_cast in self.char.spell_handler.results.cast_spells.values()))
 
 
 @unittest.skip("Not yet implemented")

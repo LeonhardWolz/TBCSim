@@ -67,6 +67,7 @@ class TestArcaneFocus(unittest.TestCase):
         self.assertEqual(self.char.spell_hit_chance, self.char.spell_hit_chance_spell(116))
 
 
+@unittest.skip("Not yet implemented")
 class TestImprovedArcaneMissiles(unittest.TestCase):
     improved_arcane_missiles_rank1 = 11237
     improved_arcane_missiles_rank2 = 12463
@@ -88,12 +89,19 @@ class TestWandSpecialization(unittest.TestCase):
     wand_specialization_rank1 = 6057
     wand_specialization_rank2 = 6085
 
+    cold_snap_wand = 19130
+
     def setUp(self) -> None:
         self.char = Char()
         self.char.player_class = "Mage"
 
     def test_wand_specialization_rank1(self):
-        self.assertEqual(True, False)
+        self.char.spell_handler.apply_spell_effect(self.wand_specialization_rank1)
+        self.assertEqual(1.13, self.char.wand_dmg_multiplier())
+
+    def test_wand_specialization_rank2(self):
+        self.char.spell_handler.apply_spell_effect(self.wand_specialization_rank2)
+        self.assertEqual(1.25, self.char.wand_dmg_multiplier())
 
 
 class TestArcaneConcentration(unittest.TestCase):
@@ -232,12 +240,20 @@ class TestImprovedBlink(unittest.TestCase):
 class TestPresenceofMind(unittest.TestCase):
     presence_of_mind = 12043
 
+    pyroblast_rank1 = 11366
+    frostbolt_rank1 = 116
+    fireball_rank1 = 133
+
     def setUp(self) -> None:
         self.char = Char()
         self.char.player_class = "Mage"
 
     def test_presence_of_mind(self):
-        self.assertEqual(True, False)
+        self.char.spell_handler.apply_spell_effect(self.presence_of_mind)
+        self.assertEqual(0, self.char.spell_cast_time(self.pyroblast_rank1, proc_auras=False))
+        self.assertEqual(0, self.char.spell_cast_time(self.frostbolt_rank1, proc_auras=False))
+        self.assertEqual(0, self.char.spell_cast_time(self.fireball_rank1, proc_auras=True))
+        self.assertEqual(1500, self.char.spell_cast_time(self.frostbolt_rank1))
 
 
 class TestArcaneMind(unittest.TestCase):
@@ -362,6 +378,8 @@ class TestEmpoweredArcaneMissiles(unittest.TestCase):
 
     arcane_missiles_rank1 = 5143
     mana_cost_arcane_missiles_rank1 = 85
+    fireball_rank1 = 133
+    fireball_rank1_mana_cost = 30
 
     def setUp(self) -> None:
         self.char = Char()
@@ -370,23 +388,41 @@ class TestEmpoweredArcaneMissiles(unittest.TestCase):
     def test_empowered_arcane_missiles_rank1(self):
         self.char.spell_handler.apply_spell_effect(self.empowered_arcane_missiles_rank1)
 
-        self.assertEqual(1.03, self.char.spell_power_coefficient(self.arcane_missiles_rank1))
+        self.assertEqual(self.char.spell_handler.spell_power_coefficient(self.arcane_missiles_rank1) + 0.03,
+                         self.char.spell_power_coefficient(self.arcane_missiles_rank1))
+        self.assertEqual(self.char.spell_handler.spell_power_coefficient(self.fireball_rank1),
+                         self.char.spell_power_coefficient(self.fireball_rank1))
+
         self.assertEqual(round(self.mana_cost_arcane_missiles_rank1 * 1.02),
                          self.char.spell_resource_cost(self.arcane_missiles_rank1))
+        self.assertEqual(self.fireball_rank1_mana_cost,
+                         self.char.spell_resource_cost(self.fireball_rank1))
 
     def test_empowered_arcane_missiles_rank2(self):
         self.char.spell_handler.apply_spell_effect(self.empowered_arcane_missiles_rank2)
 
-        self.assertEqual(1.06, self.char.spell_power_coefficient(self.arcane_missiles_rank1))
+        self.assertEqual(self.char.spell_handler.spell_power_coefficient(self.arcane_missiles_rank1) + 0.06,
+                         self.char.spell_power_coefficient(self.arcane_missiles_rank1))
+        self.assertEqual(self.char.spell_handler.spell_power_coefficient(self.fireball_rank1),
+                         self.char.spell_power_coefficient(self.fireball_rank1))
+
         self.assertEqual(round(self.mana_cost_arcane_missiles_rank1 * 1.04),
                          self.char.spell_resource_cost(self.arcane_missiles_rank1))
+        self.assertEqual(self.fireball_rank1_mana_cost,
+                         self.char.spell_resource_cost(self.fireball_rank1))
 
     def test_empowered_arcane_missiles_rank3(self):
         self.char.spell_handler.apply_spell_effect(self.empowered_arcane_missiles_rank3)
 
-        self.assertEqual(1.09, self.char.spell_power_coefficient(self.arcane_missiles_rank1))
+        self.assertEqual(self.char.spell_handler.spell_power_coefficient(self.arcane_missiles_rank1) + 0.09,
+                         self.char.spell_power_coefficient(self.arcane_missiles_rank1))
+        self.assertEqual(self.char.spell_handler.spell_power_coefficient(self.fireball_rank1),
+                         self.char.spell_power_coefficient(self.fireball_rank1))
+
         self.assertEqual(round(self.mana_cost_arcane_missiles_rank1 * 1.06),
                          self.char.spell_resource_cost(self.arcane_missiles_rank1))
+        self.assertEqual(self.fireball_rank1_mana_cost,
+                         self.char.spell_resource_cost(self.fireball_rank1))
 
 
 class TestArcanePower(unittest.TestCase):
