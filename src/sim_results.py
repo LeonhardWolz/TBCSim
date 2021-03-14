@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Dict
+from typing import Dict, List
 import src.db_connector as DB
 from src import enums
 
@@ -178,6 +178,7 @@ class SpellResults:
 @dataclass
 class EquippedItem:
     name: str
+    item_data: List = field(default_factory=lambda: [])
 
     def __str__(self):
         return self.name

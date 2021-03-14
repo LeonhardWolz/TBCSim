@@ -67,6 +67,7 @@ class SpellHandler:
 
         if spell_info[DB.spell_column_info["EffectImplicitTargetA" + str(effect_slot)]] == 1:
             self.apply_aura_to_character(spell_info, effect_slot)
+
         elif spell_info[DB.spell_column_info["EffectImplicitTargetA" + str(effect_slot)]] in [6, 25]:
             if spell_info[DB.spell_column_info["EffectApplyAuraName" + str(effect_slot)]] == 3:
                 # Apply periodic damage
@@ -121,6 +122,9 @@ class SpellHandler:
         affected_spell_school = spell_info[DB.spell_column_info["SchoolMask"]]
         affected_spell_family_mask = DB.get_spell_family_affected(spell_info[0])
 
+        affected_item_class = spell_info[DB.spell_column_info["EquippedItemClass"]]
+        affected_item_subclass_mask = spell_info[DB.spell_column_info["EquippedItemSubClassMask"]]
+
         if self.env is None:
             create_time = 0
         else:
@@ -140,26 +144,17 @@ class SpellHandler:
                       spell_info[DB.spell_column_info["AttributesEx5"]],
                       spell_info[DB.spell_column_info["AttributesEx6"]]]
 
-        if affected_spell_family_mask is not None and affected_spell_family_mask[1] == (effect_slot - 1):
-            return Aura(value=value,
-                        spell_id=spell_info[0],
-                        aura_id=aura_id,
-                        misc_value=misc_value,
-                        stack_limit=stack_limit,
-                        affected_spell_school=affected_spell_school,
-                        affected_spell_family_mask=affected_spell_family_mask[2],
-                        create_time=create_time,
-                        duration_index=duration_index,
-                        trigger_spell=trigger_spell,
-                        proc=proc,
-                        attributes=attributes)
-
         return Aura(value=value,
                     spell_id=spell_info[0],
                     aura_id=aura_id,
                     misc_value=misc_value,
                     stack_limit=stack_limit,
                     affected_spell_school=affected_spell_school,
+                    affected_spell_family_mask=affected_spell_family_mask[2] if
+                    affected_spell_family_mask is not None and
+                    affected_spell_family_mask[1] == (effect_slot - 1) else 0,
+                    affected_item_class=affected_item_class,
+                    affected_item_subclass_mask=affected_item_subclass_mask,
                     create_time=create_time,
                     duration_index=duration_index,
                     trigger_spell=trigger_spell,
@@ -184,13 +179,37 @@ class SpellHandler:
     def spell_cast_time(self, spell_id):
         return enums.cast_time[DB.get_spell(spell_id)[DB.spell_column_info["CastingTimeIndex"]]]
 
-    def spell_power_coefficient(self, spell_id):
-        # TODO improve: eg. spells that apply auras sometimes have a 0.95 multiplier
-        # Instant Spells are counted as 1.5s casts. casts longer than 7s are considered 7s casts
-        coeff_cast_time = min(
-            max(enums.cast_time[DB.get_spell(spell_id)[DB.spell_column_info["CastingTimeIndex"]]], 1500),
-            7000)
-        return coeff_cast_time / 3500
+    def spell_power_coefficient(self, spell_id, effect_slot=4):
+        def spell_aoe_divisor():
+            for x in [22, 24, 28 - 31, 33, 34]:
+                if x in [DB.get_spell(spell_id)[DB.spell_column_info["EffectImplicitTargetA" + str(1)]],
+                         DB.get_spell(spell_id)[DB.spell_column_info["EffectImplicitTargetA" + str(2)]],
+                         DB.get_spell(spell_id)[DB.spell_column_info["EffectImplicitTargetA" + str(3)]]]:
+                    return 3
+            return 1
+
+        def spell_slow_multiplier():
+            if 33 in [DB.get_spell(spell_id)[DB.spell_column_info["EffectApplyAuraName" + str(1)]],
+                      DB.get_spell(spell_id)[DB.spell_column_info["EffectApplyAuraName" + str(2)]],
+                      DB.get_spell(spell_id)[DB.spell_column_info["EffectApplyAuraName" + str(3)]]]:
+                return 0.95
+            return 1
+
+        # Pyroblast dot 70%
+        if DB.get_spell_school(spell_id) & 4194304 and \
+                DB.get_spell(spell_id)[DB.spell_column_info["Effect" + str(effect_slot)]] == 6:
+            return 0.7
+
+        # channeled spell
+        if DB.get_spell(spell_id)[DB.spell_column_info["AttributesEx"]] & 4:
+            base_cast_time = enums.duration_index[DB.get_spell(spell_id)[DB.spell_column_info["DurationIndex"]]]
+
+        # cast spell
+        else:
+            base_cast_time = enums.cast_time[DB.get_spell(spell_id)[DB.spell_column_info["CastingTimeIndex"]]]
+
+        # Instant Spells are counted as 1.5s casts. casts longer than 3.5s are considered 3.5s casts
+        return min(max(base_cast_time, 1500), 3500) / 3500 / spell_aoe_divisor() * spell_slow_multiplier()
 
     def spell_family_mask(self, spell_id):
         return DB.get_spell(spell_id)[DB.spell_column_info["SpellFamilyFlags"]]
@@ -304,10 +323,28 @@ class SpellHandler:
 
     def aura_applies_to_spell(self, aura, spell_id):
         if aura.affected_spell_family_mask & self.spell_family_mask(spell_id) != 0 or \
+                (self.spell_has_triggered_spell(spell_id) and aura.affected_spell_family_mask &
+                 self.spell_family_mask(self.spell_get_triggered_spell(spell_id)) != 0) or \
                 aura.affected_spell_school == DB.get_spell_school(spell_id) or aura.affected_spell_family_mask == 0:
             return True
         else:
             return False
+
+    def spell_has_triggered_spell(self, spell_id):
+        for i in range(1, 4):
+            if DB.get_spell(spell_id)[DB.spell_column_info["EffectTriggerSpell" + str(i)]] != 0:
+                return True
+
+        return False
+
+    def spell_get_triggered_spell(self, spell_id):
+        if DB.get_spell(spell_id)[DB.spell_column_info["EffectTriggerSpell1"]] != 0:
+            return DB.get_spell(spell_id)[DB.spell_column_info["EffectTriggerSpell1"]]
+        elif DB.get_spell(spell_id)[DB.spell_column_info["EffectTriggerSpell2"]] != 0:
+            return DB.get_spell(spell_id)[DB.spell_column_info["EffectTriggerSpell2"]]
+        elif DB.get_spell(spell_id)[DB.spell_column_info["EffectTriggerSpell3"]] != 0:
+            return DB.get_spell(spell_id)[DB.spell_column_info["EffectTriggerSpell3"]]
+        return 0
 
     def on_spell_hit(self, spell_id):
         for aura in self.get_procable_auras(proc_flag=65536):
@@ -370,7 +407,7 @@ class SpellHandler:
         elif spell_id == 12848:
             ignite_dmg_pct = 40
 
-        ignite[DB.spell_column_info["EffectBasePoints1"]] = round(damage * (ignite_dmg_pct / 100) - 1)
+        ignite[DB.spell_column_info["EffectBasePoints1"]] = round((damage * ignite_dmg_pct / 100) / 3) - 1
 
         self.process_dot_damage_spell(ignite, 1)
 

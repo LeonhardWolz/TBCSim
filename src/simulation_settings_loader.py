@@ -97,7 +97,7 @@ def load_character_items(gear_settings):
 
 
 def load_character_item(inventory_slot, item_from_db):
-    char.items[inventory_slot] = EquippedItem(item_from_db[DB.item_column_info["name"]])
+    char.items[inventory_slot] = EquippedItem(item_from_db[DB.item_column_info["name"]], item_from_db)
 
     for i in range(1, 11):
         stat_id = item_from_db[DB.item_column_info["stat_type" + str(i)]]
