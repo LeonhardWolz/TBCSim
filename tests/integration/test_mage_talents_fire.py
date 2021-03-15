@@ -91,6 +91,8 @@ class TestIgnite(unittest.TestCase):
 
     sim_length = 5000
 
+    fireball_rank14 = 38692
+    frostbolt_rank14 = 38697
     crit_damage = 12800
 
     def setUp(self) -> None:
@@ -101,9 +103,9 @@ class TestIgnite(unittest.TestCase):
         self.char.spell_handler.env = simpy.Environment()
         self.char.spell_handler.spell_does_hit = Mock(side_effect=spell_does_hit)
 
-    def test_ignite_rank1(self):
+    def test_ignite_fire_damage_rank1(self):
         self.char.spell_handler.apply_spell_effect(self.ignite_rank1)
-        self.char.spell_handler.on_spell_crit(38692, self.crit_damage)
+        self.char.spell_handler.on_spell_crit(self.fireball_rank14, self.crit_damage)
 
         for i in range(1, self.sim_length):
             self.char.spell_handler.env.run(until=i)
@@ -112,9 +114,9 @@ class TestIgnite(unittest.TestCase):
             any(spell_cast.spell_id == 12654 and spell_cast.dot_damage_dealt == round(self.crit_damage * 0.08 / 3) * 3
                 for spell_cast in self.char.spell_handler.results.cast_spells.values()))
 
-    def test_ignite_rank2(self):
+    def test_ignite_fire_damage_rank2(self):
         self.char.spell_handler.apply_spell_effect(self.ignite_rank2)
-        self.char.spell_handler.on_spell_crit(38692, self.crit_damage)
+        self.char.spell_handler.on_spell_crit(self.fireball_rank14, self.crit_damage)
 
         for i in range(1, self.sim_length):
             self.char.spell_handler.env.run(until=i)
@@ -123,9 +125,9 @@ class TestIgnite(unittest.TestCase):
             any(spell_cast.spell_id == 12654 and spell_cast.dot_damage_dealt == round(self.crit_damage * 0.16 / 3) * 3
                 for spell_cast in self.char.spell_handler.results.cast_spells.values()))
 
-    def test_ignite_rank3(self):
+    def test_ignite_fire_damage_rank3(self):
         self.char.spell_handler.apply_spell_effect(self.ignite_rank3)
-        self.char.spell_handler.on_spell_crit(38692, self.crit_damage)
+        self.char.spell_handler.on_spell_crit(self.fireball_rank14, self.crit_damage)
 
         for i in range(1, self.sim_length):
             self.char.spell_handler.env.run(until=i)
@@ -134,9 +136,9 @@ class TestIgnite(unittest.TestCase):
             any(spell_cast.spell_id == 12654 and spell_cast.dot_damage_dealt == round(self.crit_damage * 0.24 / 3) * 3
                 for spell_cast in self.char.spell_handler.results.cast_spells.values()))
 
-    def test_ignite_rank4(self):
+    def test_ignite_fire_damage_rank4(self):
         self.char.spell_handler.apply_spell_effect(self.ignite_rank4)
-        self.char.spell_handler.on_spell_crit(38692, self.crit_damage)
+        self.char.spell_handler.on_spell_crit(self.fireball_rank14, self.crit_damage)
 
         for i in range(1, self.sim_length):
             self.char.spell_handler.env.run(until=i)
@@ -145,9 +147,9 @@ class TestIgnite(unittest.TestCase):
             any(spell_cast.spell_id == 12654 and spell_cast.dot_damage_dealt == round(self.crit_damage * 0.32 / 3) * 3
                 for spell_cast in self.char.spell_handler.results.cast_spells.values()))
 
-    def test_ignite_rank5(self):
+    def test_ignite_fire_damage_rank5(self):
         self.char.spell_handler.apply_spell_effect(self.ignite_rank5)
-        self.char.spell_handler.on_spell_crit(38692, self.crit_damage)
+        self.char.spell_handler.on_spell_crit(self.fireball_rank14, self.crit_damage)
 
         for i in range(1, self.sim_length):
             self.char.spell_handler.env.run(until=i)
@@ -155,6 +157,16 @@ class TestIgnite(unittest.TestCase):
         self.assertTrue(
             any(spell_cast.spell_id == 12654 and spell_cast.dot_damage_dealt == round(self.crit_damage * 0.4 / 3) * 3
                 for spell_cast in self.char.spell_handler.results.cast_spells.values()))
+
+    def test_ignite_doesnt_proc_on_frost(self):
+        self.char.spell_handler.apply_spell_effect(self.ignite_rank5)
+        self.char.spell_handler.on_spell_crit(self.frostbolt_rank14, self.crit_damage)
+
+        for i in range(1, self.sim_length):
+            self.char.spell_handler.env.run(until=i)
+
+        self.assertFalse(any(spell_cast.spell_id == 12654 for
+                             spell_cast in self.char.spell_handler.results.cast_spells.values()))
 
 
 @unittest.skip("Not yet implemented")
@@ -567,6 +579,7 @@ class TestPyromaniac(unittest.TestCase):
         self.assertEqual(self.frostbolt_rank14_mana_cost, self.char.spell_resource_cost(self.frostbolt_rank14))
 
 
+# TODO only start cooldown after all charges used
 class TestCombustion(unittest.TestCase):
     combustion = 11129
 
