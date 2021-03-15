@@ -226,7 +226,8 @@ class SpellHandler:
             spell_base_damage = self.get_effect_strength(spell_info, effect_slot)
             spell_spell_power = self.char.spell_spell_power(spell_info[0])
             spell_power_coefficient = self.char.spell_power_coefficient(spell_info[0])
-            spell_damage_multiplier = self.char.spell_dmg_multiplier(spell_info[0])
+            spell_damage_multiplier = self.char.spell_dmg_multiplier(spell_info[0]) \
+                                      * self.enemy_damage_taken_mod(spell_info[0])
 
             spell_damage = round((spell_base_damage + spell_spell_power * spell_power_coefficient)
                                  * spell_damage_multiplier)
@@ -235,23 +236,28 @@ class SpellHandler:
                 spell_damage *= self.char.spell_crit_dmg_multiplier(spell_info[0])
                 spell_damage = round(spell_damage)
                 self.on_spell_crit(spell_info[0], spell_damage)
-                self.logg(DB.get_spell_name(spell_info[0]) + " critical damage: " + str(spell_damage))
+                self.logg(DB.get_spell_name(spell_info[0]) + " " +
+                          spell_info[DB.spell_column_info["Rank1"]] + " critical damage: " + str(spell_damage))
                 self.results.damage_spell_crit(spell_info[0], spell_damage)
             else:
                 self.on_spell_hit(spell_info[0])
-                self.logg(DB.get_spell_name(spell_info[0]) + " damage: " + str(spell_damage))
+                self.logg(DB.get_spell_name(spell_info[0]) + " " +
+                          spell_info[DB.spell_column_info["Rank1"]] + " damage: " + str(spell_damage))
                 self.results.damage_spell_hit(spell_info[0], spell_damage)
             self.on_damage(spell_info)
         else:
-            self.logg(DB.get_spell_name(spell_info[0]) + " resisted")
+            self.logg(DB.get_spell_name(spell_info[0]) + " " +
+                      spell_info[DB.spell_column_info["Rank1"]] + " resisted")
             self.results.damage_spell_resisted(spell_info[0])
 
     def process_dot_damage_spell(self, spell_info, effect_slot):
         # TODO Consider all Character Stats for damage
         if self.spell_does_hit(spell_info[0]):
             dot_duration, dot_interval = self.spell_dot_behaviour(spell_info, effect_slot)
+            spell_damage_multiplier = self.char.spell_dmg_multiplier(spell_info[0]) \
+                                      * self.enemy_damage_taken_mod(spell_info[0])
             dot_damage = round(self.get_effect_strength(spell_info, effect_slot) *
-                               self.enemy_damage_taken_mod(spell_info[0]))
+                               spell_damage_multiplier)
 
             self.env.process(Dot(self.env,
                                  self,
@@ -261,7 +267,8 @@ class SpellHandler:
                                  dot_duration,
                                  self.results).ticking())
         else:
-            self.logg(DB.get_spell_name(spell_info[0]) + " dot resisted")
+            self.logg(DB.get_spell_name(spell_info[0]) + " " +
+                      spell_info[DB.spell_column_info["Rank1"]] + " dot resisted")
             self.results.dot_spell_resisted(spell_info[0])
 
     def enemy_damage_taken_mod(self, spell_id):
@@ -360,7 +367,8 @@ class SpellHandler:
 
                 if aura.spell_id == 11129 and aura.affected_spell_school == DB.get_spell_school(spell_id):
                     self.proc_aura_charge(aura)
-                elif aura.spell_id in [11119, 11120, 12846, 12847, 12848]:
+                elif aura.spell_id in [11119, 11120, 12846, 12847, 12848] and \
+                        DB.get_spell_school(spell_id) & 4:
                     self.handle_ignite_crit(aura.spell_id, damage)
                 elif aura.spell_id in [29074, 29075, 29076]:
                     self.char.current_mana += DB.get_spell(spell_id)[DB.spell_column_info["ManaCost"]] * \

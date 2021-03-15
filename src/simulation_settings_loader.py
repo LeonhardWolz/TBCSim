@@ -73,16 +73,24 @@ def load_character_settings(char_settings):
     char.base_attributes["base_spirit"] = base_stats[11]
 
     for spell_id in char_settings["spells"][spells_to_use.get(char.player_class)]:
-        char.usable_spells.append(spell_id)
+        char.usable_damage_spells.append(spell_id)
 
     load_character_items(char_settings["gear"])
     load_talents(char_settings["talents"])
 
 
 def load_talents(talent_settings):
-    if talent_settings is not None:
-        for talent in talent_settings:
-            char.spell_handler.apply_spell_effect(talent)
+    if talent_settings["talent_list"] is not None:
+        for talent_id in talent_settings["talent_list"]:
+            talent_info = DB.get_spell(talent_id)
+            if talent_info[DB.spell_column_info["Attributes"]] & 0x00000040:
+                char.spell_handler.apply_spell_effect(talent_id)
+            elif 2 in [talent_info[DB.spell_column_info["Effect1"]],
+                       talent_info[DB.spell_column_info["Effect2"]],
+                       talent_info[DB.spell_column_info["Effect3"]]]:
+                char.usable_damage_spells.append(talent_id)
+            else:
+                char.usable_active_spells.append(talent_id)
 
 
 def load_character_items(gear_settings):

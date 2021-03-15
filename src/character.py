@@ -9,7 +9,8 @@ class Character:
         self.race = 'default'
         self.player_class = 'default'
         self.spell_handler = SpellHandler(self)
-        self.usable_spells = []
+        self.usable_damage_spells = []
+        self.usable_active_spells = []
         self.items = {}
         self.logger = logging.getLogger("simulation")
 
@@ -353,7 +354,6 @@ class Character:
         wand_damage_multiplier = 1
 
         for aura in self.spell_handler.active_auras:
-            print(aura)
             if aura.affected_item_class == 2 and aura.affected_item_subclass_mask & (1 << 19) and \
                     (aura.aura_id == 79 and aura.misc_value == 126):
                 wand_damage_multiplier *= 1 + (aura.value * aura.curr_stacks / 100)
@@ -366,7 +366,6 @@ class Character:
         cast_time_mod_pct = 1
         cast_time_mod_flat = 0
         for aura in self.spell_handler.get_character_mod_auras(spell_id):
-            print(aura)
             if aura.aura_id == 107 and aura.misc_value == 10:
                 cast_time_mod_flat += aura.value * aura.curr_stacks
                 if proc_auras:
@@ -402,7 +401,7 @@ class Character:
         gcd = self.spell_handler.get_spell_gcd(spell_id)
         return max(self.cast_time_with_haste(gcd), 1000) if gcd != 0 else 0
 
-    def can_cast_spell(self, spell_id):
+    def has_mana_to_cast_spell(self, spell_id):
         if self.current_mana >= self.spell_resource_cost(spell_id, False):
             return True
         return False
@@ -453,7 +452,8 @@ class Character:
         return self.mp5_from_spirit + self.mp5
 
     def has_wand_range_attack(self):
-        return self.items[18].item_data[DB.item_column_info["class"]] == 2 and \
+        return 18 in self.items and \
+               self.items[18].item_data[DB.item_column_info["class"]] == 2 and \
                self.items[18].item_data[DB.item_column_info["subclass"]] == 19
 
     def weapon_attack_delay_time(self, inventory_slot):

@@ -4,7 +4,7 @@ from typing import Dict, List
 import src.db_connector as DB
 from src import enums
 
-result_line_format = "{:18s}|{:16s}|{:16s}|{:16s}|{:16s}|{:16s}|{:16s}|{:16s}|{:16s}|{:16s}|{:16s}|{:16s}|{:16s}"
+result_line_format = "{:20s}|{:16s}|{:16s}|{:16s}|{:16s}|{:16s}|{:16s}|{:16s}|{:16s}|{:16s}|{:16s}|{:16s}|{:16s}"
 line_line = "----------------------------------------------------------------------------" \
             "----------------------------------------------------------------------------" \
             "-----------------------------------------------------------------------"
@@ -16,7 +16,19 @@ class SimResult:
     sim_length: int
     total_damage_dealt: int = 0
     cast_spells: Dict = field(default_factory=lambda: {})
+    action_order: List = field(default_factory=lambda: [])
     equipped_items: Dict = field(default_factory=lambda: {})
+
+    def spell_cast(self, spell_id, sim_time):
+        self.action_order.append((sim_time, DB.get_spell_name(spell_id) + " "
+                                  + DB.get_spell(spell_id)[DB.spell_column_info["Rank1"]]))
+        if spell_id in self.cast_spells.keys():
+            spell_results = self.cast_spells.get(spell_id)
+            spell_results.casts += 1
+        else:
+            self.cast_spells[spell_id] = SpellResults(spell_id=spell_id,
+                                                      sim_length=self.sim_length,
+                                                      casts=1)
 
     def damage_spell_hit(self, spell_id, damage):
         if spell_id in self.cast_spells.keys():
@@ -52,15 +64,6 @@ class SimResult:
             self.cast_spells[spell_id] = SpellResults(spell_id=spell_id,
                                                       sim_length=self.sim_length,
                                                       resisted=1)
-
-    def spell_cast(self, spell_id):
-        if spell_id in self.cast_spells.keys():
-            spell_results = self.cast_spells.get(spell_id)
-            spell_results.casts += 1
-        else:
-            self.cast_spells[spell_id] = SpellResults(spell_id=spell_id,
-                                                      sim_length=self.sim_length,
-                                                      casts=1)
 
     def dot_spell_hit(self, spell_id):
         if spell_id in self.cast_spells.keys():
@@ -104,8 +107,9 @@ class SimResult:
         self.equipped_items = items
 
     def __str__(self):
-        str_repr = "Results for TBC Damage Simulation from: {}\n\n".format(self.start_time.strftime("%Y-%m-%d %H:%M:%S"))
-        str_repr += "Length of Simulation: {}s\n\n".format(str(self.sim_length/1000))
+        str_repr = "Results for TBC Damage Simulation from: {}\n\n".format(
+            self.start_time.strftime("%Y-%m-%d %H:%M:%S"))
+        str_repr += "Length of Simulation: {}s\n\n".format(str(self.sim_length / 1000))
 
         str_repr += "------------ Equipped Items ------------\n\n"
 
@@ -118,7 +122,16 @@ class SimResult:
 
             str_repr += "\n"
 
-        str_repr += "\n------------ Spell Casts ------------\n\n"
+        str_repr += "\n------------ Action Order ------------\n\n"
+
+        str_repr += "Simtime   Combat Action\n"
+        str_repr += "---------------------------------"
+        for action in self.action_order:
+            str_repr += "\n{:8s}| ".format(str(action[0]/1000))
+            str_repr += str(action[1])
+
+        str_repr += "\n"
+        str_repr += "\n------------ Spell Cast Breakdown ------------\n\n"
         str_repr += result_line_format.format("Spell Name",
                                               "Total Casts",
                                               "Total Hits",
@@ -160,19 +173,20 @@ class SpellResults:
 
     def __str__(self):
         total_damage = self.damage_dealt + self.dot_damage_dealt
-        return result_line_format.format(DB.get_spell_name(self.spell_id),
+        return result_line_format.format(DB.get_spell_name(self.spell_id) + " " +
+                                         DB.get_spell(self.spell_id)[DB.spell_column_info["Rank1"]],
                                          str(self.casts),
                                          str(self.hits),
                                          str(self.crits),
                                          str(self.resisted),
                                          str(self.damage_dealt),
-                                         str(round(self.damage_dealt/(self.sim_length/1000), 2)),
+                                         str(round(self.damage_dealt / (self.sim_length / 1000), 2)),
                                          str(self.dot_hits),
                                          str(self.dot_crits),
                                          str(self.dot_resisted),
                                          str(self.dot_damage_dealt),
-                                         str(round(self.dot_damage_dealt/(self.sim_length/1000), 2)),
-                                         str(round(total_damage/(self.sim_length/1000), 2)))
+                                         str(round(self.dot_damage_dealt / (self.sim_length / 1000), 2)),
+                                         str(round(total_damage / (self.sim_length / 1000), 2)))
 
 
 @dataclass

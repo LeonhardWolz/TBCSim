@@ -28,12 +28,16 @@ character:
     18:           #ranged
     19:           #tabard
   talents:
-    - 12577
-    - 12341
-    - 31660
-    - 16766
-    - 11124
-    - 11119
+    talent_calc_link:
+    talent_list:
+      - 12577
+      - 12341
+      - 31660
+      - 16766
+      - 12400
+      - 12848
+      - 11129
+      - 12472
 enemy:
   boss: Yes
   level: 73
@@ -47,4 +51,4 @@ enemy:
     shadow_resistance: 0
 sim:
   sim_type: dps
-  duration: 40
+  duration: 60
