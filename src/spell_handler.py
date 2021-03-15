@@ -285,7 +285,8 @@ class SpellHandler:
 
     def remove_expired_auras(self):
         for aura in self.active_auras:
-            if self.env.now - aura.create_time > enums.duration_index[aura.duration_index] != -1:
+            if aura.duration_index != 0 and \
+                    self.env.now - aura.create_time > enums.duration_index[aura.duration_index] != -1:
                 self.active_auras.remove(aura)
 
     def proc_aura_charge(self, aura):
@@ -376,11 +377,11 @@ class SpellHandler:
 
     def handle_aura_proc(self, aura, spell_id):
         # proc trigger spell
-        if aura.spell_id in [11213, 12574, 12575, 12576, 12577] and aura.aura_id == 42:
+        if aura.spell_id in (11213, 12574, 12575, 12576, 12577) and aura.aura_id == 42:
             self.apply_spell_effect(aura.trigger_spell)
 
         # scorch proc
-        if aura.spell_id in (11095, 12872, 12873):
+        if aura.spell_id in (11095, 12872, 12873) and DB.get_spell_family(spell_id) & 16:
             if aura.value >= random.randint(0, 100):
                 self.apply_spell_effect(aura.trigger_spell)
 
@@ -389,10 +390,8 @@ class SpellHandler:
             self.apply_spell_effect(28682)
 
         # frost spells apply winters chill with talent
-        if DB.get_spell_school(spell_id) == 16:
-            for aura in self.active_auras:
-                if aura.spell_id in [11180, 28592, 28593, 28594, 28595]:
-                    self.apply_spell_effect(aura.trigger_spell)
+        if DB.get_spell_school(spell_id) == 16 and aura.spell_id in (11180, 28592, 28593, 28594, 28595):
+            self.apply_spell_effect(aura.trigger_spell)
 
     def get_procable_auras(self, proc_flag):
         procced_auras = []

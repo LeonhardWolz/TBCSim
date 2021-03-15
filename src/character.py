@@ -337,12 +337,13 @@ class Character:
 
         for aura in self.spell_handler.get_character_mod_auras(spell_id):
             if aura.aura_id == 108 and aura.misc_value == 22 or \
-                    aura.aura_id == 108 and aura.affected_spell_school == DB.get_spell_school(spell_id) or \
-                    aura.aura_id == 79 and aura.misc_value == 126 or \
-                    aura.aura_id == 79 and aura.misc_value == DB.get_spell_school(spell_id) or \
+                    aura.aura_id == 108 and aura.misc_value == 0 and \
+                    aura.affected_spell_school & DB.get_spell_school(spell_id) or \
+                    aura.aura_id == 79 and aura.misc_value & DB.get_spell_school(spell_id) and \
+                    aura.affected_item_class <= 0 or \
                     aura.spell_id in [11190, 12489, 12490] and DB.get_spell_family(spell_id) & 512 or \
-                    aura.spell_id in [31679, 31680] and self.spell_handler.enemy.in_execute_range:
-
+                    aura.spell_id in [31679, 31680] and self.spell_handler.enemy.in_execute_range or \
+                    aura.aura_id == 79 and aura.spell_id in (15058, 15059, 15060, 31638, 31639, 31640):
                 spell_damage_multiplier *= 1 + (aura.value * aura.curr_stacks / 100)
 
                 if proc_auras:

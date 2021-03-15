@@ -1,3 +1,6 @@
+import re
+from urllib.parse import urlparse
+
 import yaml
 import copy
 import logging
@@ -26,14 +29,14 @@ def load_settings():
     with open('SimSettings.yml', 'r') as settings_yaml:
         cfg = yaml.safe_load(settings_yaml)
 
+    # load sim settings
+    load_sim_settings(cfg["sim"])
+
     # load character settings
     load_character_settings(cfg["character"])
 
     # load enemy settings
     load_enemy_settings(cfg["enemy"])
-
-    # load sim settings
-    load_sim_settings(cfg["sim"])
 
     char.current_mana = char.total_mana
     char.spell_handler.enemy = enemy
@@ -80,17 +83,29 @@ def load_character_settings(char_settings):
 
 
 def load_talents(talent_settings):
-    if talent_settings["talent_list"] is not None:
+    if talent_settings["talent_calc_link"] is not None:
+        talent_string = re.sub("tal=", "", urlparse(talent_settings["talent_calc_link"]).query)
+        for num, talent in enumerate(talent_string, start=0):
+            if int(talent) != 0:
+                load_talent(DB.get_class_talents(getattr(enums.PlayerClass, char.player_class).value,
+                                                 num,
+                                                 talent)[0][0])
+
+    elif talent_settings["talent_list"] is not None:
         for talent_id in talent_settings["talent_list"]:
-            talent_info = DB.get_spell(talent_id)
-            if talent_info[DB.spell_column_info["Attributes"]] & 0x00000040:
-                char.spell_handler.apply_spell_effect(talent_id)
-            elif 2 in [talent_info[DB.spell_column_info["Effect1"]],
-                       talent_info[DB.spell_column_info["Effect2"]],
-                       talent_info[DB.spell_column_info["Effect3"]]]:
-                char.usable_damage_spells.append(talent_id)
-            else:
-                char.usable_active_spells.append(talent_id)
+            load_talent(talent_id)
+
+
+def load_talent(talent_id):
+    talent_info = DB.get_spell(talent_id)
+    if talent_info[DB.spell_column_info["Attributes"]] & 0x00000040:
+        char.spell_handler.apply_spell_effect(talent_id)
+    elif 2 in [talent_info[DB.spell_column_info["Effect1"]],
+               talent_info[DB.spell_column_info["Effect2"]],
+               talent_info[DB.spell_column_info["Effect3"]]]:
+        char.usable_damage_spells.append(talent_id)
+    else:
+        char.usable_active_spells.append(talent_id)
 
 
 def load_character_items(gear_settings):

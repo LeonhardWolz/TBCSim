@@ -28,7 +28,7 @@ character:
     18:           #ranged
     19:           #tabard
   talents:
-    talent_calc_link:
+    talent_calc_link: "https://legacy-wow.com/tbc-talents/mage-talents/?tal=2302250000000000000000050520200230333005312500030000000000000000000"
     talent_list:
       - 12577
       - 12341

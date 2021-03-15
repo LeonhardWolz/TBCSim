@@ -127,10 +127,18 @@ def get_equippable_item(item_id):
 
 def get_base_stats(player_class, race):
     try:
-        tbcdb_cursor.execute(base_stats.format(player_class, race))
+        tbcdb_cursor.execute(base_stat_query.format(player_class, race))
         return tbcdb_cursor.fetchone()
     except mysql.connector.Error as ex:
         logging.critical("DB Error during base stats retrieval: {}".format(ex))
+
+
+def get_class_talents(class_id, talent_index, talent_rank):
+    try:
+        tbcdb_cursor.execute(class_talent_query.format(talent_rank, class_id, talent_index))
+        return tbcdb_cursor.fetchall()
+    except mysql.connector.Error as ex:
+        logging.critical("DB Error during class talent retrieval: {}".format(ex))
 
 
 def good_startup():
@@ -140,14 +148,17 @@ def good_startup():
         return True
 
 
-base_stats = "select 	* " \
-             "from 	tbcmangos.player_classlevelstats, " \
-             "tbcmangos.player_levelstats " \
-             "where 	tbcmangos.player_classlevelstats.class=tbcmangos.player_levelstats.class and " \
-             "tbcmangos.player_levelstats.level = tbcmangos.player_classlevelstats.level and " \
-             "tbcmangos.player_classlevelstats.level = 70 and " \
-             "tbcmangos.player_levelstats.class = {} and " \
-             "tbcmangos.player_levelstats.race = {}"
+base_stat_query = "select 	* " \
+                  "from 	tbcmangos.player_classlevelstats, " \
+                  "tbcmangos.player_levelstats " \
+                  "where 	tbcmangos.player_classlevelstats.class=tbcmangos.player_levelstats.class and " \
+                  "tbcmangos.player_levelstats.level = tbcmangos.player_classlevelstats.level and " \
+                  "tbcmangos.player_classlevelstats.level = 70 and " \
+                  "tbcmangos.player_levelstats.class = {} and " \
+                  "tbcmangos.player_levelstats.race = {}"
+
+class_talent_query = "SELECT talent_id_rank{}" \
+                     " FROM simdata.class_talent_trees where class_id={} and talent_index={}"
 
 item_column_info = {}
 

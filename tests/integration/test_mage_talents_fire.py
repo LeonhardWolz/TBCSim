@@ -336,6 +336,7 @@ class TestImprovedScorch(unittest.TestCase):
 
     scorch_rank9 = 27074
     frostbolt_rank1 = 116
+    fireball_rank1 = 133
 
     def setUp(self) -> None:
         self.char = Char()
@@ -356,7 +357,7 @@ class TestImprovedScorch(unittest.TestCase):
         self.char.spell_handler.apply_spell_effect(self.improved_scorch_rank3)
         self.assertEqual(100, self.char.spell_handler.active_auras[0].value)
 
-    def test_improved_scorch_stacks(self):
+    def test_improved_scorch_stack_application(self):
         self.char.spell_handler.apply_spell_effect(self.improved_scorch_rank3)
         self.char.spell_handler.on_spell_hit(self.scorch_rank9)
         self.assertTrue(any(aura.spell_id == 22959 for aura in self.char.spell_handler.enemy.active_auras))
@@ -366,6 +367,9 @@ class TestImprovedScorch(unittest.TestCase):
         self.assertTrue(any(aura.spell_id == 22959 and aura.curr_stacks == 2
                             for aura in self.char.spell_handler.enemy.active_auras))
         self.char.spell_handler.on_spell_hit(self.scorch_rank9)
+        self.assertTrue(any(aura.spell_id == 22959 and aura.curr_stacks == 3
+                            for aura in self.char.spell_handler.enemy.active_auras))
+        self.char.spell_handler.on_spell_hit(self.fireball_rank1)
         self.assertTrue(any(aura.spell_id == 22959 and aura.curr_stacks == 3
                             for aura in self.char.spell_handler.enemy.active_auras))
         self.char.spell_handler.on_spell_hit(self.scorch_rank9)
@@ -382,6 +386,7 @@ class TestImprovedScorch(unittest.TestCase):
         self.char.spell_handler.apply_spell_effect(self.improved_scorch_rank3)
         self.char.spell_handler.on_spell_hit(self.scorch_rank9)
         self.assertEqual(1.03, self.char.spell_handler.enemy_damage_taken_mod(self.scorch_rank9))
+        self.assertEqual(1.03, self.char.spell_handler.enemy_damage_taken_mod(self.fireball_rank1))
         self.assertEqual(1, self.char.spell_handler.enemy_damage_taken_mod(self.frostbolt_rank1))
 
 
