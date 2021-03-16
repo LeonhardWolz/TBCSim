@@ -17,6 +17,11 @@ def create_helper_dicts():
         spell_column_info[x[0]] = i
         i += 1
 
+    i = 0
+    for x in get_item_set_columns():
+        item_set_column_info[x[0]] = i
+        i += 1
+
 
 def get_spell_columns():
     try:
@@ -26,6 +31,13 @@ def get_spell_columns():
     except mysql.connector.Error as ex:
         logging.critical("DB Error during spell column name retrieval: {}".format(ex))
 
+def get_item_set_columns():
+    try:
+        tbcdb_cursor.execute("SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS "
+                             "WHERE TABLE_SCHEMA = \"simdata\" AND TABLE_NAME = \"dbc_itemset\"")
+        return tbcdb_cursor.fetchall()
+    except mysql.connector.Error as ex:
+        logging.critical("DB Error during itemset column name retrieval: {}".format(ex))
 
 def get_spell(spell_id):
     if spell_id in spell_cache.keys():
@@ -125,6 +137,15 @@ def get_equippable_item(item_id):
         logging.critical("DB Error during item retrieval: {}".format(ex))
 
 
+def get_item_name(item_id):
+    try:
+        tbcdb_cursor.execute(
+            "SELECT name FROM simdata.item_template WHERE entry={} and (class = 2 or class = 4)".format(item_id))
+        return str(tbcdb_cursor.fetchone()[0])
+    except mysql.connector.Error as ex:
+        logging.critical("DB Error during item name retrieval: {}".format(ex))
+
+
 def get_base_stats(player_class, race):
     try:
         tbcdb_cursor.execute(base_stat_query.format(player_class, race))
@@ -139,6 +160,15 @@ def get_class_talents(class_id, talent_index, talent_rank):
         return tbcdb_cursor.fetchall()
     except mysql.connector.Error as ex:
         logging.critical("DB Error during class talent retrieval: {}".format(ex))
+
+
+def get_item_set(item_set_id):
+    try:
+        tbcdb_cursor.execute(
+            "SELECT * FROM simdata.dbc_itemset WHERE itemsetid={}".format(item_set_id))
+        return tbcdb_cursor.fetchone()
+    except mysql.connector.Error as ex:
+        logging.critical("DB Error during item set retrieval: {}".format(ex))
 
 
 def good_startup():
@@ -161,6 +191,8 @@ class_talent_query = "SELECT talent_id_rank{}" \
                      " FROM simdata.class_talent_trees where class_id={} and talent_index={}"
 
 item_column_info = {}
+
+item_set_column_info = {}
 
 spell_column_info = {}
 

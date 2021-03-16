@@ -58,7 +58,7 @@ class SpellHandler:
 
                 # cold snap
                 if spell_id == 11958:
-                    self.cold_snap()
+                    self.cold_snap(spell_id)
 
             elif spell_info[DB.spell_column_info["Effect" + str(j)]] != 0:
                 logging.warning("Effect " + str(j) + " of Spell could not be handled: " + str(spell_info))
@@ -83,7 +83,7 @@ class SpellHandler:
                     aura.misc_value == spell_info[DB.spell_column_info["EffectMiscValue" + str(effect_slot)]]:
                 if aura.stack_limit is not aura.curr_stacks:
                     aura.curr_stacks += 1
-                    aura.create_time = self.env.now
+                    aura.create_time = self.env.now if self.env else 0
                 modified_aura = True
 
         if not modified_aura:
@@ -214,11 +214,11 @@ class SpellHandler:
     def spell_family_mask(self, spell_id):
         return DB.get_spell(spell_id)[DB.spell_column_info["SpellFamilyFlags"]]
 
-    def spell_does_hit(self, spell_id):
+    def spell_does_hit(self, spell_id=0):
         # TODO consider player and enemy level. currently player=70 enemy=73 boss
         return random.uniform(0.00, 100.00) < (83 + self.char.spell_hit_chance_spell(spell_id))
 
-    def spell_crit(self, spell_id):
+    def spell_does_crit(self, spell_id=0):
         return random.uniform(0.00, 100.00) < self.char.spell_crit_chance_spell(spell_id)
 
     def process_direct_damage_spell(self, spell_info, effect_slot):
@@ -232,7 +232,7 @@ class SpellHandler:
             spell_damage = round((spell_base_damage + spell_spell_power * spell_power_coefficient)
                                  * spell_damage_multiplier)
 
-            if self.spell_crit(spell_info[0]):
+            if self.spell_does_crit(spell_info[0]):
                 spell_damage *= self.char.spell_crit_dmg_multiplier(spell_info[0])
                 spell_damage = round(spell_damage)
                 self.on_spell_crit(spell_info[0], spell_damage)
@@ -271,6 +271,22 @@ class SpellHandler:
                       spell_info[DB.spell_column_info["Rank1"]] + " dot resisted")
             self.results.dot_spell_resisted(spell_info[0])
 
+    def process_wand_attack(self):
+        if self.spell_does_hit():
+            min_wand_damage, max_wand_damage = self.char.get_weapon_damage(18)
+            wand_damage = random.randint(min_wand_damage, max_wand_damage)
+            if self.spell_does_crit():
+                wand_damage = round(wand_damage * 1.5)
+                self.logg(self.char.items[18].name + " wand attack critical damage: " + str(wand_damage))
+                self.results.wand_attack_crit(self.char.items[18].item_data[0], wand_damage)
+            else:
+                self.logg(self.char.items[18].name + " wand attack damage: " + str(wand_damage))
+                self.results.wand_attack_hit(self.char.items[18].item_data[0], wand_damage)
+
+        else:
+            self.logg(self.char.items[18].name + " wand attack resisted")
+            self.results.wand_attack_resisted(self.char.items[18].item_data[0])
+
     def enemy_damage_taken_mod(self, spell_id):
         dmg_taken_mod = 1
         for aura in self.get_enemy_mod_auras(spell_id):
@@ -295,6 +311,7 @@ class SpellHandler:
             # Handle Combustion Auras
             if aura.spell_id == 11129:
                 self.remove_auras_from_spell(28682)
+                self.spell_start_cooldown(aura.spell_id)
             self.active_auras.remove(aura)
 
     def remove_auras_from_spell(self, spell_id):
@@ -357,13 +374,13 @@ class SpellHandler:
     def on_spell_hit(self, spell_id):
         for aura in self.get_procable_auras(proc_flag=65536):
             if self.aura_applies_to_spell(aura, spell_id):
-                if aura.proc[1] > random.randint(0, 100):
+                if aura.proc[1] >= random.randint(0, 100):
                     self.handle_aura_proc(aura, spell_id)
 
     def on_spell_crit(self, spell_id, damage=0):
         for aura in self.get_procable_auras(proc_flag=65536):
             if self.aura_applies_to_spell(aura, spell_id):
-                if aura.proc[1] > random.randint(0, 100):
+                if aura.proc[1] >= random.randint(0, 100):
                     self.handle_aura_proc(aura, spell_id)
 
                 if aura.spell_id == 11129 and aura.affected_spell_school == DB.get_spell_school(spell_id):
@@ -376,21 +393,21 @@ class SpellHandler:
                                               (aura.value * aura.curr_stacks) / 100
 
     def handle_aura_proc(self, aura, spell_id):
-        # proc trigger spell
-        if aura.spell_id in (11213, 12574, 12575, 12576, 12577) and aura.aura_id == 42:
+        # proc trigger spell #(11213, 12574, 12575, 12576, 12577)
+        if aura.spell_id not in (11180, 28592, 28593, 28594, 28595) and aura.aura_id == 42:
             self.apply_spell_effect(aura.trigger_spell)
 
         # scorch proc
-        if aura.spell_id in (11095, 12872, 12873) and DB.get_spell_family(spell_id) & 16:
+        elif aura.spell_id in (11095, 12872, 12873) and DB.get_spell_family(spell_id) & 16:
             if aura.value >= random.randint(0, 100):
                 self.apply_spell_effect(aura.trigger_spell)
 
         # trigger combustion aura
-        if aura.spell_id == 11129 and aura.affected_spell_school == DB.get_spell_school(spell_id):
+        elif aura.spell_id == 11129 and aura.affected_spell_school == DB.get_spell_school(spell_id):
             self.apply_spell_effect(28682)
 
         # frost spells apply winters chill with talent
-        if DB.get_spell_school(spell_id) == 16 and aura.spell_id in (11180, 28592, 28593, 28594, 28595):
+        elif DB.get_spell_school(spell_id) == 16 and aura.spell_id in (11180, 28592, 28593, 28594, 28595):
             self.apply_spell_effect(aura.trigger_spell)
 
     def get_procable_auras(self, proc_flag):
@@ -422,7 +439,9 @@ class SpellHandler:
         recovery_time_mod = 0
         for aura in self.get_character_mod_auras(spell_id):
             if aura.aura_id == 107 and aura.misc_value == 11 and \
-                    (aura.spell_id not in [11078, 11080, 12342] or DB.get_spell_family(spell_id) & 2):
+                    (aura.spell_id not in [11078, 11080, 12342, 11165, 12475] or
+                     DB.get_spell_family(spell_id) & 2 or
+                     DB.get_spell_family(spell_id) & 64):
                 recovery_time_mod += aura.value * aura.curr_stacks
         return recovery_time_mod
 
@@ -436,11 +455,13 @@ class SpellHandler:
 
     def spell_start_cooldown(self, spell_id):
         if DB.get_spell(spell_id)[DB.spell_column_info["RecoveryTime"]] != 0:
-
-            ready_time = self.env.now + \
-                         DB.get_spell(spell_id)[DB.spell_column_info["RecoveryTime"]] * \
-                         self.get_recovery_time_multiplier(spell_id) + \
-                         self.get_recovery_time_mod(spell_id)
+            if spell_id == 11129 and not self.spell_on_cooldown(spell_id):
+                ready_time = -1
+            else:
+                ready_time = self.env.now + \
+                             DB.get_spell(spell_id)[DB.spell_column_info["RecoveryTime"]] * \
+                             self.get_recovery_time_multiplier(spell_id) + \
+                             self.get_recovery_time_mod(spell_id)
 
             self.cooldown_spell_id[spell_id] = (ready_time, DB.get_spell_school(spell_id))
 
@@ -461,16 +482,17 @@ class SpellHandler:
 
     def recover_cooldowns(self):
         for entry in dict(self.cooldown_spell_id).items():
-            if entry[1][0] <= self.env.now:
+            if entry[1][0] != -1 and entry[1][0] <= self.env.now:
                 del self.cooldown_spell_id[entry[0]]
         for entry in dict(self.cooldown_family_mask).items():
-            if entry[1][0] <= self.env.now:
+            if entry[1][0] != -1 and entry[1][0] <= self.env.now:
                 del self.cooldown_family_mask[entry[0]]
 
-    def cold_snap(self):
+    def cold_snap(self, spell_id):
         for entry in dict(self.cooldown_spell_id).items():
             if entry[1][1] & 16:
                 del self.cooldown_spell_id[entry[0]]
         for entry in dict(self.cooldown_family_mask).items():
             if entry[1][1] & 16:
                 del self.cooldown_family_mask[entry[0]]
+        self.spell_start_cooldown(spell_id)

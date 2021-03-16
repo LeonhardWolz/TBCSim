@@ -30,16 +30,14 @@ class Player(object):
             elif combat_action[0] == CombatAction.Cast_Spell:
                 yield self.env.process(self.cast_spell(combat_action[1]))
             elif combat_action[0] == CombatAction.Wand_Attack:
-                self.logg("Wandattack for 0.5s")
-                yield self.env.timeout(500)
-                # TODO process wand attack
+                yield self.env.process(self.wand_attack())
 
             yield self.env.timeout(self.time_padding)
 
     def get_next_combat_action(self):
-        for spell_id in self.char.usable_active_spells:
-            if not self.char.spell_handler.spell_on_cooldown(spell_id):
-                return [CombatAction.Cast_Spell, spell_id]
+        misc_spell_action = self.get_misc_spell_action()
+        if misc_spell_action is not None:
+            return misc_spell_action
 
         damage_spell_action = self.get_damage_spell_action()
         if damage_spell_action is not None:
@@ -49,6 +47,12 @@ class Player(object):
             return [CombatAction.Wand_Attack]
 
         return [CombatAction.Idle]
+
+    def get_misc_spell_action(self):
+        # TODO implement more sophisticated logic to find best use for power spells
+        for spell_id in self.char.usable_active_spells:
+            if not self.char.spell_handler.spell_on_cooldown(spell_id):
+                return [CombatAction.Cast_Spell, spell_id]
 
     def get_damage_spell_action(self):
         damage_spells_to_consider = []
@@ -144,6 +148,12 @@ class Player(object):
         self.char.cast_mana_spell(spell_id)
         self.char.spell_handler.spell_start_cooldown(spell_id)
         self.char.spell_handler.apply_spell_effect(spell_id)
+
+    def wand_attack(self):
+        self.logg("Start Wand attack with " + self.char.items[18].name)
+        yield self.env.timeout(self.char.weapon_attack_delay_time(18))
+        self.results.wand_attack_used(self.char.items[18].item_data[0], self.env.now)
+        self.char.spell_handler.process_wand_attack()
 
     def start_gcd(self, spell_id):
         self.char.gcd_end_time = self.env.now + self.char.get_spell_gcd(spell_id)

@@ -275,51 +275,53 @@ class Character:
                     self.spell_handler.proc_aura_charge(aura)
         return crit_rating
 
-    def spell_hit_chance_spell(self, spell_id, proc_auras=True):
+    def spell_hit_chance_spell(self, spell_id=0, proc_auras=True):
         hit_chance_mod = 0
-        for aura in self.spell_handler.get_character_mod_auras(spell_id):
-            if aura.aura_id == 107 and aura.misc_value == 16 and aura.spell_id not in [29438, 29439, 29440] or \
-                    aura.aura_id == 107 and aura.misc_value == 16 and \
-                    aura.affected_spell_family_mask & DB.get_spell_family(spell_id):
-                hit_chance_mod += aura.value * aura.curr_stacks
-                if proc_auras:
-                    self.spell_handler.proc_aura_charge(aura)
-        return max(min(self.spell_hit_chance + hit_chance_mod, 16), 0)
-
-    def spell_crit_chance_spell(self, spell_id, proc_auras=True):
-        crit_chance_mod = 0
-        for aura in self.spell_handler.get_character_mod_auras(spell_id):
-            if aura.aura_id == 107 and aura.misc_value == 7 and \
-                    (aura.spell_id not in [31682, 31683, 31684, 31685, 31686] or
-                     aura.affected_spell_school & DB.get_spell_school(spell_id) or
-                     aura.affected_spell_family_mask & DB.get_spell_family(spell_id)) and \
-                    (aura.spell_id not in [11108, 12349, 12350] or DB.get_spell_family(spell_id) & 4) or \
-                    aura.aura_id == 71 and aura.misc_value == 126 or \
-                    aura.aura_id == 71 and aura.misc_value == DB.get_spell_school(spell_id) or \
-                    aura.aura_id == 57:
-
-                # Apply spell crit modifier from mage incineration talent only if spell scorch or fire blast
-                if aura.spell_id not in (18459, 18460) or \
-                        self.spell_handler.spell_family_mask(spell_id) & 2 or \
-                        self.spell_handler.spell_family_mask(spell_id) & 16:
-                    crit_chance_mod += aura.value * aura.curr_stacks
+        if spell_id != 0:
+            for aura in self.spell_handler.get_character_mod_auras(spell_id):
+                if aura.aura_id == 107 and aura.misc_value == 16 and aura.spell_id not in [29438, 29439, 29440] or \
+                        aura.aura_id == 107 and aura.misc_value == 16 and \
+                        aura.affected_spell_family_mask & DB.get_spell_family(spell_id):
+                    hit_chance_mod += aura.value * aura.curr_stacks
                     if proc_auras:
                         self.spell_handler.proc_aura_charge(aura)
-            elif aura.spell_id in [11170, 12982, 12983, 12984, 12985] and \
-                    any(aura.spell_id == 12494 for aura in self.spell_handler.enemy.active_auras):
-                shatter_crit_chance = {
-                    11170: 10,
-                    12982: 20,
-                    12983: 30,
-                    12984: 40,
-                    12985: 50
-                }
-                crit_chance_mod += shatter_crit_chance.get(aura.spell_id) * aura.curr_stacks
+        return max(min(self.spell_hit_chance + hit_chance_mod, 16), 0)
 
-        for aura in self.spell_handler.enemy.active_auras:
-            if DB.get_spell_school(spell_id) == 16 and \
-                    any(aura.spell_id == 12579 for aura in self.spell_handler.enemy.active_auras):
-                crit_chance_mod = aura.value * aura.curr_stacks
+    def spell_crit_chance_spell(self, spell_id=0, proc_auras=True):
+        crit_chance_mod = 0
+        if spell_id != 0:
+            for aura in self.spell_handler.get_character_mod_auras(spell_id):
+                if aura.aura_id == 107 and aura.misc_value == 7 and \
+                        (aura.spell_id not in [31682, 31683, 31684, 31685, 31686] or
+                         aura.affected_spell_school & DB.get_spell_school(spell_id) or
+                         aura.affected_spell_family_mask & DB.get_spell_family(spell_id)) and \
+                        (aura.spell_id not in [11108, 12349, 12350] or DB.get_spell_family(spell_id) & 4) or \
+                        aura.aura_id == 71 and aura.misc_value == 126 or \
+                        aura.aura_id == 71 and aura.misc_value == DB.get_spell_school(spell_id) or \
+                        aura.aura_id == 57:
+
+                    # Apply spell crit modifier from mage incineration talent only if spell scorch or fire blast
+                    if aura.spell_id not in (18459, 18460) or \
+                            self.spell_handler.spell_family_mask(spell_id) & 2 or \
+                            self.spell_handler.spell_family_mask(spell_id) & 16:
+                        crit_chance_mod += aura.value * aura.curr_stacks
+                        if proc_auras:
+                            self.spell_handler.proc_aura_charge(aura)
+                elif aura.spell_id in [11170, 12982, 12983, 12984, 12985] and \
+                        any(aura.spell_id == 12494 for aura in self.spell_handler.enemy.active_auras):
+                    shatter_crit_chance = {
+                        11170: 10,
+                        12982: 20,
+                        12983: 30,
+                        12984: 40,
+                        12985: 50
+                    }
+                    crit_chance_mod += shatter_crit_chance.get(aura.spell_id) * aura.curr_stacks
+
+            for aura in self.spell_handler.enemy.active_auras:
+                if DB.get_spell_school(spell_id) == 16 and \
+                        any(aura.spell_id == 12579 for aura in self.spell_handler.enemy.active_auras):
+                    crit_chance_mod = aura.value * aura.curr_stacks
 
         return self.spell_crit_chance + crit_chance_mod
 

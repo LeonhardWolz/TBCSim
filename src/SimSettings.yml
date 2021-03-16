@@ -8,13 +8,13 @@ character:
       - 116
   gear:
     0:            #ammo
-    1: 23032           #head
+    1: 24266           #head
     2:            #neck
     3: 22983           #shoulder
     4:            #body (shirt)
     5: 1716           #chest
     6:            #waist (belt)
-    7:            #legs
+    7: 24262           #legs
     8:            #feet
     9:            #wrist
     10:           #hand
@@ -25,19 +25,12 @@ character:
     15:           #back
     16:           #mainhand
     17:           #offhand
-    18:           #ranged
+    18: 22821          #ranged
     19:           #tabard
   talents:
-    talent_calc_link: "https://legacy-wow.com/tbc-talents/mage-talents/?tal=2302250000000000000000050520200230333005312500030000000000000000000"
+    talent_calc_link: "https://legacy-wow.com/tbc-talents/mage-talents/?tal=2302250000000000000000050520200230333005312500030000000000000000000" #fire
+    #talent_calc_link: "https://legacy-wow.com/tbc-talents/mage-talents/?tal=2300050000000000000000000000000000000000000000535323310033010251551"  #frost
     talent_list:
-      - 12577
-      - 12341
-      - 31660
-      - 16766
-      - 12400
-      - 12848
-      - 11129
-      - 12472
 enemy:
   boss: Yes
   level: 73
@@ -51,4 +44,4 @@ enemy:
     shadow_resistance: 0
 sim:
   sim_type: dps
-  duration: 60
+  duration: 30
