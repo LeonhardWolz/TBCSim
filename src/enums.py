@@ -84,7 +84,6 @@ cast_time = {
     198: 900,
     199: 333}
 
-
 duration_index = {
     1: 10000,
     2: 300000010,
@@ -220,3 +219,9 @@ class Race(enum.Enum):
     Troll = 8
     Bloodelf = 10
     Draenei = 11
+
+
+class CombatAction(enum.Enum):
+    Idle = 0
+    Cast_Spell = 1
+    Wand_Attack = 2

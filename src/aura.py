@@ -10,6 +10,8 @@ class Aura:
     misc_value: int
     affected_spell_school: int
     affected_spell_family_mask: int = 0
+    affected_item_class: int = 0
+    affected_item_subclass_mask: int = 0
     create_time: int = 0
     duration_index: int = 0
     trigger_spell: int = 0
