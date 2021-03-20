@@ -1,4 +1,5 @@
 import logging
+from functools import lru_cache
 
 import src.db_connector as DB
 from src import enums
@@ -230,6 +231,7 @@ class Player(object):
                      * self.char.spell_crit_dmg_multiplier(spell_id, proc_auras=False)
                      * self.char.spell_crit_chance_spell(spell_id, proc_auras=False))
 
+    @lru_cache
     def get_avg_effect_strength(self, spell_info, effect_slot):
         min_value = spell_info[DB.spell_column_info["EffectBasePoints" + str(effect_slot)]] + \
                     spell_info[DB.spell_column_info["EffectBaseDice" + str(effect_slot)]] * 1

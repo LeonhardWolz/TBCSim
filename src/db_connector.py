@@ -1,3 +1,5 @@
+from functools import lru_cache
+
 import mysql.connector
 import logging
 
@@ -51,6 +53,7 @@ def get_item_set_columns():
         logging.critical("DB Error during itemset column name retrieval: {}".format(ex))
 
 
+@lru_cache
 def get_spell(spell_id):
     if spell_id in spell_cache.keys():
         return spell_cache[spell_id]
@@ -64,6 +67,7 @@ def get_spell(spell_id):
             logging.critical("DB Error during spell retrieval: {}".format(ex))
 
 
+@lru_cache
 def get_spell_name(spell_id):
     if spell_id in spell_cache.keys():
         return spell_cache[spell_id][spell_column_info["SpellName"]]
@@ -75,6 +79,7 @@ def get_spell_name(spell_id):
             logging.critical("DB Error during spell name retrieval: {}".format(ex))
 
 
+@lru_cache
 def get_spell_school(spell_id):
     if spell_id in spell_cache.keys():
         return spell_cache[spell_id][spell_column_info["SchoolMask"]]
@@ -86,6 +91,7 @@ def get_spell_school(spell_id):
             logging.critical("DB Error during spell school mask retrieval: {}".format(ex))
 
 
+@lru_cache
 def get_spell_family(spell_id):
     if spell_id in spell_cache.keys():
         return spell_cache[spell_id][spell_column_info["SpellFamilyFlags"]]
@@ -97,6 +103,7 @@ def get_spell_family(spell_id):
             logging.critical("DB Error during spell family mask retrieval: {}".format(ex))
 
 
+@lru_cache
 def get_spell_gcd(spell_id):
     if spell_id in spell_cache.keys():
         return spell_cache[spell_id][spell_column_info["StartRecoveryTime"]]
@@ -131,6 +138,7 @@ def get_spell_is_passive(spell_id):
             logging.critical("DB Error during spell passive flag retrieval: {}".format(ex))
 
 
+@lru_cache
 def get_item(item_id):
     if item_id in item_cache.keys():
         return item_cache[item_id]
@@ -143,6 +151,7 @@ def get_item(item_id):
             logging.critical("DB Error during item retrieval: {}".format(ex))
 
 
+@lru_cache
 def get_item_name(item_id):
     if item_id in item_cache.keys():
         return str(item_cache[item_id][item_column_info["name"]])

@@ -1,5 +1,7 @@
 import logging
 import random
+from functools import lru_cache
+
 import src.db_connector as DB
 
 from src import enums
@@ -227,6 +229,7 @@ class SpellHandler:
         # Instant Spells are counted as 1.5s casts. casts longer than 3.5s are considered 3.5s casts
         return min(max(base_cast_time, 1500), 3500) / 3500 / spell_aoe_divisor() * spell_slow_multiplier()
 
+    @lru_cache
     def spell_family_mask(self, spell_id):
         return DB.get_spell(spell_id)[DB.spell_column_info["SpellFamilyFlags"]]
 
@@ -376,6 +379,7 @@ class SpellHandler:
             if spell_info[DB.spell_column_info["SpellFamilyFlags"]] & 0x20000000:
                 self.apply_spell_effect(36032)
 
+    @lru_cache
     def get_spell_gcd(self, spell_id):
         return DB.get_spell_gcd(spell_id)
 
@@ -388,6 +392,7 @@ class SpellHandler:
         else:
             return False
 
+    @lru_cache
     def spell_has_triggered_spell(self, spell_id):
         for i in range(1, 4):
             if DB.get_spell(spell_id)[DB.spell_column_info["EffectTriggerSpell" + str(i)]] != 0:
@@ -395,6 +400,7 @@ class SpellHandler:
 
         return False
 
+    @lru_cache
     def spell_get_triggered_spell(self, spell_id):
         if DB.get_spell(spell_id)[DB.spell_column_info["EffectTriggerSpell1"]] != 0:
             return DB.get_spell(spell_id)[DB.spell_column_info["EffectTriggerSpell1"]]
