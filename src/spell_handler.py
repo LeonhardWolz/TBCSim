@@ -335,7 +335,8 @@ class SpellHandler:
 
     def enemy_damage_taken_mod(self, spell_id):
         dmg_taken_mod = 1
-        for aura in self.get_enemy_mod_auras(spell_id):
+        # for aura in self.get_enemy_mod_auras(spell_id):
+        for aura in self.enemy.active_auras:
             if aura.aura_id == 87 and \
                     aura.affected_spell_school & DB.get_spell(spell_id)[DB.spell_column_info["SchoolMask"]]:
                 dmg_taken_mod *= 1 + (aura.value * aura.curr_stacks / 100)
@@ -377,20 +378,6 @@ class SpellHandler:
 
     def get_spell_gcd(self, spell_id):
         return DB.get_spell_gcd(spell_id)
-
-    def get_character_mod_auras(self, spell_id):
-        mod_auras = []
-        for aura in self.active_auras:
-            if self.aura_applies_to_spell(aura, spell_id):
-                mod_auras.append(aura)
-        return mod_auras
-
-    def get_enemy_mod_auras(self, spell_id):
-        mod_auras = []
-        for aura in self.enemy.active_auras:
-            if self.aura_applies_to_spell(aura, spell_id):
-                mod_auras.append(aura)
-        return mod_auras
 
     def aura_applies_to_spell(self, aura, spell_id):
         if aura.affected_spell_family_mask & self.spell_family_mask(spell_id) != 0 or \
@@ -483,19 +470,23 @@ class SpellHandler:
 
     def get_recovery_time_mod(self, spell_id):
         recovery_time_mod = 0
-        for aura in self.get_character_mod_auras(spell_id):
-            if aura.aura_id == 107 and aura.misc_value == 11 and \
-                    (aura.spell_id not in [11078, 11080, 12342, 11165, 12475] or
-                     DB.get_spell_family(spell_id) & 2 or
-                     DB.get_spell_family(spell_id) & 64):
+        # for aura in self.get_character_mod_auras(spell_id):
+        for aura in self.active_auras:
+            if self.aura_applies_to_spell(aura, spell_id) and \
+                    (aura.aura_id == 107 and aura.misc_value == 11 and
+                     (aura.spell_id not in [11078, 11080, 12342, 11165, 12475] or
+                      DB.get_spell_family(spell_id) & 2 or
+                      DB.get_spell_family(spell_id) & 64)):
                 recovery_time_mod += aura.value * aura.curr_stacks
         return recovery_time_mod
 
     def get_recovery_time_multiplier(self, spell_id):
         recovery_time_multiplier = 1
-        for aura in self.get_character_mod_auras(spell_id):
-            if aura.aura_id == 108 and aura.misc_value == 11 and \
-                    (aura.spell_id not in [11078, 11080, 12342] or DB.get_spell_family(spell_id) & 2):
+        # for aura in self.get_character_mod_auras(spell_id):
+        for aura in self.active_auras:
+            if self.aura_applies_to_spell(aura, spell_id) and \
+                    (aura.aura_id == 108 and aura.misc_value == 11 and
+                     (aura.spell_id not in [11078, 11080, 12342] or DB.get_spell_family(spell_id) & 2)):
                 recovery_time_multiplier *= 1 + (aura.value * aura.curr_stacks / 100)
         return recovery_time_multiplier
 

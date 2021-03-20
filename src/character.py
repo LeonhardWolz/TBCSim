@@ -235,11 +235,14 @@ class Character:
     def spell_hit_chance_spell(self, spell_id=0, proc_auras=True):
         hit_chance_mod = 0
         if spell_id != 0:
-            for aura in self.spell_handler.get_character_mod_auras(spell_id):
-                if aura.aura_id == 107 and aura.misc_value == 16 and aura.spell_id not in [29438, 29439, 29440] or \
-                        aura.aura_id == 107 and aura.misc_value == 16 and \
-                        aura.affected_spell_family_mask & DB.get_spell_family(spell_id):
+            # for aura in self.spell_handler.get_character_mod_auras(spell_id):
+            for aura in self.spell_handler.active_auras:
+                if self.spell_handler.aura_applies_to_spell(aura, spell_id) and \
+                        (aura.aura_id == 107 and aura.misc_value == 16 and aura.spell_id not in [29438, 29439, 29440] or
+                         aura.aura_id == 107 and aura.misc_value == 16 and
+                         aura.affected_spell_family_mask & DB.get_spell_family(spell_id)):
                     hit_chance_mod += aura.value * aura.curr_stacks
+
                     if proc_auras:
                         self.spell_handler.proc_aura_charge(aura)
         return max(min(self.spell_hit_chance + hit_chance_mod, 16), 0)
@@ -247,15 +250,17 @@ class Character:
     def spell_crit_chance_spell(self, spell_id=0, proc_auras=True):
         crit_chance_mod = 0
         if spell_id != 0:
-            for aura in self.spell_handler.get_character_mod_auras(spell_id):
-                if aura.aura_id == 107 and aura.misc_value == 7 and \
-                        (aura.spell_id not in [31682, 31683, 31684, 31685, 31686] or
-                         aura.affected_spell_school & DB.get_spell_school(spell_id) or
-                         aura.affected_spell_family_mask & DB.get_spell_family(spell_id)) and \
-                        (aura.spell_id not in [11108, 12349, 12350] or DB.get_spell_family(spell_id) & 4) or \
-                        aura.aura_id == 71 and aura.misc_value == 126 or \
-                        aura.aura_id == 71 and aura.misc_value == DB.get_spell_school(spell_id) or \
-                        aura.aura_id == 57:
+            # for aura in self.spell_handler.get_character_mod_auras(spell_id):
+            for aura in self.spell_handler.active_auras:
+                if self.spell_handler.aura_applies_to_spell(aura, spell_id) and \
+                        (aura.aura_id == 107 and aura.misc_value == 7 and
+                         (aura.spell_id not in [31682, 31683, 31684, 31685, 31686] or
+                          aura.affected_spell_school & DB.get_spell_school(spell_id) or
+                          aura.affected_spell_family_mask & DB.get_spell_family(spell_id)) and
+                         (aura.spell_id not in [11108, 12349, 12350] or DB.get_spell_family(spell_id) & 4) or
+                         aura.aura_id == 71 and aura.misc_value == 126 or
+                         aura.aura_id == 71 and aura.misc_value == DB.get_spell_school(spell_id) or
+                         aura.aura_id == 57):
 
                     # Apply spell crit modifier from mage incineration talent only if spell scorch or fire blast
                     if aura.spell_id not in (18459, 18460) or \
@@ -284,9 +289,12 @@ class Character:
 
     def spell_crit_dmg_multiplier(self, spell_id, proc_auras=True):
         crit_damage_mod = 0
-        for aura in self.spell_handler.get_character_mod_auras(spell_id):
-            if aura.aura_id == 108 and aura.misc_value == 15:
+        # for aura in self.spell_handler.get_character_mod_auras(spell_id):
+        for aura in self.spell_handler.active_auras:
+            if self.spell_handler.aura_applies_to_spell(aura, spell_id) and \
+                    (aura.aura_id == 108 and aura.misc_value == 15):
                 crit_damage_mod += aura.value * aura.curr_stacks
+
                 if proc_auras:
                     self.spell_handler.proc_aura_charge(aura)
         return 1.5 + crit_damage_mod / 100
@@ -294,7 +302,8 @@ class Character:
     def spell_dmg_multiplier(self, spell_id, proc_auras=True):
         spell_damage_multiplier = 1
 
-        for aura in self.spell_handler.get_character_mod_auras(spell_id):
+        # for aura in self.spell_handler.get_character_mod_auras(spell_id):
+        for aura in self.spell_handler.active_auras:
             if aura.aura_id == 108 and aura.misc_value == 22 or \
                     aura.aura_id == 108 and aura.misc_value == 0 and \
                     aura.affected_spell_school & DB.get_spell_school(spell_id) or \
@@ -325,19 +334,21 @@ class Character:
     def spell_cast_time(self, spell_id, proc_auras=True):
         cast_time_mod_pct = 1
         cast_time_mod_flat = 0
-        for aura in self.spell_handler.get_character_mod_auras(spell_id):
-            if aura.aura_id == 107 and aura.misc_value == 10:
-                cast_time_mod_flat += aura.value * aura.curr_stacks
-                if proc_auras:
-                    self.spell_handler.proc_aura_charge(aura)
-            elif aura.aura_id == 65:
-                cast_time_mod_pct *= 1 - (aura.value * aura.curr_stacks / 100)
-                if proc_auras:
-                    self.spell_handler.proc_aura_charge(aura)
-            elif aura.aura_id == 108 and aura.misc_value == 10:
-                cast_time_mod_pct *= (aura.value * aura.curr_stacks / 100)
-                if proc_auras:
-                    self.spell_handler.proc_aura_charge(aura)
+        # for aura in self.spell_handler.get_character_mod_auras(spell_id):
+        for aura in self.spell_handler.active_auras:
+            if self.spell_handler.aura_applies_to_spell(aura, spell_id):
+                if aura.aura_id == 107 and aura.misc_value == 10:
+                    cast_time_mod_flat += aura.value * aura.curr_stacks
+                    if proc_auras:
+                        self.spell_handler.proc_aura_charge(aura)
+                elif aura.aura_id == 65:
+                    cast_time_mod_pct *= 1 - (aura.value * aura.curr_stacks / 100)
+                    if proc_auras:
+                        self.spell_handler.proc_aura_charge(aura)
+                elif aura.aura_id == 108 and aura.misc_value == 10:
+                    cast_time_mod_pct *= (aura.value * aura.curr_stacks / 100)
+                    if proc_auras:
+                        self.spell_handler.proc_aura_charge(aura)
 
         cast_time = self.cast_time_with_haste(self.spell_handler.spell_cast_time(spell_id) + cast_time_mod_flat) \
                     * cast_time_mod_pct
@@ -349,11 +360,14 @@ class Character:
         resource_cost = self.spell_handler.spell_flat_mana_cost(spell_id) \
                         + (self.spell_handler.spell_pct_mana_cost(spell_id) / 100) * self.total_mana
 
-        for aura in self.spell_handler.get_character_mod_auras(spell_id):
-            if (aura.aura_id == 108 and aura.misc_value == 14) and \
-                    (aura.spell_id not in [31579, 31582, 31583] or DB.get_spell_family(spell_id) & 2048) or \
-                    (aura.aura_id == 72 and (aura.misc_value & DB.get_spell_school(spell_id))):
+        # for aura in self.spell_handler.get_character_mod_auras(spell_id):
+        for aura in self.spell_handler.active_auras:
+            if self.spell_handler.aura_applies_to_spell(aura, spell_id) and \
+                    ((aura.aura_id == 108 and aura.misc_value == 14) and
+                     (aura.spell_id not in [31579, 31582, 31583] or DB.get_spell_family(spell_id) & 2048) or
+                     (aura.aura_id == 72 and (aura.misc_value & DB.get_spell_school(spell_id)))):
                 resource_cost *= 1 + (aura.value * aura.curr_stacks / 100)
+
                 if proc_auras:
                     self.spell_handler.proc_aura_charge(aura)
         return max(round(resource_cost), 0)
@@ -372,8 +386,10 @@ class Character:
 
     def spell_power_coefficient(self, spell_id, proc_auras=True):
         coefficient_mod = 0
-        for aura in self.spell_handler.get_character_mod_auras(spell_id):
-            if aura.aura_id == 107 and aura.misc_value == 24:
+        # for aura in self.spell_handler.get_character_mod_auras(spell_id):
+        for aura in self.spell_handler.active_auras:
+            if self.spell_handler.aura_applies_to_spell(aura, spell_id) and \
+                    (aura.aura_id == 107 and aura.misc_value == 24):
                 coefficient_mod += aura.value * aura.curr_stacks
                 if proc_auras:
                     self.spell_handler.proc_aura_charge(aura)
