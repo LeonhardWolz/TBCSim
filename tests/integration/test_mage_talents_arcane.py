@@ -480,27 +480,47 @@ class TestMindMastery(unittest.TestCase):
     def test_mind_mastery_rank1(self):
         self.char.spell_handler.apply_spell_effect(self.mind_mastery_rank1)
 
-        self.assertEqual(5, self.char.total_spell_power)
+        self.assertEqual(5, self.char.total_fire_power)
+        self.assertEqual(5, self.char.total_nature_power)
+        self.assertEqual(5, self.char.total_frost_power)
+        self.assertEqual(5, self.char.total_shadow_power)
+        self.assertEqual(5, self.char.total_arcane_power)
 
     def test_mind_mastery_rank2(self):
         self.char.spell_handler.apply_spell_effect(self.mind_mastery_rank2)
 
-        self.assertEqual(10, self.char.total_spell_power)
+        self.assertEqual(10, self.char.total_fire_power)
+        self.assertEqual(10, self.char.total_nature_power)
+        self.assertEqual(10, self.char.total_frost_power)
+        self.assertEqual(10, self.char.total_shadow_power)
+        self.assertEqual(10, self.char.total_arcane_power)
 
     def test_mind_mastery_rank3(self):
         self.char.spell_handler.apply_spell_effect(self.mind_mastery_rank3)
 
-        self.assertEqual(15, self.char.total_spell_power)
+        self.assertEqual(15, self.char.total_fire_power)
+        self.assertEqual(15, self.char.total_nature_power)
+        self.assertEqual(15, self.char.total_frost_power)
+        self.assertEqual(15, self.char.total_shadow_power)
+        self.assertEqual(15, self.char.total_arcane_power)
 
     def test_mind_mastery_rank4(self):
         self.char.spell_handler.apply_spell_effect(self.mind_mastery_rank4)
 
-        self.assertEqual(20, self.char.total_spell_power)
+        self.assertEqual(20, self.char.total_fire_power)
+        self.assertEqual(20, self.char.total_nature_power)
+        self.assertEqual(20, self.char.total_frost_power)
+        self.assertEqual(20, self.char.total_shadow_power)
+        self.assertEqual(20, self.char.total_arcane_power)
 
     def test_mind_mastery_rank5(self):
         self.char.spell_handler.apply_spell_effect(self.mind_mastery_rank5)
 
-        self.assertEqual(25, self.char.total_spell_power)
+        self.assertEqual(25, self.char.total_fire_power)
+        self.assertEqual(25, self.char.total_nature_power)
+        self.assertEqual(25, self.char.total_frost_power)
+        self.assertEqual(25, self.char.total_shadow_power)
+        self.assertEqual(25, self.char.total_arcane_power)
 
 
 if __name__ == '__main__':

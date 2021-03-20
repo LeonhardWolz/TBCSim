@@ -6,6 +6,19 @@ character:
       - 38697 #Frostbolt rank14
       - 38692 #Fireball rank14
       - 116
+      - 38704
+    passive_buffs:
+      - 27126 #arcane intellect
+      - 27125 #mage armor
+      - 25312 #divine spirit
+      - 25389 #powerword fortitude
+  passive_consumables:
+    - 22866 #flask of pure death
+    - 27657 #blackened basilisk
+  active_consumables:
+    - 22044 #mana emerald
+    - 22832 #mana potion
+    - 22839 #destruction potion
   gear:
     0:            #ammo
     1: 24266           #head
@@ -44,4 +57,4 @@ enemy:
     shadow_resistance: 0
 sim:
   sim_type: dps
-  duration: 30
+  duration: 45

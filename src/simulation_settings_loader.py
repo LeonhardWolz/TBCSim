@@ -23,6 +23,10 @@ spells_to_use = {
     "Mage": "mage_spells_to_use"
 }
 
+mage_boost_spells = (11129, 12472)
+
+mage_mana_spells = (12051,)
+
 
 def load_settings():
     # load settings file
@@ -38,6 +42,7 @@ def load_settings():
     # load enemy settings
     load_enemy_settings(cfg["enemy"])
 
+    char.current_health = char.total_health
     char.current_mana = char.total_mana
     char.spell_handler.enemy = enemy
 
@@ -64,22 +69,86 @@ def load_character_settings(char_settings):
     # load base stats for race and class specified in settings
     base_stats = DB.get_base_stats(enums.PlayerClass[char_settings["player_class"]].value,
                                    enums.Race[char_settings["race"]].value)
+
+    char.modify_stat(1, base_stats[2])
+    char.modify_stat(0, base_stats[3])
+    char.modify_stat(4, base_stats[7])
+    char.modify_stat(3, base_stats[8])
+    char.modify_stat(7, base_stats[9])
+    char.modify_stat(5, base_stats[10])
+    char.modify_stat(6, base_stats[11])
+
     char.race = char_settings["race"]
     char.player_class = char_settings["player_class"]
 
-    char.base_attributes["base_health"] = base_stats[2]
-    char.base_attributes["base_mana"] = base_stats[3]
-    char.base_attributes["base_strength"] = base_stats[7]
-    char.base_attributes["base_agility"] = base_stats[8]
-    char.base_attributes["base_stamina"] = base_stats[9]
-    char.base_attributes["base_intellect"] = base_stats[10]
-    char.base_attributes["base_spirit"] = base_stats[11]
+    load_racials()
+    load_class_spells(char_settings["spells"])
 
-    for spell_id in char_settings["spells"][spells_to_use.get(char.player_class)]:
-        char.usable_damage_spells.append(spell_id)
+    load_consumables(char_settings)
 
     load_character_items(char_settings["gear"])
     load_talents(char_settings["talents"])
+
+
+def load_racials():
+    if char.race == "Human":
+        char.spell_handler.apply_spell_effect(20598)
+    elif char.race == "Orc":
+        pass
+    elif char.race == "Dwarf":
+        char.spell_handler.apply_spell_effect(20595)
+        char.spell_handler.apply_spell_effect(20596)
+    elif char.race == "Nightelf":
+        char.spell_handler.apply_spell_effect(20583)
+    elif char.race == "Undead":
+        char.spell_handler.apply_spell_effect(20579)
+    elif char.race == "Tauren":
+        char.spell_handler.apply_spell_effect(20551)
+        char.spell_handler.apply_spell_effect(20550)
+    elif char.race == "Gnome":
+        char.spell_handler.apply_spell_effect(20592)
+        char.spell_handler.apply_spell_effect(20591)
+    elif char.race == "Troll":
+        char.boost_spells.append(20554)
+    elif char.race == "Bloodelf":
+        char.spell_handler.apply_spell_effect(822)
+    elif char.race == "Draenei":
+        char.spell_handler.apply_spell_effect(6562)
+        char.spell_handler.apply_spell_effect(28878)
+        char.spell_handler.apply_spell_effect(20579)
+
+
+def load_consumables(char_settings):
+    for consumable_id in char_settings["passive_consumables"]:
+        item_info = DB.get_item(consumable_id)
+        for i in range(1, 4):
+            spell_id = item_info[DB.item_column_info["spellid_" + str(i)]]
+            if spell_id != 0:
+                # bufffood triggers spell
+                triggered_spell_id = char.spell_handler.spell_get_triggered_spell(spell_id)
+                if triggered_spell_id != 0:
+                    char.spell_handler.apply_spell_effect(triggered_spell_id)
+                else:
+                    char.spell_handler.apply_spell_effect(spell_id)
+
+    for consumable_id in char_settings["active_consumables"]:
+        char.active_consumables.append(consumable_id)
+    #
+    # print(char.active_consumables)
+    # for i, aura in enumerate(char.spell_handler.active_auras):
+    #     print(i, aura)
+
+
+def load_class_spells(spell_settings):
+    for spell_id in spell_settings[spells_to_use.get(char.player_class)]:
+        char.damage_spells.append(spell_id)
+
+    for spell_id in spell_settings["passive_buffs"]:
+        char.spell_handler.apply_spell_effect(spell_id)
+
+    if char.player_class == "Mage":
+        for spell_id in mage_mana_spells:
+            char.mana_spells.append(spell_id)
 
 
 def load_talents(talent_settings):
@@ -100,17 +169,21 @@ def load_talent(talent_id):
     talent_info = DB.get_spell(talent_id)
     if talent_info[DB.spell_column_info["Attributes"]] & 0x00000040:
         char.spell_handler.apply_spell_effect(talent_id)
-    elif 2 in [talent_info[DB.spell_column_info["Effect1"]],
+    elif 2 in [talent_info[DB.spell_column_info["Effect1"]],  # TODO also add pure dots to dmg spells
                talent_info[DB.spell_column_info["Effect2"]],
                talent_info[DB.spell_column_info["Effect3"]]]:
-        char.usable_damage_spells.append(talent_id)
+        char.damage_spells.append(talent_id)
+    elif talent_id in mage_boost_spells:
+        char.boost_spells.append(talent_id)
+    elif talent_id in mage_mana_spells:
+        char.mana_spells.append(talent_id)
     else:
-        char.usable_active_spells.append(talent_id)
+        char.defensive_spells.append(talent_id)
 
 
 def load_item_sets():
     item_set_items = {}
-    for item in char.items.values():
+    for item in char.gear.values():
         if item.item_data[DB.item_column_info["itemset"]] != 0:
             item_set_id = item.item_data[DB.item_column_info["itemset"]]
             if item_set_id in item_set_items.keys():
@@ -129,7 +202,7 @@ def load_item_sets():
 def load_character_items(gear_settings):
     for item in gear_settings.items():
         if item[1] is not None:
-            item_from_db = DB.get_equippable_item(int(item[1]))
+            item_from_db = DB.get_item(int(item[1]))
 
             if item_from_db is not None:
                 load_character_item(item[0], item_from_db)
@@ -139,7 +212,7 @@ def load_character_items(gear_settings):
 
 
 def load_character_item(inventory_slot, item_from_db):
-    char.items[inventory_slot] = EquippedItem(item_from_db[DB.item_column_info["name"]], item_from_db)
+    char.gear[inventory_slot] = EquippedItem(item_from_db[DB.item_column_info["name"]], item_from_db)
 
     for i in range(1, 11):
         stat_id = item_from_db[DB.item_column_info["stat_type" + str(i)]]

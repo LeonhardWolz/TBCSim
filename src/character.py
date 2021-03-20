@@ -9,18 +9,13 @@ class Character:
         self.race = 'default'
         self.player_class = 'default'
         self.spell_handler = SpellHandler(self)
-        self.usable_damage_spells = []
-        self.usable_active_spells = []
-        self.items = {}
+        self.damage_spells = []
+        self.boost_spells = []
+        self.defensive_spells = []
+        self.mana_spells = []
+        self.active_consumables = []
+        self.gear = {}
         self.logger = logging.getLogger("simulation")
-
-        self.base_attributes = {"base_health": 0,
-                                "base_mana": 0,
-                                "base_strength": 0,
-                                "base_agility": 0,
-                                "base_stamina": 0,
-                                "base_intellect": 0,
-                                "base_spirit": 0}
 
         self.agility = 0
         self.strength = 0
@@ -28,6 +23,7 @@ class Character:
         self.spirit = 0
         self.stamina = 0
         self.health = 0
+        self.current_health = 0
         self.mana = 0
         self.current_mana = 0
         self.mp5 = 0
@@ -48,11 +44,21 @@ class Character:
 
     @property
     def total_health(self):
-        return self.base_attributes["base_health"] + self.health + self.total_stamina * 10
+        return self.health + self.total_stamina * 10
+
+    @property
+    def current_health(self):
+        return self.__current_health
+
+    @current_health.setter
+    def current_health(self, value):
+        self.__current_health = value
+        if self.__current_health > self.total_health:
+            self.__current_health = self.total_health
 
     @property
     def total_mana(self):
-        return self.base_attributes["base_mana"] + self.mana + self.total_intellect * 15
+        return self.mana + self.total_intellect * 15
 
     @property
     def current_mana(self):
@@ -60,9 +66,10 @@ class Character:
 
     @current_mana.setter
     def current_mana(self, value):
-        self.__current_mana = value
+        self.__current_mana = round(value)
         if self.__current_mana > self.total_mana:
             self.__current_mana = self.total_mana
+        print(self.__current_mana)
 
     @property
     def is_casting(self):
@@ -70,51 +77,47 @@ class Character:
 
     @property
     def total_agility(self):
-        return round((self.agility + self.base_attributes["base_agility"]) * self.get_pct_stat_mod(1))
+        return round((self.agility + self.get_stat_mod(1)) * self.get_pct_stat_mod(1))
 
     @property
     def total_strength(self):
-        return round((self.strength + self.base_attributes["base_strength"]) * self.get_pct_stat_mod(0))
+        return round((self.strength + self.get_stat_mod(0)) * self.get_pct_stat_mod(0))
 
     @property
     def total_intellect(self):
-        return round((self.intellect + self.base_attributes["base_intellect"]) * self.get_pct_stat_mod(3))
+        return round((self.intellect + self.get_stat_mod(3)) * self.get_pct_stat_mod(3))
 
     @property
     def total_stamina(self):
-        return round((self.stamina + self.base_attributes["base_stamina"]) * self.get_pct_stat_mod(2))
+        return round((self.stamina + self.get_stat_mod(2)) * self.get_pct_stat_mod(2))
 
     @property
     def total_spirit(self):
-        return round((self.spirit + self.base_attributes["base_spirit"]) * self.get_pct_stat_mod(4))
-
-    @property
-    def total_spell_power(self):
-        return self.spell_power + self.spell_power_from_auras()
+        return round((self.spirit + self.get_stat_mod(4)) * self.get_pct_stat_mod(4))
 
     @property
     def total_holy_power(self):
-        return self.total_spell_power + self.holy_power + self.holy_power_from_auras()
+        return self.spell_power + self.holy_power + self.school_power_from_auras(2)
 
     @property
     def total_fire_power(self):
-        return self.total_spell_power + self.fire_power + self.fire_power_from_auras()
+        return self.spell_power + self.fire_power + self.school_power_from_auras(4)
 
     @property
     def total_nature_power(self):
-        return self.total_spell_power + self.nature_power + self.nature_power_from_auras()
+        return self.spell_power + self.nature_power + self.school_power_from_auras(8)
 
     @property
     def total_frost_power(self):
-        return self.total_spell_power + self.frost_power + self.frost_power_from_auras()
+        return self.spell_power + self.frost_power + self.school_power_from_auras(16)
 
     @property
     def total_shadow_power(self):
-        return self.total_spell_power + self.shadow_power + self.shadow_power_from_auras()
+        return self.spell_power + self.shadow_power + self.school_power_from_auras(32)
 
     @property
     def total_arcane_power(self):
-        return self.total_spell_power + self.arcane_power + self.arcane_power_from_auras()
+        return self.spell_power + self.arcane_power + self.school_power_from_auras(64)
 
     @property
     def total_spell_hit_rating(self):
@@ -157,14 +160,23 @@ class Character:
         }
         return mp5_spirit_gain.get(self.player_class)
 
-    def get_pct_stat_mod(self, mod_unit_index, proc_auras=True):
+    def get_pct_stat_mod(self, stat_index, proc_auras=True):
         stat_pct_mod = 100
         for aura in self.spell_handler.active_auras:
-            if aura.aura_id == 137 and aura.misc_value == mod_unit_index:
+            if aura.aura_id == 137 and aura.misc_value == stat_index:
                 stat_pct_mod += aura.value * aura.curr_stacks
                 if proc_auras:
                     self.spell_handler.proc_aura_charge(aura)
         return stat_pct_mod / 100
+
+    def get_stat_mod(self, stat_index, proc_auras=True):
+        stat_mod = 0
+        for aura in self.spell_handler.active_auras:
+            if aura.aura_id == 29 and aura.misc_value == stat_index:
+                stat_mod += aura.value * aura.curr_stacks
+                if proc_auras:
+                    self.spell_handler.proc_aura_charge(aura)
+        return stat_mod
 
     def modify_stat(self, stat_type, value):
         if stat_type == 0:
@@ -190,72 +202,18 @@ class Character:
         else:
             raise NotImplementedError("Stat modification not implemented for stat_type: " + str(stat_type))
 
-    def holy_power_from_auras(self, proc_auras=True):
-        holy_power = 0
+    def school_power_from_auras(self, spell_school, proc_auras=True):
+        school_power = 0
         for aura in self.spell_handler.active_auras:
-            if aura.aura_id == 13 and aura.misc_value == 2:
-                holy_power += aura.value * aura.curr_stacks
+            if aura.aura_id == 13 and aura.misc_value & spell_school:
+                school_power += aura.value * aura.curr_stacks
                 if proc_auras:
                     self.spell_handler.proc_aura_charge(aura)
-        return holy_power
-
-    def fire_power_from_auras(self, proc_auras=True):
-        fire_power = 0
-        for aura in self.spell_handler.active_auras:
-            if aura.aura_id == 13 and aura.misc_value == 4:
-                fire_power += aura.value * aura.curr_stacks
+            elif aura.aura_id == 174 and aura.misc_value & spell_school:
+                school_power += self.total_intellect * (aura.value * aura.curr_stacks / 100)
                 if proc_auras:
                     self.spell_handler.proc_aura_charge(aura)
-        return fire_power
-
-    def nature_power_from_auras(self, proc_auras=True):
-        nature_power = 0
-        for aura in self.spell_handler.active_auras:
-            if aura.aura_id == 13 and aura.misc_value == 8:
-                nature_power += aura.value * aura.curr_stacks
-                if proc_auras:
-                    self.spell_handler.proc_aura_charge(aura)
-        return nature_power
-
-    def frost_power_from_auras(self, proc_auras=True):
-        frost_power = 0
-        for aura in self.spell_handler.active_auras:
-            if aura.aura_id == 13 and aura.misc_value == 16:
-                frost_power += aura.value * aura.curr_stacks
-                if proc_auras:
-                    self.spell_handler.proc_aura_charge(aura)
-        return frost_power
-
-    def shadow_power_from_auras(self, proc_auras=True):
-        shadow_power = 0
-        for aura in self.spell_handler.active_auras:
-            if aura.aura_id == 13 and aura.misc_value == 32:
-                shadow_power += aura.value * aura.curr_stacks
-                if proc_auras:
-                    self.spell_handler.proc_aura_charge(aura)
-        return shadow_power
-
-    def arcane_power_from_auras(self, proc_auras=True):
-        arcane_power = 0
-        for aura in self.spell_handler.active_auras:
-            if aura.aura_id == 13 and aura.misc_value == 64:
-                arcane_power += aura.value * aura.curr_stacks
-                if proc_auras:
-                    self.spell_handler.proc_aura_charge(aura)
-        return arcane_power
-
-    def spell_power_from_auras(self, proc_auras=True):
-        spell_power = 0
-        for aura in self.spell_handler.active_auras:
-            if aura.aura_id == 13 and aura.misc_value == 126:
-                spell_power += aura.value * aura.curr_stacks
-                if proc_auras:
-                    self.spell_handler.proc_aura_charge(aura)
-            elif aura.aura_id == 174 and aura.misc_value == 126:
-                spell_power += self.total_intellect * (aura.value * aura.curr_stacks / 100)
-                if proc_auras:
-                    self.spell_handler.proc_aura_charge(aura)
-        return spell_power
+        return school_power
 
     def spell_hit_rating_from_auras(self, proc_auras=True):
         hit_rating = 0
@@ -373,7 +331,7 @@ class Character:
                 cast_time_mod_flat += aura.value * aura.curr_stacks
                 if proc_auras:
                     self.spell_handler.proc_aura_charge(aura)
-            elif aura.aura_id == 65 and aura.misc_value & DB.get_spell_school(spell_id):
+            elif aura.aura_id == 65:
                 cast_time_mod_pct *= 1 - (aura.value * aura.curr_stacks / 100)
                 if proc_auras:
                     self.spell_handler.proc_aura_charge(aura)
@@ -389,7 +347,8 @@ class Character:
         return 0
 
     def spell_resource_cost(self, spell_id, proc_auras=True):
-        resource_cost = self.spell_handler.spell_mana_cost(spell_id)
+        resource_cost = self.spell_handler.spell_flat_mana_cost(spell_id) \
+                        + (self.spell_handler.spell_pct_mana_cost(spell_id) / 100) * self.total_mana
 
         for aura in self.spell_handler.get_character_mod_auras(spell_id):
             if (aura.aura_id == 108 and aura.misc_value == 14) and \
@@ -455,13 +414,13 @@ class Character:
         return self.mp5_from_spirit + self.mp5
 
     def has_wand_range_attack(self):
-        return 18 in self.items and \
-               self.items[18].item_data[DB.item_column_info["class"]] == 2 and \
-               self.items[18].item_data[DB.item_column_info["subclass"]] == 19
+        return 18 in self.gear and \
+               self.gear[18].item_data[DB.item_column_info["class"]] == 2 and \
+               self.gear[18].item_data[DB.item_column_info["subclass"]] == 19
 
     def weapon_attack_delay_time(self, inventory_slot):
-        return self.items[inventory_slot].item_data[DB.item_column_info["delay"]]
+        return self.gear[inventory_slot].item_data[DB.item_column_info["delay"]]
 
     def get_weapon_damage(self, inventory_slot):
-        return self.items[inventory_slot].item_data[DB.item_column_info["dmg_min1"]], \
-               self.items[inventory_slot].item_data[DB.item_column_info["dmg_max1"]]
+        return self.gear[inventory_slot].item_data[DB.item_column_info["dmg_min1"]], \
+               self.gear[inventory_slot].item_data[DB.item_column_info["dmg_max1"]]

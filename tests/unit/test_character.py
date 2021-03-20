@@ -12,44 +12,38 @@ class AuraSpellPowerTests(unittest.TestCase):
         spell_power_aura = aura.Aura(9346, 13, self.value, 126, 0, 8)
         self.char.spell_handler.active_auras.append(spell_power_aura)
 
-    def test_spell_power_from_auras(self):
-        self.assertEqual(self.value, self.char.spell_power_from_auras())
-
-    def test_total_spell_power(self):
-        self.assertEqual(self.value, self.char.total_spell_power)
-
     def test_fire_power_from_auras(self):
-        self.assertEqual(0, self.char.fire_power_from_auras())
+        self.assertEqual(self.value, self.char.school_power_from_auras(4))
 
     def test_total_fire_power(self):
         self.assertEqual(self.value, self.char.total_fire_power)
 
     def test_holy_power_from_auras(self):
-        self.assertEqual(0, self.char.holy_power_from_auras())
+        self.assertEqual(self.value, self.char.school_power_from_auras(2))
 
     def test_total_holy_power(self):
         self.assertEqual(self.value, self.char.total_holy_power)
 
     def test_frost_power_from_auras(self):
-        self.assertEqual(0, self.char.frost_power_from_auras())
+        self.assertEqual(self.value, self.char.school_power_from_auras(16))
 
     def test_total_frost_power(self):
         self.assertEqual(self.value, self.char.total_frost_power)
 
     def test_nature_power_from_auras(self):
-        self.assertEqual(0, self.char.nature_power_from_auras())
+        self.assertEqual(self.value, self.char.school_power_from_auras(8))
 
     def test_total_nature_power(self):
         self.assertEqual(self.value, self.char.total_nature_power)
 
     def test_shadow_power_from_auras(self):
-        self.assertEqual(0, self.char.shadow_power_from_auras())
+        self.assertEqual(self.value, self.char.school_power_from_auras(32))
 
     def test_total_shadow_power(self):
         self.assertEqual(self.value, self.char.total_shadow_power)
 
     def test_arcane_power_from_auras(self):
-        self.assertEqual(0, self.char.arcane_power_from_auras())
+        self.assertEqual(self.value, self.char.school_power_from_auras(64))
 
     def test_total_arcane_power(self):
         self.assertEqual(self.value, self.char.total_arcane_power)
@@ -62,44 +56,38 @@ class AuraFirePowerTests(unittest.TestCase):
         fire_power_aura = aura.Aura(9400, 13, self.value, 4, 0, 8)
         self.char.spell_handler.active_auras.append(fire_power_aura)
 
-    def test_spell_power_from_auras(self):
-        self.assertEqual(0, self.char.spell_power_from_auras())
-
-    def test_total_spell_power(self):
-        self.assertEqual(0, self.char.total_spell_power)
-
     def test_fire_power_from_auras(self):
-        self.assertEqual(self.value, self.char.fire_power_from_auras())
+        self.assertEqual(self.value, self.char.school_power_from_auras(4))
 
     def test_total_fire_power(self):
         self.assertEqual(self.value, self.char.total_fire_power)
 
     def test_holy_power_from_auras(self):
-        self.assertEqual(0, self.char.holy_power_from_auras())
+        self.assertEqual(0, self.char.school_power_from_auras(2))
 
     def test_total_holy_power(self):
         self.assertEqual(0, self.char.total_holy_power, )
 
     def test_frost_power_from_auras(self):
-        self.assertEqual(0, self.char.frost_power_from_auras())
+        self.assertEqual(0, self.char.school_power_from_auras(16))
 
     def test_total_frost_power(self):
         self.assertEqual(0, self.char.total_frost_power)
 
     def test_nature_power_from_auras(self):
-        self.assertEqual(0, self.char.nature_power_from_auras())
+        self.assertEqual(0, self.char.school_power_from_auras(8))
 
     def test_total_nature_power(self):
         self.assertEqual(0, self.char.total_nature_power)
 
     def test_shadow_power_from_auras(self):
-        self.assertEqual(0, self.char.shadow_power_from_auras())
+        self.assertEqual(0, self.char.school_power_from_auras(32))
 
     def test_total_shadow_power(self):
         self.assertEqual(0, self.char.total_shadow_power)
 
     def test_arcane_power_from_auras(self):
-        self.assertEqual(0, self.char.arcane_power_from_auras())
+        self.assertEqual(0, self.char.school_power_from_auras(64))
 
     def test_total_arcane_power(self):
         self.assertEqual(0, self.char.total_arcane_power)

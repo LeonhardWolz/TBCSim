@@ -213,16 +213,16 @@ class TestImprovedFrostNova(unittest.TestCase):
         self.char.spell_handler.spell_start_cooldown(self.frost_nova_rank5)
         self.char.spell_handler.spell_start_cooldown(self.ice_barrier_rank6)
 
-        self.assertEqual(23000, self.char.spell_handler.cooldown_family_mask[524352][0])
-        self.assertEqual(30000, self.char.spell_handler.cooldown_family_mask[4294967296][0])
+        self.assertEqual(23000, self.char.spell_handler.cooldown_spell_family_mask[524352][0])
+        self.assertEqual(30000, self.char.spell_handler.cooldown_spell_family_mask[4294967296][0])
 
     def test_improved_frost_nova_rank2(self):
         self.char.spell_handler.apply_spell_effect(self.improved_frost_nova_rank2)
         self.char.spell_handler.spell_start_cooldown(self.frost_nova_rank5)
         self.char.spell_handler.spell_start_cooldown(self.ice_barrier_rank6)
 
-        self.assertEqual(21000, self.char.spell_handler.cooldown_family_mask[524352][0])
-        self.assertEqual(30000, self.char.spell_handler.cooldown_family_mask[4294967296][0])
+        self.assertEqual(21000, self.char.spell_handler.cooldown_spell_family_mask[524352][0])
+        self.assertEqual(30000, self.char.spell_handler.cooldown_spell_family_mask[4294967296][0])
 
 
 @unittest.skip("Not yet implemented")
@@ -523,10 +523,10 @@ class TestIceFloes(unittest.TestCase):
         self.char.spell_handler.spell_start_cooldown(self.frost_nova_rank5)
 
         self.assertEqual(480000 * 0.9, self.char.spell_handler.cooldown_spell_id[self.cold_snap][0])
-        self.assertEqual(10000 * 0.9, self.char.spell_handler.cooldown_family_mask[1573376][0])
-        self.assertEqual(30000 * 0.9, self.char.spell_handler.cooldown_family_mask[4294967296][0])
-        self.assertEqual(300000 * 0.9, self.char.spell_handler.cooldown_family_mask[554050781184][0])
-        self.assertEqual(25000, self.char.spell_handler.cooldown_family_mask[524352][0])
+        self.assertEqual(10000 * 0.9, self.char.spell_handler.cooldown_spell_family_mask[1573376][0])
+        self.assertEqual(30000 * 0.9, self.char.spell_handler.cooldown_spell_family_mask[4294967296][0])
+        self.assertEqual(300000 * 0.9, self.char.spell_handler.cooldown_spell_family_mask[554050781184][0])
+        self.assertEqual(25000, self.char.spell_handler.cooldown_spell_family_mask[524352][0])
 
     def test_ice_floes_rank2(self):
         self.char.spell_handler.apply_spell_effect(self.ice_floes_rank2)
@@ -538,10 +538,10 @@ class TestIceFloes(unittest.TestCase):
         self.char.spell_handler.spell_start_cooldown(self.frost_nova_rank5)
 
         self.assertEqual(480000 * 0.8, self.char.spell_handler.cooldown_spell_id[self.cold_snap][0])
-        self.assertEqual(10000 * 0.8, self.char.spell_handler.cooldown_family_mask[1573376][0])
-        self.assertEqual(30000 * 0.8, self.char.spell_handler.cooldown_family_mask[4294967296][0])
-        self.assertEqual(300000 * 0.8, self.char.spell_handler.cooldown_family_mask[554050781184][0])
-        self.assertEqual(25000, self.char.spell_handler.cooldown_family_mask[524352][0])
+        self.assertEqual(10000 * 0.8, self.char.spell_handler.cooldown_spell_family_mask[1573376][0])
+        self.assertEqual(30000 * 0.8, self.char.spell_handler.cooldown_spell_family_mask[4294967296][0])
+        self.assertEqual(300000 * 0.8, self.char.spell_handler.cooldown_spell_family_mask[554050781184][0])
+        self.assertEqual(25000, self.char.spell_handler.cooldown_spell_family_mask[524352][0])
 
 
 def spell_does_hit(spell_id):

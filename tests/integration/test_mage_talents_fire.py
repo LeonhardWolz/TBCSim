@@ -203,24 +203,24 @@ class TestImprovedFireBlast(unittest.TestCase):
         self.char.spell_handler.spell_start_cooldown(self.fire_blast_rank9)
         self.char.spell_handler.spell_start_cooldown(self.cone_of_cold_rank1)
 
-        self.assertEqual(7500, self.char.spell_handler.cooldown_family_mask[2][0])
-        self.assertEqual(10000, self.char.spell_handler.cooldown_family_mask[1573376][0])
+        self.assertEqual(7500, self.char.spell_handler.cooldown_spell_family_mask[2][0])
+        self.assertEqual(10000, self.char.spell_handler.cooldown_spell_family_mask[1573376][0])
 
     def test_improved_fire_blast_rank2(self):
         self.char.spell_handler.apply_spell_effect(self.improved_fire_blast_rank2)
         self.char.spell_handler.spell_start_cooldown(self.fire_blast_rank9)
         self.char.spell_handler.spell_start_cooldown(self.cone_of_cold_rank1)
 
-        self.assertEqual(7000, self.char.spell_handler.cooldown_family_mask[2][0])
-        self.assertEqual(10000, self.char.spell_handler.cooldown_family_mask[1573376][0])
+        self.assertEqual(7000, self.char.spell_handler.cooldown_spell_family_mask[2][0])
+        self.assertEqual(10000, self.char.spell_handler.cooldown_spell_family_mask[1573376][0])
 
     def test_improved_fire_blast_rank3(self):
         self.char.spell_handler.apply_spell_effect(self.improved_fire_blast_rank3)
         self.char.spell_handler.spell_start_cooldown(self.fire_blast_rank9)
         self.char.spell_handler.spell_start_cooldown(self.cone_of_cold_rank1)
 
-        self.assertEqual(6500, self.char.spell_handler.cooldown_family_mask[2][0])
-        self.assertEqual(10000, self.char.spell_handler.cooldown_family_mask[1573376][0])
+        self.assertEqual(6500, self.char.spell_handler.cooldown_spell_family_mask[2][0])
+        self.assertEqual(10000, self.char.spell_handler.cooldown_spell_family_mask[1573376][0])
 
 
 class TestIncineration(unittest.TestCase):

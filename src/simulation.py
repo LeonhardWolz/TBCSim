@@ -13,7 +13,7 @@ def start_simulation(settings, char):
     logger.warning("Starting Simulation for " + str(settings.duration / 1000) + " seconds.")
     env = simpy.Environment()
     results = SimResult(start_time=datetime.now(), sim_length=settings.duration)
-    results.set_items(char.items)
+    results.set_items(char.gear)
     char.spell_handler.env = env
     char.spell_handler.results = results
     player = Player(env, char, results)

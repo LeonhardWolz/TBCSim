@@ -2,7 +2,7 @@ import logging
 import src.db_connector as DB
 
 
-class Dot(object):
+class DotSpell(object):
     def __init__(self, env, spell_handler, spell_id, dot_dmg, interval, duration, results):
         self.env = env
         self.spell_handler = spell_handler

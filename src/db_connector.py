@@ -3,6 +3,7 @@ import logging
 
 spell_cache = {}
 spell_affected_cache = {}
+item_cache = {}
 tbcdb_cursor = None
 
 
@@ -31,6 +32,16 @@ def get_spell_columns():
     except mysql.connector.Error as ex:
         logging.critical("DB Error during spell column name retrieval: {}".format(ex))
 
+
+def get_item_columns():
+    try:
+        tbcdb_cursor.execute("SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS "
+                             "WHERE TABLE_SCHEMA = \"simdata\" AND TABLE_NAME = \"item_template\"")
+        return tbcdb_cursor.fetchall()
+    except mysql.connector.Error as ex:
+        logging.critical("DB Error during item column name retrieval: {}".format(ex))
+
+
 def get_item_set_columns():
     try:
         tbcdb_cursor.execute("SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS "
@@ -38,6 +49,7 @@ def get_item_set_columns():
         return tbcdb_cursor.fetchall()
     except mysql.connector.Error as ex:
         logging.critical("DB Error during itemset column name retrieval: {}".format(ex))
+
 
 def get_spell(spell_id):
     if spell_id in spell_cache.keys():
@@ -119,31 +131,27 @@ def get_spell_is_passive(spell_id):
             logging.critical("DB Error during spell passive flag retrieval: {}".format(ex))
 
 
-def get_item_columns():
-    try:
-        tbcdb_cursor.execute("SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS "
-                             "WHERE TABLE_SCHEMA = \"simdata\" AND TABLE_NAME = \"item_template\"")
-        return tbcdb_cursor.fetchall()
-    except mysql.connector.Error as ex:
-        logging.critical("DB Error during item column name retrieval: {}".format(ex))
-
-
-def get_equippable_item(item_id):
-    try:
-        tbcdb_cursor.execute(
-            "SELECT * FROM simdata.item_template WHERE entry={} and (class = 2 or class = 4)".format(item_id))
-        return tbcdb_cursor.fetchone()
-    except mysql.connector.Error as ex:
-        logging.critical("DB Error during item retrieval: {}".format(ex))
+def get_item(item_id):
+    if item_id in item_cache.keys():
+        return item_cache[item_id]
+    else:
+        try:
+            tbcdb_cursor.execute("SELECT * FROM simdata.item_template WHERE entry={}".format(item_id))
+            item_cache[item_id] = tbcdb_cursor.fetchone()
+            return item_cache[item_id]
+        except mysql.connector.Error as ex:
+            logging.critical("DB Error during item retrieval: {}".format(ex))
 
 
 def get_item_name(item_id):
-    try:
-        tbcdb_cursor.execute(
-            "SELECT name FROM simdata.item_template WHERE entry={} and (class = 2 or class = 4)".format(item_id))
-        return str(tbcdb_cursor.fetchone()[0])
-    except mysql.connector.Error as ex:
-        logging.critical("DB Error during item name retrieval: {}".format(ex))
+    if item_id in item_cache.keys():
+        return str(item_cache[item_id][item_column_info["name"]])
+    else:
+        try:
+            tbcdb_cursor.execute("SELECT name FROM simdata.item_template WHERE entry={}".format(item_id))
+            return str(tbcdb_cursor.fetchone()[0])
+        except mysql.connector.Error as ex:
+            logging.critical("DB Error during item name retrieval: {}".format(ex))
 
 
 def get_base_stats(player_class, race):

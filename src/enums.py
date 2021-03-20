@@ -225,3 +225,5 @@ class CombatAction(enum.Enum):
     Idle = 0
     Cast_Spell = 1
     Wand_Attack = 2
+    Consume_Item = 3
+
