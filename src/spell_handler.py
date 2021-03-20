@@ -22,7 +22,7 @@ class SpellHandler:
         self.results = None
         self.logger = logging.getLogger("simulation")
 
-    def apply_spell_effect(self, spell_id):
+    def apply_spell_effect(self, spell_id, item_id=0):
         spell_info = DB.get_spell(spell_id)
 
         for j in range(1, 4):
@@ -67,14 +67,14 @@ class SpellHandler:
                     self.cold_snap(spell_id)
             elif spell_info[DB.spell_column_info["Effect" + str(j)]] == 30:
 
-                self.energize(spell_info, j)
+                self.energize(spell_info, j, item_id)
             elif spell_info[DB.spell_column_info["Effect" + str(j)]] != 0:
                 logging.warning("Effect " + str(j) + " of Spell could not be handled: " + str(spell_info))
 
     def apply_passive_auras(self, spell_info, effect_slot):
         if (spell_info[DB.spell_column_info["AttributesEx"]] & 4 or
             spell_info[DB.spell_column_info["AttributesEx"]] & 64) and \
-                spell_info[DB.spell_column_info["EffectApplyAuraName" + str(effect_slot)]] in [23]:
+                spell_info[DB.spell_column_info["EffectApplyAuraName" + str(effect_slot)]] in [21, 23]:
             self.process_channelled_spell(spell_info, effect_slot)
 
         elif spell_info[DB.spell_column_info["EffectImplicitTargetA" + str(effect_slot)]] in [1, 21]:
@@ -288,19 +288,27 @@ class SpellHandler:
             self.results.dot_spell_resisted(spell_info[0])
 
     def process_channelled_spell(self, spell_info, effect_slot):
-        self.results.spell_cast(spell_info[DB.spell_column_info["EffectTriggerSpell" + str(effect_slot)]],
-                                self.env.now)
+        aura_id = spell_info[DB.spell_column_info["EffectApplyAuraName" + str(effect_slot)]]
 
         channel_duration, channel_interval = self.periodic_effect_behaviour(spell_info, effect_slot)
-        self.env.process(ChannelledSpell(spell_info[DB.spell_column_info["EffectApplyAuraName" + str(effect_slot)]],
-                                         self.env,
-                                         self,
-                                         spell_info[0],
-                                         channel_interval,
-                                         channel_duration,
-                                         self.results,
-                                         spell_info[DB.spell_column_info["EffectTriggerSpell" + str(effect_slot)]])
-                         .channel())
+        channelled_spell = ChannelledSpell(spell_info[DB.spell_column_info["EffectApplyAuraName" + str(effect_slot)]],
+                                           self.env,
+                                           self,
+                                           spell_info[0],
+                                           channel_interval,
+                                           channel_duration,
+                                           self.results)
+
+        if aura_id == 21:
+            self.results.spell_cast(spell_info[0], self.env.now)
+            channelled_spell.value = self.get_effect_strength(spell_info, effect_slot)
+
+        elif aura_id == 23:
+            self.results.spell_cast(spell_info[DB.spell_column_info["EffectTriggerSpell" + str(effect_slot)]],
+                                    self.env.now)
+            channelled_spell.trigger_spell = spell_info[DB.spell_column_info["EffectTriggerSpell" + str(effect_slot)]]
+
+        self.env.process(channelled_spell.channel())
 
     def process_wand_attack(self):
         if self.spell_does_hit():
@@ -318,8 +326,12 @@ class SpellHandler:
             self.logg(self.char.gear[18].name + " wand attack resisted")
             self.results.wand_attack_resisted(self.char.gear[18].item_data[0])
 
-    def energize(self, spell_info, effect_slot):
-        self.char.current_mana += self.get_effect_strength(spell_info, effect_slot)
+    def energize(self, spell_info, effect_slot, item_id=0):
+        mana_restored = self.get_effect_strength(spell_info, effect_slot)
+        self.logg("Restored " + str(mana_restored) + " Mana")
+        if item_id != 0:
+            self.results.item_mana_restored(item_id, mana_restored)
+        self.char.current_mana += mana_restored
 
     def enemy_damage_taken_mod(self, spell_id):
         dmg_taken_mod = 1
@@ -538,9 +550,18 @@ class SpellHandler:
         for entry in dict(self.cooldown_spell_id).items():
             if entry[1][0] != -1 and entry[1][0] <= self.env.now:
                 del self.cooldown_spell_id[entry[0]]
+
         for entry in dict(self.cooldown_spell_family_mask).items():
             if entry[1][0] != -1 and entry[1][0] <= self.env.now:
                 del self.cooldown_spell_family_mask[entry[0]]
+
+        for entry in dict(self.cooldown_item_id).items():
+            if entry[1] != -1 and entry[1] <= self.env.now:
+                del self.cooldown_item_id[entry[0]]
+
+        for entry in dict(self.cooldown_item_family_mask).items():
+            if entry[1] != -1 and entry[1] <= self.env.now:
+                del self.cooldown_item_family_mask[entry[0]]
 
     def cold_snap(self, spell_id):
         for entry in dict(self.cooldown_spell_id).items():
@@ -564,4 +585,3 @@ class SpellHandler:
             aura = self.get_aura(spell_info, i)
             aura.value = haste_mod
             self.active_auras.append(aura)
-

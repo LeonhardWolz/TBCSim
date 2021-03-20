@@ -57,4 +57,4 @@ enemy:
     shadow_resistance: 0
 sim:
   sim_type: dps
-  duration: 45
+  duration: 400

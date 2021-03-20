@@ -69,7 +69,6 @@ class Character:
         self.__current_mana = round(value)
         if self.__current_mana > self.total_mana:
             self.__current_mana = self.total_mana
-        print(self.__current_mana)
 
     @property
     def is_casting(self):

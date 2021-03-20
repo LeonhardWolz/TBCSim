@@ -4,10 +4,14 @@ from typing import Dict, List
 import src.db_connector as DB
 from src import enums
 
-result_line_format = "{:24s}|{:16s}|{:16s}|{:16s}|{:16s}|{:16s}|{:16s}|{:16s}|{:16s}|{:16s}|{:16s}|{:16s}|{:16s}"
-line_line = "----------------------------------------------------------------------------" \
-            "----------------------------------------------------------------------------" \
-            "-----------------------------------------------------------------------"
+spell_result_line_format = "{:24s}|{:12s}|{:12s}|{:12s}|{:16s}|{:14s}|{:8s}|" \
+                           "{:16s}|{:16s}|{:14s}|{:16s}|{:8s}|{:10s}|{:16s}"
+spell_row_divider = "----------------------------------------------------------------------------" \
+                    "----------------------------------------------------------------------------" \
+                    "-----------------------------------------------------------------------"
+
+used_consumables_line_format = "{:24s}|{:16s}|{:16s}"
+consumable_row_divider = "----------------------------------------------------------"
 
 
 @dataclass
@@ -16,6 +20,7 @@ class SimResult:
     sim_length: int
     total_damage_dealt: int = 0
     used_attacks: Dict = field(default_factory=lambda: {})
+    used_consumables: Dict = field(default_factory=lambda: {})
     action_order: List = field(default_factory=lambda: [])
     equipped_items: Dict = field(default_factory=lambda: {})
 
@@ -32,6 +37,12 @@ class SimResult:
                                                                   DB.get_spell(spell_id)[DB.spell_column_info["Rank1"]],
                                                              sim_length=self.sim_length,
                                                              uses=1)
+
+    def misc_effect(self, action_id, effect_strength):
+        if (action_id, 1) in self.used_attacks.keys():
+            self.used_attacks[(action_id, 1)].misc_effect += effect_strength
+        elif (action_id, 2) in self.used_attacks.keys():
+            self.used_attacks[(action_id, 2)].misc_effect += effect_strength
 
     def damage_spell_hit(self, spell_id, damage):
         if (spell_id, 1) in self.used_attacks.keys():
@@ -180,6 +191,20 @@ class SimResult:
                                                             sim_length=self.sim_length,
                                                             resisted=1)
 
+    def item_used(self, item_id, sim_time):
+        self.action_order.append((sim_time, "Used " + DB.get_item_name(item_id)))
+        if item_id in self.used_consumables.keys():
+            used_consumable = self.used_consumables.get(item_id)
+            used_consumable.uses += 1
+        else:
+            self.used_consumables[item_id] = UsedConsumable(name=DB.get_item_name(item_id),
+                                                            item_id=item_id,
+                                                            uses=1)
+
+    def item_mana_restored(self, item_id, mana_restored):
+        if item_id in self.used_consumables.keys():
+            self.used_consumables.get(item_id).mana_restored += mana_restored
+
     def set_items(self, items):
         self.equipped_items = items
 
@@ -208,25 +233,36 @@ class SimResult:
             str_repr += str(action[1])
 
         str_repr += "\n"
-        str_repr += "\n------------ Action Breakdown ------------\n\n"
-        str_repr += result_line_format.format("Action Name",
-                                              "Total Uses",
-                                              "Total Hits",
-                                              "Total Crits",
-                                              "Total Resisted",
-                                              "Total Damage",
-                                              "DPS",
-                                              "Total Dot Hits",
-                                              "Total Dot Crits",
-                                              "Total Dot Res.",
-                                              "Total Dot Damage",
-                                              "Dot DPS",
-                                              "Total DPS")
+        str_repr += "\n------------ Consumable Breakdown ------------\n\n"
+        str_repr += used_consumables_line_format.format("Consumable Name",
+                                                        "Total Uses",
+                                                        "Mana restored")
+        str_repr += "\n"
+        for consumable in self.used_consumables.values():
+            str_repr += consumable_row_divider + "\n"
+            str_repr += str(consumable) + "\n"
+        str_repr += consumable_row_divider + "\n"
+
+        str_repr += "\n------------ Spell Action Breakdown ------------\n\n"
+        str_repr += spell_result_line_format.format("Spell Action Name",
+                                                    "Total Uses",
+                                                    "Total Hits",
+                                                    "Total Crits",
+                                                    "Total Resisted",
+                                                    "Total Damage",
+                                                    "DPS",
+                                                    "Total Dot Hits",
+                                                    "Total Dot Crits",
+                                                    "Total Dot Res.",
+                                                    "Total Dot Damage",
+                                                    "Dot DPS",
+                                                    "Total DPS",
+                                                    "Misc Effect (eg. Mana Restored)")
         str_repr += "\n"
         for res in self.used_attacks.values():
-            str_repr += line_line + "\n"
+            str_repr += spell_row_divider + "\n"
             str_repr += str(res) + "\n"
-        str_repr += line_line + "\n"
+        str_repr += spell_row_divider + "\n"
         str_repr += "Total Damage dealt: " + str(self.total_damage_dealt) + "\n"
         str_repr += "DPS: " + str(round(self.total_damage_dealt / (self.sim_length / 1000), 2)) + "\n"
         # TODO aura procs eg. Arcane Concentration
@@ -249,22 +285,24 @@ class DamageResults:
     dot_crits: int = 0
     dot_resisted: int = 0
     dot_damage_dealt: int = 0
+    misc_effect: int = 0
 
     def __str__(self):
         total_damage = self.damage_dealt + self.dot_damage_dealt
-        return result_line_format.format(self.name,
-                                         str(self.uses),
-                                         str(self.hits),
-                                         str(self.crits),
-                                         str(self.resisted),
-                                         str(self.damage_dealt),
-                                         str(round(self.damage_dealt / (self.sim_length / 1000), 2)),
-                                         str(self.dot_hits),
-                                         str(self.dot_crits),
-                                         str(self.dot_resisted),
-                                         str(self.dot_damage_dealt),
-                                         str(round(self.dot_damage_dealt / (self.sim_length / 1000), 2)),
-                                         str(round(total_damage / (self.sim_length / 1000), 2)))
+        return spell_result_line_format.format(self.name,
+                                               str(self.uses),
+                                               str(self.hits),
+                                               str(self.crits),
+                                               str(self.resisted),
+                                               str(self.damage_dealt),
+                                               str(round(self.damage_dealt / (self.sim_length / 1000), 2)),
+                                               str(self.dot_hits),
+                                               str(self.dot_crits),
+                                               str(self.dot_resisted),
+                                               str(self.dot_damage_dealt),
+                                               str(round(self.dot_damage_dealt / (self.sim_length / 1000), 2)),
+                                               str(round(total_damage / (self.sim_length / 1000), 2)),
+                                               str(self.misc_effect))
 
 
 @dataclass
@@ -274,3 +312,16 @@ class EquippedItem:
 
     def __str__(self):
         return self.name
+
+
+@dataclass
+class UsedConsumable:
+    name: str
+    item_id: int
+    uses: int = 0
+    mana_restored: int = 0
+
+    def __str__(self):
+        return used_consumables_line_format.format(self.name,
+                                                   str(self.uses),
+                                                   str(self.mana_restored))

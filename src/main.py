@@ -4,6 +4,7 @@ import src.db_connector as DB
 
 from src import simulation_settings_loader as SettingsLoader
 from src import simulation as Sim
+import cProfile
 
 logging.config.fileConfig("logging.conf")
 
@@ -17,4 +18,5 @@ def main():
 
 
 if __name__ == '__main__':
+    # cProfile.run("main()")
     main()

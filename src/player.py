@@ -69,6 +69,8 @@ class Player(object):
 
         misc_combat_actions_to_consider.sort(key=lambda x: x["combat_rating"])
 
+        # print(self.char.current_mana, self.char.total_mana)
+        # print(misc_combat_actions_to_consider)
         if misc_combat_actions_to_consider:
             misc_combat_action = misc_combat_actions_to_consider.pop()
             if misc_combat_action["combat_rating"] > 0:
@@ -84,6 +86,8 @@ class Player(object):
                                                  "spell_rating": self.get_boost_spell_rating(spell_id)})
 
         boost_spells_to_consider.sort(key=lambda x: x["spell_rating"])
+        # print(self.char.current_mana, self.char.total_mana)
+        # print(boost_spells_to_consider)
 
         if boost_spells_to_consider:
             spell_to_consider = boost_spells_to_consider.pop()
@@ -111,11 +115,15 @@ class Player(object):
             return None
 
     def get_mana_spell_rating(self, spell_id):
+        mana_spell_rating = 0
         if spell_id == 12051:
-            if self.char.current_mana / self.char.total_mana <= 0.6:
-                return 1
-            return -1
-        return 1
+            if self.char.current_mana / self.char.total_mana <= 0.35:
+                mana_spell_rating += 1
+            else:
+                mana_spell_rating += -1
+        else:
+            mana_spell_rating += 1
+        return mana_spell_rating
 
     def get_consumable_rating(self, item_id):
         consumable_rating = 0
@@ -129,10 +137,11 @@ class Player(object):
                                     item_spell[DB.spell_column_info["EffectBaseDice" + str(effect_slot)]] * \
                                     item_spell[DB.spell_column_info["EffectDieSides" + str(effect_slot)]]
                         if max_value != 0 and max_value < (self.char.total_mana - self.char.current_mana):
-                            consumable_rating += 1
+                            consumable_rating += 1 + \
+                                                 (self.char.total_mana - self.char.current_mana) / self.char.total_mana
                 elif item_id in (22839,):
-                    if self.char.current_mana / self.char.total_mana > 0.6:
-                        consumable_rating += 1
+                    if self.char.current_mana / self.char.total_mana > 0.35:
+                        consumable_rating += 0.4 + self.char.current_mana / self.char.total_mana
 
         return consumable_rating
 
@@ -145,10 +154,9 @@ class Player(object):
 
     def get_boost_spell_base_rating(self):
         spell_rating = -1
-        if self.char.current_mana >= self.char.total_mana:
-            spell_rating += (self.char.current_mana / self.char.total_mana) + 0.8
+        spell_rating += (self.char.current_mana / self.char.total_mana) + 0.7
 
-        if self.env.now / self.results.sim_length > 0.75:
+        if self.env.now / self.results.sim_length > 0.65:
             spell_rating += self.env.now / self.results.sim_length
 
         return spell_rating
@@ -197,9 +205,9 @@ class Player(object):
         spell_mana_cost = self.char.spell_resource_cost(spell_id, proc_auras=False)
         spell_mana_cost = spell_mana_cost if spell_mana_cost != 0 else 1
 
-        if DB.get_spell(spell_id)[DB.spell_column_info["AttributesEx"]] & 4 or \
-                DB.get_spell(spell_id)[DB.spell_column_info["AttributesEx"]] & 64:
-            spell_time = enums.duration_index[DB.get_spell(spell_id)[DB.spell_column_info["DurationIndex"]]]
+        if spell_info[DB.spell_column_info["AttributesEx"]] & 4 or \
+                spell_info[DB.spell_column_info["AttributesEx"]] & 64:
+            spell_time = enums.duration_index[spell_info[DB.spell_column_info["DurationIndex"]]]
         else:
             spell_time = self.char.spell_cast_time(spell_id, proc_auras=False)
 
@@ -253,11 +261,12 @@ class Player(object):
         spell_duration_index = DB.get_spell(spell_id)[DB.spell_column_info["DurationIndex"]]
         spell_duration = enums.duration_index[spell_duration_index if spell_duration_index != 0 else 1]
         spell_cast_time = self.char.spell_cast_time(spell_id)
+
         if spell_cast_time != 0:
             self.logg("Begin Cast " + DB.get_spell_name(spell_id) + " " +
                       DB.get_spell(spell_id)[DB.spell_column_info["Rank1"]])
-        elif DB.get_spell(spell_id)[DB.spell_column_info["AttributesEx"]] & 4 and \
-                not DB.get_spell(spell_id)[DB.spell_column_info["AttributesEx"]] & 64:
+        elif DB.get_spell(spell_id)[DB.spell_column_info["AttributesEx"]] & 4 or \
+                DB.get_spell(spell_id)[DB.spell_column_info["AttributesEx"]] & 64:
             self.logg("Begin Channel " + DB.get_spell_name(spell_id) + " " +
                       DB.get_spell(spell_id)[DB.spell_column_info["Rank1"]])
         else:
@@ -271,8 +280,7 @@ class Player(object):
         self.five_second_rule()
         if not DB.get_spell(spell_id)[DB.spell_column_info["AttributesEx"]] & 4 and \
                 not DB.get_spell(spell_id)[DB.spell_column_info["AttributesEx"]] & 64:
-            self.results.spell_cast(spell_id,
-                                    self.env.now)
+            self.results.spell_cast(spell_id, self.env.now)
 
         self.char.cast_mana_spell(spell_id)
         self.char.spell_handler.spell_start_cooldown(spell_id)
@@ -292,8 +300,10 @@ class Player(object):
 
     def consume_item(self, item_id):
         item_info = DB.get_item(item_id)
+        self.results.item_used(item_id, self.env.now)
+        self.logg("Used " + item_info[DB.item_column_info["name"]])
         for i in range(1, 6):
             item_spell_id = item_info[DB.item_column_info["spellid_" + str(i)]]
             if item_spell_id:
-                self.char.spell_handler.apply_spell_effect(item_spell_id)
+                self.char.spell_handler.apply_spell_effect(item_spell_id, item_id)
                 self.char.spell_handler.item_start_cooldown(item_id)

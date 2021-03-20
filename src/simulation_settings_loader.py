@@ -130,9 +130,9 @@ def load_consumables(char_settings):
                     char.spell_handler.apply_spell_effect(triggered_spell_id)
                 else:
                     char.spell_handler.apply_spell_effect(spell_id)
-
-    for consumable_id in char_settings["active_consumables"]:
-        char.active_consumables.append(consumable_id)
+    if char_settings["active_consumables"]:
+        for consumable_id in char_settings["active_consumables"]:
+            char.active_consumables.append(consumable_id)
     #
     # print(char.active_consumables)
     # for i, aura in enumerate(char.spell_handler.active_auras):
