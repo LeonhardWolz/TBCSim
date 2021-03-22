@@ -58,6 +58,6 @@ enemy:
 simulation:
   sim_type: dps
   sim_duration: 500
-  sim_iterations: 3
+  sim_iterations: 300
   results_file_path: "C:\\Users\\Leo\\Documents\\TBCSimLogs\\"
   full_log_for_best: True

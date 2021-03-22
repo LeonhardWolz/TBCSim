@@ -22,15 +22,15 @@ class SimCumResult:
         str_repr += f"Simulation Type: {self.settings.sim_type}\n"
         str_repr += f"Length of Simulation: {str(self.settings.sim_duration / 1000)}s\n"
         str_repr += f"Iterations: {self.settings.sim_iterations}\n"
-        str_repr += f"    Completed {self.settings.sim_iterations} Iteration(s) in {self.actual_time} seconds"
 
-        str_repr += "\n\n"
+        str_repr += "\n"
         str_repr += "Best Single Simulation by DPS Results:\n"
         str_repr += row_divider
         str_repr += str(max(self.results, key=lambda res: res.dps))
         str_repr += row_divider
 
-        str_repr += "\n\n----------------------- Cumulative Sim Results -----------------------"
+        str_repr += f"\nCompleted {self.settings.sim_iterations} Iteration(s) in {self.actual_time} seconds"
+        str_repr += "\n----------------------- Cumulative Sim Results -----------------------"
         str_repr += f"\nAvg DPS: {self.avg_dps}"
 
         return str_repr
