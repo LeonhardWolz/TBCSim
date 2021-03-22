@@ -1,4 +1,3 @@
-import logging
 import src.db_connector as DB
 
 
@@ -11,7 +10,6 @@ class DotSpell(object):
         self.interval = interval
         self.duration = duration
         self.results = results
-        self.logger = logging.getLogger("simulation")
         self.start = env.now
 
     def ticking(self):

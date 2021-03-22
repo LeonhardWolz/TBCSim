@@ -1,29 +1,21 @@
 from datetime import datetime
 
 import simpy
-import logging
 
 from src.player import Player
 from src.sim_results import SimResult
 
-logger = logging.getLogger("simulation")
 
-
-def start_simulation(settings, char):
-    logger.warning("Starting Simulation for " + str(settings.duration / 1000) + " seconds.")
+def start_simulation(settings, char, sim_num):
     env = simpy.Environment()
-    results = SimResult(start_time=datetime.now(), sim_length=settings.duration)
+    results = SimResult(start_time=datetime.now(), sim_length=settings.sim_duration)
     results.set_items(char.gear)
+    results.info("Starting Simulation for " + str(settings.sim_duration / 1000) + " seconds.")
     char.spell_handler.env = env
     char.spell_handler.results = results
+    char.spell_handler.sim_num = sim_num
     player = Player(env, char, results)
     env.process(player.rotation())
     env.process(player.mana_regeneration())
-    env.run(until=settings.duration)
-    print(results)
-
-
-def print_results(settings, char):
-    logger.warning("Simulation Complete")
-    logger.warning("Total damage: " + str(char.spell_handler.enemy.total_damage_taken))
-    logger.warning("DPS: " + str(char.spell_handler.enemy.total_damage_taken / (settings.duration / 1000)))
+    env.run(until=settings.sim_duration)
+    return results

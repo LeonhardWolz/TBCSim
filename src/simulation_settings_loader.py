@@ -3,7 +3,6 @@ from urllib.parse import urlparse
 
 import yaml
 import copy
-import logging
 
 from src import db_connector as DB
 from src import enums
@@ -13,7 +12,6 @@ from src.sim_settings import SimSettings
 from src.character import Character
 from src.sim_results import EquippedItem
 
-logger = logging.getLogger("simulation")
 
 char = Character()
 enemy = Enemy()
@@ -34,7 +32,7 @@ def load_settings():
         cfg = yaml.safe_load(settings_yaml)
 
     # load sim settings
-    load_sim_settings(cfg["sim"])
+    load_sim_settings(cfg["simulation"])
 
     # load character settings
     load_character_settings(cfg["character"])
@@ -48,8 +46,11 @@ def load_settings():
 
 
 def load_sim_settings(sim_settings):
-    simSettings.sim_type = sim_settings["sim_type"]
-    simSettings.duration = sim_settings["duration"] * 1000
+    simSettings.sim_type = sim_settings["sim_type"] if sim_settings["sim_type"] else "dps"
+    simSettings.sim_duration = sim_settings["sim_duration"] * 1000 if sim_settings["sim_duration"] else 6000
+    simSettings.sim_iterations = sim_settings["sim_iterations"] if sim_settings["sim_iterations"] else 1
+    simSettings.results_file_path = sim_settings["results_file_path"] if sim_settings["results_file_path"] else None
+    simSettings.full_log_for_best = sim_settings["full_log_for_best"] if sim_settings["full_log_for_best"] else False
 
 
 def load_enemy_settings(enemy_settings):
@@ -207,7 +208,7 @@ def load_character_items(gear_settings):
             if item_from_db is not None:
                 load_character_item(item[0], item_from_db)
             else:
-                logger.error("Item " + str(item[1]) + " in Inventory Slot " + str(item[0]) + " not found")
+                ValueError("Item " + str(item[1]) + " in Inventory Slot " + str(item[0]) + " not found")
     load_item_sets()
 
 
@@ -218,10 +219,8 @@ def load_character_item(inventory_slot, item_from_db):
         stat_id = item_from_db[DB.item_column_info["stat_type" + str(i)]]
         stat_value = item_from_db[DB.item_column_info["stat_value" + str(i)]]
         if stat_value != 0:
-            try:
-                char.modify_stat(stat_id, stat_value)
-            except NotImplementedError as e:
-                logger.error(str(e))
+            char.modify_stat(stat_id, stat_value)
+
     for i in range(1, 6):
         spell_id = item_from_db[DB.item_column_info["spellid_" + str(i)]]
         spell_trigger = item_from_db[DB.item_column_info["spelltrigger_" + str(i)]]
@@ -231,3 +230,7 @@ def load_character_item(inventory_slot, item_from_db):
 
 def get_settings():
     return copy.deepcopy(simSettings), copy.deepcopy(char)
+
+
+def get_sim_settings():
+    return copy.deepcopy(simSettings)

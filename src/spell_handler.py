@@ -1,4 +1,3 @@
-import logging
 import random
 from functools import lru_cache
 
@@ -11,10 +10,6 @@ from src.dot_spell import DotSpell
 
 
 class SpellHandler:
-    cooldown_spell_id = {}
-    cooldown_spell_family_mask = {}
-    cooldown_item_id = {}
-    cooldown_item_family_mask = {}
 
     def __init__(self, char):
         self.char = char
@@ -22,7 +17,12 @@ class SpellHandler:
         self.enemy = None
         self.env = None
         self.results = None
-        self.logger = logging.getLogger("simulation")
+        self.sim_num = None
+
+        self.cooldown_spell_id = {}
+        self.cooldown_spell_family_mask = {}
+        self.cooldown_item_id = {}
+        self.cooldown_item_family_mask = {}
 
     def apply_spell_effect(self, spell_id, item_id=0):
         spell_info = DB.get_spell(spell_id)
@@ -71,7 +71,7 @@ class SpellHandler:
 
                 self.energize(spell_info, j, item_id)
             elif spell_info[DB.spell_column_info["Effect" + str(j)]] != 0:
-                logging.warning("Effect " + str(j) + " of Spell could not be handled: " + str(spell_info))
+                self.results.warning("Effect " + str(j) + " of Spell could not be handled: " + str(spell_info))
 
     def apply_passive_auras(self, spell_info, effect_slot):
         if (spell_info[DB.spell_column_info["AttributesEx"]] & 4 or
@@ -370,7 +370,7 @@ class SpellHandler:
                 self.active_auras.remove(aura)
 
     def logg(self, info):
-        self.logger.info("{:8s} {}".format(self.curr_sim_time_str(), info))
+        self.results.logg("{:8s} {}".format(self.curr_sim_time_str(), info))
 
     def on_damage(self, spell_info):
         # Mage

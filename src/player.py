@@ -1,4 +1,3 @@
-import logging
 from functools import lru_cache
 
 import src.db_connector as DB
@@ -8,16 +7,15 @@ from src.enums import CombatAction
 
 class Player(object):
     time_padding = 1
+    max_spell_damage = 0
 
     def __init__(self, env, char, results):
         self.env = env
         self.char = char
         self.results = results
-        self.logger = logging.getLogger("simulation")
 
     def rotation(self):
-        self.logger.info("{:8s} {}".format("Simtime", "Current Action"))
-
+        self.results.logg("{:8s} {}".format("Simtime", "Current Action"))
         while True:
             self.char.spell_handler.remove_expired_auras()
             self.char.spell_handler.recover_cooldowns()
@@ -39,7 +37,6 @@ class Player(object):
             yield self.env.timeout(self.time_padding)
 
     def get_next_combat_action(self):
-        # TODO implement active mana restoration eg. mana pots, evocation etc.
         misc_combat_action = self.get_misc_combat_action()
         if misc_combat_action is not None:
             return misc_combat_action
@@ -108,7 +105,7 @@ class Player(object):
 
         if damage_spells_to_consider:
             spell_to_consider = damage_spells_to_consider.pop()
-            if spell_to_consider["spell_rating"] >= 1.5:
+            if spell_to_consider["spell_rating"] > 0:
                 return [CombatAction.Cast_Spell, spell_to_consider["spell_id"]]
             else:
                 return None
@@ -176,6 +173,10 @@ class Player(object):
                     spell_info[DB.spell_column_info["EffectImplicitTargetA" + str(i)]] in [6, 25] and \
                     spell_info[DB.spell_column_info["EffectApplyAuraName" + str(i)]] == 3:
                 spell_base_damage = self.get_avg_effect_strength(spell_info, i)
+                spell_base_damage = spell_base_damage * \
+                                    enums.duration_index[spell_info[DB.spell_column_info["DurationIndex"]]] / \
+                                    spell_info[DB.spell_column_info["EffectAmplitude" + str(i)]]
+
                 spell_damage_multiplier = self.char.spell_dmg_multiplier(spell_id, proc_auras=False) \
                                           * self.char.spell_handler.enemy_damage_taken_mod(spell_info[0])
 
@@ -201,7 +202,7 @@ class Player(object):
 
                 spell_damage += triggered_spell_total_damage
 
-        spell_damage = spell_damage * spell_damage * 0.05
+        spell_damage = spell_damage * spell_damage * 0.7
 
         spell_mana_cost = self.char.spell_resource_cost(spell_id, proc_auras=False)
         spell_mana_cost = spell_mana_cost if spell_mana_cost != 0 else 1
@@ -214,9 +215,9 @@ class Player(object):
 
         normalized_spell_time = max(spell_time, 1500)
 
-        spell_rating = spell_damage / (normalized_spell_time * spell_mana_cost)
+        spell_rating = spell_damage / normalized_spell_time / spell_mana_cost - 1
 
-        # print(DB.get_spell_name(spell_id) + str(spell_id), spell_rating)
+        #print(DB.get_spell_name(spell_id) + str(spell_id), spell_rating)
 
         return spell_rating
 
@@ -226,10 +227,13 @@ class Player(object):
         spell_power_coefficient = self.char.spell_power_coefficient(spell_id, proc_auras=False)
         spell_damage_multiplier = self.char.spell_dmg_multiplier(spell_id, proc_auras=False) \
                                   * self.char.spell_handler.enemy_damage_taken_mod(spell_info[0])
-        return round((spell_base_damage + spell_spell_power * spell_power_coefficient)
-                     * spell_damage_multiplier
-                     * self.char.spell_crit_dmg_multiplier(spell_id, proc_auras=False)
-                     * self.char.spell_crit_chance_spell(spell_id, proc_auras=False))
+        spell_crit_damage_multiplier = self.char.spell_crit_dmg_multiplier(spell_id, proc_auras=False)
+        spell_crit_chance_spell = self.char.spell_crit_chance_spell(spell_id, proc_auras=False)
+
+        # non crit damage
+        spell_damage = (spell_base_damage + spell_spell_power * spell_power_coefficient) * spell_damage_multiplier
+        # return non crit damage + avg per spell crit damage
+        return round(spell_damage + spell_damage * spell_crit_damage_multiplier * spell_crit_chance_spell / 100)
 
     @lru_cache
     def get_avg_effect_strength(self, spell_info, effect_slot):
@@ -257,7 +261,7 @@ class Player(object):
         return str(self.env.now / 1000)
 
     def logg(self, info):
-        self.logger.info("{:8s} {}".format(self.curr_sim_time_str(), info))
+        self.results.logg("{:8s} {}".format(self.curr_sim_time_str(), info))
 
     def cast_spell(self, spell_id):
         spell_duration_index = DB.get_spell(spell_id)[DB.spell_column_info["DurationIndex"]]

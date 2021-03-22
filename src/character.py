@@ -1,5 +1,3 @@
-import logging
-
 from src.spell_handler import SpellHandler
 import src.db_connector as DB
 
@@ -15,7 +13,6 @@ class Character:
         self.mana_spells = []
         self.active_consumables = []
         self.gear = {}
-        self.logger = logging.getLogger("simulation")
 
         self.agility = 0
         self.strength = 0

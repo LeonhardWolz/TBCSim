@@ -111,8 +111,8 @@ class TestIgnite(unittest.TestCase):
             self.char.spell_handler.env.run(until=i)
 
         self.assertTrue(
-            any(spell_cast.attack_id == 12654 and spell_cast.dot_damage_dealt == round(self.crit_damage * 0.08 / 3) * 3
-                for spell_cast in self.char.spell_handler.results.used_attacks.values()))
+            any(spell_cast.attack_id == 12654 and spell_cast.dot_damage == round(self.crit_damage * 0.08 / 3) * 3
+                for spell_cast in self.char.spell_handler.results.combat_actions.values()))
 
     def test_ignite_fire_damage_rank2(self):
         self.char.spell_handler.apply_spell_effect(self.ignite_rank2)
@@ -122,8 +122,8 @@ class TestIgnite(unittest.TestCase):
             self.char.spell_handler.env.run(until=i)
 
         self.assertTrue(
-            any(spell_cast.attack_id == 12654 and spell_cast.dot_damage_dealt == round(self.crit_damage * 0.16 / 3) * 3
-                for spell_cast in self.char.spell_handler.results.used_attacks.values()))
+            any(spell_cast.attack_id == 12654 and spell_cast.dot_damage == round(self.crit_damage * 0.16 / 3) * 3
+                for spell_cast in self.char.spell_handler.results.combat_actions.values()))
 
     def test_ignite_fire_damage_rank3(self):
         self.char.spell_handler.apply_spell_effect(self.ignite_rank3)
@@ -133,8 +133,8 @@ class TestIgnite(unittest.TestCase):
             self.char.spell_handler.env.run(until=i)
 
         self.assertTrue(
-            any(spell_cast.attack_id == 12654 and spell_cast.dot_damage_dealt == round(self.crit_damage * 0.24 / 3) * 3
-                for spell_cast in self.char.spell_handler.results.used_attacks.values()))
+            any(spell_cast.attack_id == 12654 and spell_cast.dot_damage == round(self.crit_damage * 0.24 / 3) * 3
+                for spell_cast in self.char.spell_handler.results.combat_actions.values()))
 
     def test_ignite_fire_damage_rank4(self):
         self.char.spell_handler.apply_spell_effect(self.ignite_rank4)
@@ -144,8 +144,8 @@ class TestIgnite(unittest.TestCase):
             self.char.spell_handler.env.run(until=i)
 
         self.assertTrue(
-            any(spell_cast.attack_id == 12654 and spell_cast.dot_damage_dealt == round(self.crit_damage * 0.32 / 3) * 3
-                for spell_cast in self.char.spell_handler.results.used_attacks.values()))
+            any(spell_cast.attack_id == 12654 and spell_cast.dot_damage == round(self.crit_damage * 0.32 / 3) * 3
+                for spell_cast in self.char.spell_handler.results.combat_actions.values()))
 
     def test_ignite_fire_damage_rank5(self):
         self.char.spell_handler.apply_spell_effect(self.ignite_rank5)
@@ -155,8 +155,8 @@ class TestIgnite(unittest.TestCase):
             self.char.spell_handler.env.run(until=i)
 
         self.assertTrue(
-            any(spell_cast.attack_id == 12654 and spell_cast.dot_damage_dealt == round(self.crit_damage * 0.4 / 3) * 3
-                for spell_cast in self.char.spell_handler.results.used_attacks.values()))
+            any(spell_cast.attack_id == 12654 and spell_cast.dot_damage == round(self.crit_damage * 0.4 / 3) * 3
+                for spell_cast in self.char.spell_handler.results.combat_actions.values()))
 
     def test_ignite_doesnt_proc_on_frost(self):
         self.char.spell_handler.apply_spell_effect(self.ignite_rank5)
@@ -166,7 +166,7 @@ class TestIgnite(unittest.TestCase):
             self.char.spell_handler.env.run(until=i)
 
         self.assertFalse(any(spell_cast.attack_id == 12654 for
-                             spell_cast in self.char.spell_handler.results.used_attacks.values()))
+                             spell_cast in self.char.spell_handler.results.combat_actions.values()))
 
 
 @unittest.skip("Not yet implemented")
@@ -310,8 +310,8 @@ class TestPyroblast(unittest.TestCase):
 
         self.assertTrue(
             any(spell_cast.attack_id == self.pyroblast_rank1 and
-                spell_cast.damage_dealt != 0 and spell_cast.dot_damage_dealt != 0
-                for spell_cast in self.char.spell_handler.results.used_attacks.values()))
+                spell_cast.direct_hit_damage != 0 and spell_cast.dot_damage != 0
+                for spell_cast in self.char.spell_handler.results.combat_actions.values()))
 
 
 @unittest.skip("Not yet implemented")

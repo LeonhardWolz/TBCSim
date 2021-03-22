@@ -55,6 +55,9 @@ enemy:
     nature_resistance: 0
     arcane_resistance: 0
     shadow_resistance: 0
-sim:
+simulation:
   sim_type: dps
-  duration: 400
+  sim_duration: 500
+  sim_iterations: 3
+  results_file_path: "C:\\Users\\Leo\\Documents\\TBCSimLogs\\"
+  full_log_for_best: True
