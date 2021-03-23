@@ -16,6 +16,7 @@ character:
     - 22866 #flask of pure death
     - 27657 #blackened basilisk
   active_consumables:
+    - 8008 #mana ruby
     - 22044 #mana emerald
     - 22832 #mana potion
     - 22839 #destruction potion

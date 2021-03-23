@@ -11,7 +11,7 @@ class Character:
         self.boost_spells = []
         self.defensive_spells = []
         self.mana_spells = []
-        self.active_consumables = []
+        self.active_consumables = {}
         self.gear = {}
 
         self.agility = 0

@@ -60,7 +60,7 @@ class Player(object):
             if not self.char.spell_handler.spell_on_cooldown(spell_id):
                 misc_combat_actions_to_consider.append({"combat_action": [CombatAction.Cast_Spell, spell_id],
                                                         "combat_rating": self.get_mana_spell_rating(spell_id)})
-        for item_id in self.char.active_consumables:
+        for item_id in self.char.active_consumables.keys():
             if not self.char.spell_handler.item_on_cooldown(item_id):
                 misc_combat_actions_to_consider.append({"combat_action": [CombatAction.Consume_Item, item_id],
                                                         "combat_rating": self.get_consumable_rating(item_id)})
@@ -129,7 +129,7 @@ class Player(object):
         for i in range(1, 6):
             item_spell = DB.get_spell(item_info[DB.item_column_info["spellid_" + str(i)]])
             if item_spell:
-                if item_id in (22044, 22832):
+                if item_id in (5513, 5514, 8007, 8008, 22044, 22832):
                     for effect_slot in range(1, 4):
                         max_value = item_spell[DB.spell_column_info["EffectBasePoints" + str(effect_slot)]] + \
                                     item_spell[DB.spell_column_info["EffectBaseDice" + str(effect_slot)]] * \
@@ -217,7 +217,7 @@ class Player(object):
 
         spell_rating = spell_damage / normalized_spell_time / spell_mana_cost - 1
 
-        #print(DB.get_spell_name(spell_id) + str(spell_id), spell_rating)
+        # print(DB.get_spell_name(spell_id) + str(spell_id), spell_rating)
 
         return spell_rating
 
@@ -313,3 +313,10 @@ class Player(object):
             if item_spell_id:
                 self.char.spell_handler.apply_spell_effect(item_spell_id, item_id)
                 self.char.spell_handler.item_start_cooldown(item_id)
+
+                self.char.active_consumables[item_id] += 1
+                # delete some active items after charges used eg. mana gems
+                if item_info[DB.item_column_info["spellcharges_" + str(i)]]\
+                        + self.char.active_consumables[item_id] == 0 \
+                        and item_info[DB.item_column_info["spellcategory_" + str(i)]] == 1153:
+                    del self.char.active_consumables[item_id]

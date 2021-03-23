@@ -8,6 +8,24 @@ spell_affected_cache = {}
 item_cache = {}
 tbcdb_cursor = None
 
+base_stat_query = "select 	* " \
+                  "from 	tbcmangos.player_classlevelstats, " \
+                  "tbcmangos.player_levelstats " \
+                  "where 	tbcmangos.player_classlevelstats.class=tbcmangos.player_levelstats.class and " \
+                  "tbcmangos.player_levelstats.level = tbcmangos.player_classlevelstats.level and " \
+                  "tbcmangos.player_classlevelstats.level = 70 and " \
+                  "tbcmangos.player_levelstats.class = {} and " \
+                  "tbcmangos.player_levelstats.race = {}"
+
+class_talent_query = "SELECT talent_id_rank{}" \
+                     " FROM simdata.class_talent_trees where class_id={} and talent_index={}"
+
+item_column_info = {}
+
+item_set_column_info = {}
+
+spell_column_info = {}
+
 
 def create_helper_dicts():
     i = 0
@@ -195,26 +213,10 @@ def good_startup():
         return True
 
 
-base_stat_query = "select 	* " \
-                  "from 	tbcmangos.player_classlevelstats, " \
-                  "tbcmangos.player_levelstats " \
-                  "where 	tbcmangos.player_classlevelstats.class=tbcmangos.player_levelstats.class and " \
-                  "tbcmangos.player_levelstats.level = tbcmangos.player_classlevelstats.level and " \
-                  "tbcmangos.player_classlevelstats.level = 70 and " \
-                  "tbcmangos.player_levelstats.class = {} and " \
-                  "tbcmangos.player_levelstats.race = {}"
-
-class_talent_query = "SELECT talent_id_rank{}" \
-                     " FROM simdata.class_talent_trees where class_id={} and talent_index={}"
-
-item_column_info = {}
-
-item_set_column_info = {}
-
-spell_column_info = {}
-
 try:
     tbcdb = mysql.connector.connect(
+        pool_name="tbcsimpool",
+        pool_size=5,
         host="localhost",
         user="root",
         password="root"
