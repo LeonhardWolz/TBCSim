@@ -12,7 +12,6 @@ from src.sim_settings import SimSettings
 from src.character import Character
 from src.sim_results import EquippedItem
 
-
 char = Character()
 enemy = Enemy()
 simSettings = SimSettings()
@@ -201,19 +200,96 @@ def load_item_sets():
 
 
 def load_character_items(gear_settings):
+    meta_gems_to_check = []
     for item in gear_settings.items():
         if item[1] is not None:
-            item_from_db = DB.get_item(int(item[1]))
+            item_from_db = DB.get_item(int(item[1]["itemid"]))
 
             if item_from_db is not None:
                 load_character_item(item[0], item_from_db)
             else:
-                ValueError("Item " + str(item[1]) + " in Inventory Slot " + str(item[0]) + " not found")
+                ValueError("Item " + str(item[1]["itemid"]) + " in Inventory Slot " + str(item[0]) + " not found")
+
+            if "enchant" in item[1]:
+                enchantment = DB.get_enchant(item[1]["enchant"])
+                char.gear[item[0]].enchantment = enchantment[DB.enchant_column_info["m_name_lang_1"]]
+                apply_enchantment(enchantment)
+
+            if "gems" in item[1]:
+                for gem_socket in item[1]["gems"]:
+                    gem_item_info = DB.get_item(item[1]["gems"][gem_socket])
+                    gem_info = DB.get_gem(gem_item_info[DB.item_column_info["GemProperties"]])
+                    gem_enchant_info = DB.get_enchant(gem_info[1])
+                    item_socket = char.gear[item[0]].sockets[gem_socket - 1]
+                    item_socket[1] = gem_info[4]
+                    item_socket[2] = gem_item_info[DB.item_column_info["name"]]
+                    item_socket[3] = gem_enchant_info[DB.enchant_column_info["m_name_lang_1"]]
+                    if item_socket[1] & 1:
+                        meta_gems_to_check.append([item_socket, gem_enchant_info])
+                    else:
+                        apply_enchantment(gem_enchant_info)
+                check_gem_socket_bonus(item[0])
     load_item_sets()
+    check_meta_gem_conditions(meta_gems_to_check)
+
+
+def check_meta_gem_conditions(meta_gems):
+    for gem_to_check in meta_gems:
+        if meta_gem_condition(gem_to_check[1][DB.enchant_column_info["m_condition_id"]]):
+            apply_enchantment(gem_to_check[1])
+            gem_to_check[0][4] = True
+        else:
+            gem_to_check[0][4] = False
+
+
+def meta_gem_condition(condition_id):
+    condition_info = DB.get_enchant_condition(condition_id)
+    gem_conditions = []
+    for i in range(1, 6):
+        gemtype = condition_info[DB.enchant_condition_column_info["m_lt_operandType" + str(i)]]
+        if gemtype:
+            operator = condition_info[DB.enchant_condition_column_info["m_operator" + str(i)]]
+            value = condition_info[DB.enchant_condition_column_info["m_rt_operand" + str(i)]]
+            gem_conditions.append([enums.socket_bitmask[gemtype], operator, value])
+
+    for gem_condition in gem_conditions:
+        typecounter = 0
+        for item in char.gear.values():
+            for socket in item.sockets:
+                if socket[1] and socket[1] & gem_condition[0]:
+                    typecounter += 1
+
+        if gem_condition[1] == 5:
+            if typecounter < gem_condition[2]:
+                return False
+        elif gem_condition[1] == 2:
+            if typecounter >= gem_condition[2]:
+                return False
+        elif gem_condition[1] == 3:
+            if typecounter <= gem_condition[2]:
+                return False
+    return True
+
+
+def check_gem_socket_bonus(inventory_slot):
+    sockets_match = True
+    for socket in char.gear[inventory_slot].sockets:
+        if not socket[0] or not socket[1] or not socket[0] & socket[1]:
+            sockets_match = False
+    char.gear[inventory_slot].socket_bonus_met = sockets_match
+    if sockets_match:
+        apply_enchantment(DB.get_enchant(char.gear[inventory_slot].socket_bonus))
+
+
+def apply_enchantment(enchantment_info):
+    for i in range(1, 4):
+        if enchantment_info[DB.enchant_column_info["m_effect" + str(i)]] == 3:
+            char.spell_handler.apply_spell_effect(enchantment_info[DB.enchant_column_info["m_effectArg" + str(i)]])
 
 
 def load_character_item(inventory_slot, item_from_db):
-    char.gear[inventory_slot] = EquippedItem(item_from_db[DB.item_column_info["name"]], item_from_db)
+    char.gear[inventory_slot] = EquippedItem(name=item_from_db[DB.item_column_info["name"]],
+                                             item_data=item_from_db)
 
     for i in range(1, 11):
         stat_id = item_from_db[DB.item_column_info["stat_type" + str(i)]]
@@ -226,6 +302,13 @@ def load_character_item(inventory_slot, item_from_db):
         spell_trigger = item_from_db[DB.item_column_info["spelltrigger_" + str(i)]]
         if spell_id != 0 and spell_trigger == 1:
             char.spell_handler.apply_spell_effect(spell_id)
+
+    for i in range(1, 4):
+        socket_color = item_from_db[DB.item_column_info["socketColor_" + str(i)]]
+        if socket_color:
+            char.gear[inventory_slot].sockets.append([socket_color, None, None, None, None])
+
+    char.gear[inventory_slot].socket_bonus = item_from_db[DB.item_column_info["socketBonus"]]
 
 
 def get_settings():

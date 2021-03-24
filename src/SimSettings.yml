@@ -21,26 +21,39 @@ character:
     - 22832 #mana potion
     - 22839 #destruction potion
   gear:
-    0:            #ammo
-    1: 24266           #head
-    2:            #neck
-    3: 22983           #shoulder
-    4:            #body (shirt)
-    5: 1716           #chest
-    6:            #waist (belt)
-    7: 24262           #legs
-    8:            #feet
-    9:            #wrist
-    10:           #hand
-    11:           #finger1
-    12:           #finger2
-    13:           #trinket1
-    14:           #trinket2
-    15:           #back
-    16:           #mainhand
-    17:           #offhand
-    18: 22821          #ranged
-    19:           #tabard
+    0:  #ammo
+    1:  #head
+      itemid: 29076
+      gems:
+        1: 34220
+        2: 32215
+    2:  #neck
+    3:  #shoulder
+      itemid: 22983
+    4:  #body (shirt)
+    5:  #chest
+      itemid: 29077
+      enchant: 2661
+      gems:
+        1: 32221
+        2: 32215
+        3: 32215
+    6:  #waist (belt)
+    7:  #legs
+      itemid: 23262
+    8:  #feet
+    9:  #wrist
+    10: #hand
+    11: #finger1
+    12: #finger2
+    13: #trinket1
+    14: #trinket2
+    15: #back
+    16: #mainhand
+    17: #offhand
+    18: #ranged
+      itemid: 22821
+    19: #tabard
   talents:
     talent_calc_link: "https://legacy-wow.com/tbc-talents/mage-talents/?tal=2302250000000000000000050520200230333005312500030000000000000000000" #fire
     #talent_calc_link: "https://legacy-wow.com/tbc-talents/mage-talents/?tal=2300050000000000000000000000000000000000000000535323310033010251551"  #frost
@@ -59,6 +72,6 @@ enemy:
 simulation:
   sim_type: dps
   sim_duration: 500
-  sim_iterations: 300
+  sim_iterations: 500
   results_file_path: "C:\\Users\\Leo\\Documents\\TBCSimLogs\\"
   full_log_for_best: True

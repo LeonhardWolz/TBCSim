@@ -172,10 +172,10 @@ class AuraSpellModTest(unittest.TestCase):
         self.assertEqual(3500 / 3500, self.char.spell_power_coefficient(38692))
 
     def test_frostbolt_crit_chance(self):
-        self.assertEqual(1, self.char.spell_crit_chance_spell(38697))
+        self.assertEqual(1.91, self.char.spell_crit_chance_spell(38697))
 
     def test_fireball_crit_chance(self):
-        self.assertEqual(0, self.char.spell_crit_chance_spell(38692))
+        self.assertEqual(0.91, self.char.spell_crit_chance_spell(38692))
 
 
 if __name__ == '__main__':

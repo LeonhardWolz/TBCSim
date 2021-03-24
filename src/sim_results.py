@@ -269,6 +269,7 @@ class SimResult:
                 str_repr += str(self.equipped_items.get(i)) + "\n"
             else:
                 str_repr += "----\n"
+            str_repr += "   ---------------------------------------------------\n"
 
         str_repr += "\n"
         str_repr += "   ------------ Action Order ------------\n\n"
@@ -388,9 +389,33 @@ class CombatActionResults:
 class EquippedItem:
     name: str
     item_data: List = field(default_factory=lambda: [])
+    enchantment: str = ""
+    sockets: List = field(default_factory=lambda: [])
+    socket_bonus: int = 0
+    socket_bonus_met: bool = False
 
     def __str__(self):
-        return self.name
+        str_repr = "\n\tName:\t\t" + self.name
+        if self.enchantment != "":
+            str_repr += "\n\tEnchantment:\t" + self.enchantment
+
+        if self.sockets:
+            str_repr += "\n\tSockets:"
+            for socket in self.sockets:
+                str_repr += "\n\t\t" + enums.socket_color_name[socket[0]] + " Socket: \t"
+                if socket[2] is not None:
+                    str_repr += str(socket[2]) + ": " + str(socket[3])
+                    if socket[1] & 1 and socket[4]:
+                        str_repr += " - Gem Active"
+                    elif socket[1] & 1 and not socket[4]:
+                        str_repr += " - Gem Inactive"
+                else:
+                    str_repr += "Socket Empty"
+        if self.socket_bonus != 0:
+            socket_bonus_name = DB.get_enchant(self.socket_bonus)[DB.enchant_column_info["m_name_lang_1"]]
+            str_repr += "\n\t\tSocket Bonus {}: ".format("Active" if self.socket_bonus_met else "Inactive") + \
+                        socket_bonus_name
+        return str_repr
 
 
 @dataclass

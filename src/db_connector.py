@@ -21,10 +21,10 @@ class_talent_query = "SELECT talent_id_rank{}" \
                      " FROM simdata.class_talent_trees where class_id={} and talent_index={}"
 
 item_column_info = {}
-
 item_set_column_info = {}
-
 spell_column_info = {}
+enchant_column_info = {}
+enchant_condition_column_info = {}
 
 
 def create_helper_dicts():
@@ -41,6 +41,16 @@ def create_helper_dicts():
     i = 0
     for x in get_item_set_columns():
         item_set_column_info[x[0]] = i
+        i += 1
+
+    i = 0
+    for x in get_enchant_columns():
+        enchant_column_info[x[0]] = i
+        i += 1
+
+    i = 0
+    for x in get_enchant_condition_columns():
+        enchant_condition_column_info[x[0]] = i
         i += 1
 
 
@@ -70,6 +80,23 @@ def get_item_set_columns():
     except mysql.connector.Error as ex:
         logging.critical("DB Error during itemset column name retrieval: {}".format(ex))
 
+
+def get_enchant_columns():
+    try:
+        tbcdb_cursor.execute("SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS "
+                             "WHERE TABLE_SCHEMA = \"simdata\" AND TABLE_NAME = \"dbc_spellitemenchantment\"")
+        return tbcdb_cursor.fetchall()
+    except mysql.connector.Error as ex:
+        logging.critical("DB Error during enchant column name retrieval: {}".format(ex))
+
+
+def get_enchant_condition_columns():
+    try:
+        tbcdb_cursor.execute("SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS "
+                             "WHERE TABLE_SCHEMA = \"simdata\" AND TABLE_NAME = \"dbc_spellitemenchantmentcondition\"")
+        return tbcdb_cursor.fetchall()
+    except mysql.connector.Error as ex:
+        logging.critical("DB Error during enchant condition column name retrieval: {}".format(ex))
 
 @lru_cache
 def get_spell(spell_id):
@@ -179,6 +206,34 @@ def get_item_name(item_id):
             return str(tbcdb_cursor.fetchone()[0])
         except mysql.connector.Error as ex:
             logging.critical("DB Error during item name retrieval: {}".format(ex))
+
+
+@lru_cache
+def get_enchant(enchantment_id):
+    try:
+        tbcdb_cursor.execute("SELECT * FROM simdata.dbc_spellitemenchantment WHERE m_ID={}".format(enchantment_id))
+        return tbcdb_cursor.fetchone()
+    except mysql.connector.Error as ex:
+        logging.critical("DB Error during enchantment retrieval: {}".format(ex))
+
+
+@lru_cache
+def get_enchant_condition(condition_id):
+    try:
+        tbcdb_cursor.execute(
+            "SELECT * FROM simdata.dbc_spellitemenchantmentcondition WHERE m_ID={}".format(condition_id))
+        return tbcdb_cursor.fetchone()
+    except mysql.connector.Error as ex:
+        logging.critical("DB Error during enchantment condition retrieval: {}".format(ex))
+
+
+@lru_cache
+def get_gem(gem_id):
+    try:
+        tbcdb_cursor.execute("SELECT * FROM simdata.dbc_gemproperties WHERE id={}".format(gem_id))
+        return tbcdb_cursor.fetchone()
+    except mysql.connector.Error as ex:
+        logging.critical("DB Error during gem retrieval: {}".format(ex))
 
 
 def get_base_stats(player_class, race):

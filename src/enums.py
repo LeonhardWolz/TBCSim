@@ -227,3 +227,17 @@ class CombatAction(enum.Enum):
     Wand_Attack = 2
     Consume_Item = 3
 
+
+socket_color_name = {
+    1: "Meta",
+    2: "Red",
+    4: "Yellow",
+    8: "Blue"
+}
+
+socket_bitmask = {
+    1: 1,
+    2: 2,
+    3: 4,
+    4: 8
+}

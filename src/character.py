@@ -137,11 +137,13 @@ class Character:
             "Priest": 80,
             "Paladin": 80.05
         }
-        return self.total_spell_crit_rating / 22.1 + self.total_intellect / spell_crit_gain.get(self.player_class)
+        return self.total_spell_crit_rating / 22.1 \
+               + self.total_intellect / spell_crit_gain.get(self.player_class) \
+               + 0.91
 
     @property
     def spell_haste_pct(self):
-        return self.spell_haste_rating / 15.8
+        return self.spell_haste_rating / 15.75
 
     @property
     def mp5_from_spirit(self):
@@ -282,7 +284,7 @@ class Character:
                         any(aura.spell_id == 12579 for aura in self.spell_handler.enemy.active_auras):
                     crit_chance_mod = aura.value * aura.curr_stacks
 
-        return self.spell_crit_chance + crit_chance_mod
+        return round(self.spell_crit_chance + crit_chance_mod, 3)
 
     def spell_crit_dmg_multiplier(self, spell_id, proc_auras=True):
         crit_damage_mod = 0

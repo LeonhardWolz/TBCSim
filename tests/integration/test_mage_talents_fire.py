@@ -240,18 +240,18 @@ class TestIncineration(unittest.TestCase):
     def test_incineration_rank1(self):
         self.char.spell_handler.apply_spell_effect(self.incineration_rank1)
 
-        self.assertEqual(2, self.char.spell_crit_chance_spell(self.fire_blast_rank9))
-        self.assertEqual(2, self.char.spell_crit_chance_spell(self.scorch_rank9))
-        self.assertEqual(0, self.char.spell_crit_chance_spell(self.fireball_rank1))
-        self.assertEqual(0, self.char.spell_crit_chance_spell(self.frostbolt_rank1))
+        self.assertEqual(2.91, self.char.spell_crit_chance_spell(self.fire_blast_rank9))
+        self.assertEqual(2.91, self.char.spell_crit_chance_spell(self.scorch_rank9))
+        self.assertEqual(0.91, self.char.spell_crit_chance_spell(self.fireball_rank1))
+        self.assertEqual(0.91, self.char.spell_crit_chance_spell(self.frostbolt_rank1))
 
     def test_incineration_rank2(self):
         self.char.spell_handler.apply_spell_effect(self.incineration_rank2)
 
-        self.assertEqual(4, self.char.spell_crit_chance_spell(self.fire_blast_rank9))
-        self.assertEqual(4, self.char.spell_crit_chance_spell(self.scorch_rank9))
-        self.assertEqual(0, self.char.spell_crit_chance_spell(self.fireball_rank1))
-        self.assertEqual(0, self.char.spell_crit_chance_spell(self.frostbolt_rank1))
+        self.assertEqual(4.91, self.char.spell_crit_chance_spell(self.fire_blast_rank9))
+        self.assertEqual(4.91, self.char.spell_crit_chance_spell(self.scorch_rank9))
+        self.assertEqual(0.91, self.char.spell_crit_chance_spell(self.fireball_rank1))
+        self.assertEqual(0.91, self.char.spell_crit_chance_spell(self.frostbolt_rank1))
 
 
 class TestImprovedFlamestrike(unittest.TestCase):
@@ -271,23 +271,23 @@ class TestImprovedFlamestrike(unittest.TestCase):
     def test_improved_flamestrike_rank1(self):
         self.char.spell_handler.apply_spell_effect(self.improved_flamestrike_rank1)
 
-        self.assertEqual(5, self.char.spell_crit_chance_spell(self.flamestrike_rank1, proc_auras=False))
-        self.assertEqual(0, self.char.spell_crit_chance_spell(self.fireball_rank1, proc_auras=False))
-        self.assertEqual(0, self.char.spell_crit_chance_spell(self.frostbolt_rank1, proc_auras=False))
+        self.assertEqual(5.91, self.char.spell_crit_chance_spell(self.flamestrike_rank1, proc_auras=False))
+        self.assertEqual(0.91, self.char.spell_crit_chance_spell(self.fireball_rank1, proc_auras=False))
+        self.assertEqual(0.91, self.char.spell_crit_chance_spell(self.frostbolt_rank1, proc_auras=False))
 
     def test_improved_flamestrike_rank2(self):
         self.char.spell_handler.apply_spell_effect(self.improved_flamestrike_rank2)
 
-        self.assertEqual(10, self.char.spell_crit_chance_spell(self.flamestrike_rank1, proc_auras=False))
-        self.assertEqual(0, self.char.spell_crit_chance_spell(self.fireball_rank1, proc_auras=False))
-        self.assertEqual(0, self.char.spell_crit_chance_spell(self.frostbolt_rank1, proc_auras=False))
+        self.assertEqual(10.91, self.char.spell_crit_chance_spell(self.flamestrike_rank1, proc_auras=False))
+        self.assertEqual(0.91, self.char.spell_crit_chance_spell(self.fireball_rank1, proc_auras=False))
+        self.assertEqual(0.91, self.char.spell_crit_chance_spell(self.frostbolt_rank1, proc_auras=False))
 
     def test_improved_flamestrike_rank3(self):
         self.char.spell_handler.apply_spell_effect(self.improved_flamestrike_rank3)
 
-        self.assertEqual(15, self.char.spell_crit_chance_spell(self.flamestrike_rank1, proc_auras=False))
-        self.assertEqual(0, self.char.spell_crit_chance_spell(self.fireball_rank1, proc_auras=False))
-        self.assertEqual(0, self.char.spell_crit_chance_spell(self.frostbolt_rank1, proc_auras=False))
+        self.assertEqual(15.91, self.char.spell_crit_chance_spell(self.flamestrike_rank1, proc_auras=False))
+        self.assertEqual(0.91, self.char.spell_crit_chance_spell(self.fireball_rank1, proc_auras=False))
+        self.assertEqual(0.91, self.char.spell_crit_chance_spell(self.frostbolt_rank1, proc_auras=False))
 
 
 class TestPyroblast(unittest.TestCase):
@@ -476,18 +476,18 @@ class TestCriticalMass(unittest.TestCase):
 
     def test_critical_mass_rank1(self):
         self.char.spell_handler.apply_spell_effect(self.critical_mass_rank1)
-        self.assertEqual(2, self.char.spell_crit_chance_spell(self.fireball_rank1))
-        self.assertEqual(0, self.char.spell_crit_chance_spell(self.frostbolt_rank1))
+        self.assertEqual(2.91, self.char.spell_crit_chance_spell(self.fireball_rank1))
+        self.assertEqual(0.91, self.char.spell_crit_chance_spell(self.frostbolt_rank1))
 
     def test_critical_mass_rank2(self):
         self.char.spell_handler.apply_spell_effect(self.critical_mass_rank2)
-        self.assertEqual(4, self.char.spell_crit_chance_spell(self.fireball_rank1))
-        self.assertEqual(0, self.char.spell_crit_chance_spell(self.frostbolt_rank1))
+        self.assertEqual(4.91, self.char.spell_crit_chance_spell(self.fireball_rank1))
+        self.assertEqual(0.91, self.char.spell_crit_chance_spell(self.frostbolt_rank1))
 
     def test_critical_mass_rank3(self):
         self.char.spell_handler.apply_spell_effect(self.critical_mass_rank3)
-        self.assertEqual(6, self.char.spell_crit_chance_spell(self.fireball_rank1))
-        self.assertEqual(0, self.char.spell_crit_chance_spell(self.frostbolt_rank1))
+        self.assertEqual(6.91, self.char.spell_crit_chance_spell(self.fireball_rank1))
+        self.assertEqual(0.91, self.char.spell_crit_chance_spell(self.frostbolt_rank1))
 
 
 @unittest.skip("Not yet implemented")
@@ -558,8 +558,8 @@ class TestPyromaniac(unittest.TestCase):
 
     def test_pyromaniac_rank1(self):
         self.char.spell_handler.apply_spell_effect(self.pyromaniac_rank1)
-        self.assertEqual(1, self.char.spell_crit_chance_spell(self.fireball_rank14))
-        self.assertEqual(0, self.char.spell_crit_chance_spell(self.frostbolt_rank14))
+        self.assertEqual(1.91, self.char.spell_crit_chance_spell(self.fireball_rank14))
+        self.assertEqual(0.91, self.char.spell_crit_chance_spell(self.frostbolt_rank14))
 
         self.assertEqual(round(self.fireball_rank14_mana_cost * 0.99),
                          self.char.spell_resource_cost(self.fireball_rank14))
@@ -567,8 +567,8 @@ class TestPyromaniac(unittest.TestCase):
 
     def test_pyromaniac_rank2(self):
         self.char.spell_handler.apply_spell_effect(self.pyromaniac_rank2)
-        self.assertEqual(2, self.char.spell_crit_chance_spell(self.fireball_rank14))
-        self.assertEqual(0, self.char.spell_crit_chance_spell(self.frostbolt_rank14))
+        self.assertEqual(2.91, self.char.spell_crit_chance_spell(self.fireball_rank14))
+        self.assertEqual(0.91, self.char.spell_crit_chance_spell(self.frostbolt_rank14))
 
         self.assertEqual(round(self.fireball_rank14_mana_cost * 0.98),
                          self.char.spell_resource_cost(self.fireball_rank14))
@@ -576,8 +576,8 @@ class TestPyromaniac(unittest.TestCase):
 
     def test_pyromaniac_rank3(self):
         self.char.spell_handler.apply_spell_effect(self.pyromaniac_rank3)
-        self.assertEqual(3, self.char.spell_crit_chance_spell(self.fireball_rank14))
-        self.assertEqual(0, self.char.spell_crit_chance_spell(self.frostbolt_rank14))
+        self.assertEqual(3.91, self.char.spell_crit_chance_spell(self.fireball_rank14))
+        self.assertEqual(0.91, self.char.spell_crit_chance_spell(self.frostbolt_rank14))
 
         self.assertEqual(round(self.fireball_rank14_mana_cost * 0.97),
                          self.char.spell_resource_cost(self.fireball_rank14))
@@ -602,36 +602,36 @@ class TestCombustion(unittest.TestCase):
 
     def test_combustion(self):
         self.char.spell_handler.apply_spell_effect(self.combustion)
-        self.assertEqual(10, self.char.spell_crit_chance_spell(self.fireball_rank14))
-        self.assertEqual(0, self.char.spell_crit_chance_spell(self.frostbolt_rank14))
+        self.assertEqual(10.91, self.char.spell_crit_chance_spell(self.fireball_rank14))
+        self.assertEqual(0.91, self.char.spell_crit_chance_spell(self.frostbolt_rank14))
 
         self.char.spell_handler.on_spell_hit(self.fireball_rank14)
-        self.assertEqual(20, self.char.spell_crit_chance_spell(self.fireball_rank14))
-        self.assertEqual(0, self.char.spell_crit_chance_spell(self.frostbolt_rank14))
+        self.assertEqual(20.91, self.char.spell_crit_chance_spell(self.fireball_rank14))
+        self.assertEqual(0.91, self.char.spell_crit_chance_spell(self.frostbolt_rank14))
 
         self.char.spell_handler.on_spell_hit(self.frostbolt_rank14)
-        self.assertEqual(20, self.char.spell_crit_chance_spell(self.fireball_rank14))
-        self.assertEqual(0, self.char.spell_crit_chance_spell(self.frostbolt_rank14))
+        self.assertEqual(20.91, self.char.spell_crit_chance_spell(self.fireball_rank14))
+        self.assertEqual(0.91, self.char.spell_crit_chance_spell(self.frostbolt_rank14))
 
         self.char.spell_handler.on_spell_crit(self.fireball_rank14)
-        self.assertEqual(30, self.char.spell_crit_chance_spell(self.fireball_rank14))
-        self.assertEqual(0, self.char.spell_crit_chance_spell(self.frostbolt_rank14))
+        self.assertEqual(30.91, self.char.spell_crit_chance_spell(self.fireball_rank14))
+        self.assertEqual(0.91, self.char.spell_crit_chance_spell(self.frostbolt_rank14))
 
         self.char.spell_handler.on_spell_crit(self.fireball_rank14)
-        self.assertEqual(40, self.char.spell_crit_chance_spell(self.fireball_rank14))
-        self.assertEqual(0, self.char.spell_crit_chance_spell(self.frostbolt_rank14))
+        self.assertEqual(40.91, self.char.spell_crit_chance_spell(self.fireball_rank14))
+        self.assertEqual(0.91, self.char.spell_crit_chance_spell(self.frostbolt_rank14))
 
         self.char.spell_handler.on_spell_hit(self.fireball_rank14)
-        self.assertEqual(50, self.char.spell_crit_chance_spell(self.fireball_rank14))
-        self.assertEqual(0, self.char.spell_crit_chance_spell(self.frostbolt_rank14))
+        self.assertEqual(50.91, self.char.spell_crit_chance_spell(self.fireball_rank14))
+        self.assertEqual(0.91, self.char.spell_crit_chance_spell(self.frostbolt_rank14))
 
         self.char.spell_handler.on_spell_crit(self.frostbolt_rank14)
-        self.assertEqual(50, self.char.spell_crit_chance_spell(self.fireball_rank14))
-        self.assertEqual(0, self.char.spell_crit_chance_spell(self.frostbolt_rank14))
+        self.assertEqual(50.91, self.char.spell_crit_chance_spell(self.fireball_rank14))
+        self.assertEqual(0.91, self.char.spell_crit_chance_spell(self.frostbolt_rank14))
 
         self.char.spell_handler.on_spell_crit(self.fireball_rank14)
-        self.assertEqual(0, self.char.spell_crit_chance_spell(self.fireball_rank14))
-        self.assertEqual(0, self.char.spell_crit_chance_spell(self.frostbolt_rank14))
+        self.assertEqual(0.91, self.char.spell_crit_chance_spell(self.fireball_rank14))
+        self.assertEqual(0.91, self.char.spell_crit_chance_spell(self.frostbolt_rank14))
 
 
 class TestMoltenFury(unittest.TestCase):

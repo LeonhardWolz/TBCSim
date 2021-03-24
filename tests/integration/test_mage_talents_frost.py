@@ -369,48 +369,48 @@ class TestShatter(unittest.TestCase):
 
     def test_shatter_rank1(self):
         self.char.spell_handler.apply_spell_effect(self.shatter_rank1)
-        self.assertEqual(0, self.char.spell_crit_chance_spell(self.frostbolt_rank14, proc_auras=False))
-        self.assertEqual(0, self.char.spell_crit_chance_spell(self.fireball_rank14, proc_auras=False))
+        self.assertEqual(0.91, self.char.spell_crit_chance_spell(self.frostbolt_rank14, proc_auras=False))
+        self.assertEqual(0.91, self.char.spell_crit_chance_spell(self.fireball_rank14, proc_auras=False))
 
         self.char.spell_handler.apply_spell_effect(12494)
-        self.assertEqual(10, self.char.spell_crit_chance_spell(self.frostbolt_rank14, proc_auras=False))
-        self.assertEqual(10, self.char.spell_crit_chance_spell(self.fireball_rank14, proc_auras=False))
+        self.assertEqual(10.91, self.char.spell_crit_chance_spell(self.frostbolt_rank14, proc_auras=False))
+        self.assertEqual(10.91, self.char.spell_crit_chance_spell(self.fireball_rank14, proc_auras=False))
 
     def test_shatter_rank2(self):
         self.char.spell_handler.apply_spell_effect(self.shatter_rank2)
-        self.assertEqual(0, self.char.spell_crit_chance_spell(self.frostbolt_rank14, proc_auras=False))
-        self.assertEqual(0, self.char.spell_crit_chance_spell(self.fireball_rank14, proc_auras=False))
+        self.assertEqual(0.91, self.char.spell_crit_chance_spell(self.frostbolt_rank14, proc_auras=False))
+        self.assertEqual(0.91, self.char.spell_crit_chance_spell(self.fireball_rank14, proc_auras=False))
 
         self.char.spell_handler.apply_spell_effect(12494)
-        self.assertEqual(20, self.char.spell_crit_chance_spell(self.frostbolt_rank14, proc_auras=False))
-        self.assertEqual(20, self.char.spell_crit_chance_spell(self.fireball_rank14, proc_auras=False))
+        self.assertEqual(20.91, self.char.spell_crit_chance_spell(self.frostbolt_rank14, proc_auras=False))
+        self.assertEqual(20.91, self.char.spell_crit_chance_spell(self.fireball_rank14, proc_auras=False))
 
     def test_shatter_rank3(self):
         self.char.spell_handler.apply_spell_effect(self.shatter_rank3)
-        self.assertEqual(0, self.char.spell_crit_chance_spell(self.frostbolt_rank14, proc_auras=False))
-        self.assertEqual(0, self.char.spell_crit_chance_spell(self.fireball_rank14, proc_auras=False))
+        self.assertEqual(0.91, self.char.spell_crit_chance_spell(self.frostbolt_rank14, proc_auras=False))
+        self.assertEqual(0.91, self.char.spell_crit_chance_spell(self.fireball_rank14, proc_auras=False))
 
         self.char.spell_handler.apply_spell_effect(12494)
-        self.assertEqual(30, self.char.spell_crit_chance_spell(self.frostbolt_rank14, proc_auras=False))
-        self.assertEqual(30, self.char.spell_crit_chance_spell(self.fireball_rank14, proc_auras=False))
+        self.assertEqual(30.91, self.char.spell_crit_chance_spell(self.frostbolt_rank14, proc_auras=False))
+        self.assertEqual(30.91, self.char.spell_crit_chance_spell(self.fireball_rank14, proc_auras=False))
 
     def test_shatter_rank4(self):
         self.char.spell_handler.apply_spell_effect(self.shatter_rank4)
-        self.assertEqual(0, self.char.spell_crit_chance_spell(self.frostbolt_rank14, proc_auras=False))
-        self.assertEqual(0, self.char.spell_crit_chance_spell(self.fireball_rank14, proc_auras=False))
+        self.assertEqual(0.91, self.char.spell_crit_chance_spell(self.frostbolt_rank14, proc_auras=False))
+        self.assertEqual(0.91, self.char.spell_crit_chance_spell(self.fireball_rank14, proc_auras=False))
 
         self.char.spell_handler.apply_spell_effect(12494)
-        self.assertEqual(40, self.char.spell_crit_chance_spell(self.frostbolt_rank14, proc_auras=False))
-        self.assertEqual(40, self.char.spell_crit_chance_spell(self.fireball_rank14, proc_auras=False))
+        self.assertEqual(40.91, self.char.spell_crit_chance_spell(self.frostbolt_rank14, proc_auras=False))
+        self.assertEqual(40.91, self.char.spell_crit_chance_spell(self.fireball_rank14, proc_auras=False))
 
     def test_shatter_rank5(self):
         self.char.spell_handler.apply_spell_effect(self.shatter_rank5)
-        self.assertEqual(0, self.char.spell_crit_chance_spell(self.frostbolt_rank14, proc_auras=False))
-        self.assertEqual(0, self.char.spell_crit_chance_spell(self.fireball_rank14, proc_auras=False))
+        self.assertEqual(0.91, self.char.spell_crit_chance_spell(self.frostbolt_rank14, proc_auras=False))
+        self.assertEqual(0.91, self.char.spell_crit_chance_spell(self.fireball_rank14, proc_auras=False))
 
         self.char.spell_handler.apply_spell_effect(12494)
-        self.assertEqual(50, self.char.spell_crit_chance_spell(self.frostbolt_rank14, proc_auras=False))
-        self.assertEqual(50, self.char.spell_crit_chance_spell(self.fireball_rank14, proc_auras=False))
+        self.assertEqual(50.91, self.char.spell_crit_chance_spell(self.frostbolt_rank14, proc_auras=False))
+        self.assertEqual(50.91, self.char.spell_crit_chance_spell(self.fireball_rank14, proc_auras=False))
 
 
 @unittest.skip("Not yet implemented")
@@ -601,14 +601,14 @@ class TestWintersChill(unittest.TestCase):
         self.char.spell_handler.apply_spell_effect(self.fireball_rank14)
         self.assertFalse(any(aura.spell_id == 12579 for aura in self.char.spell_handler.enemy.active_auras))
 
-        self.assertEqual(0, self.char.spell_crit_chance_spell(self.frostbolt_rank14))
-        self.assertEqual(0, self.char.spell_crit_chance_spell(self.fireball_rank14))
+        self.assertEqual(0.91, self.char.spell_crit_chance_spell(self.frostbolt_rank14))
+        self.assertEqual(0.91, self.char.spell_crit_chance_spell(self.fireball_rank14))
 
         self.char.spell_handler.apply_spell_effect(self.frostbolt_rank14)
         self.assertTrue(any(aura.spell_id == 12579 for aura in self.char.spell_handler.enemy.active_auras))
 
-        self.assertEqual(2, self.char.spell_crit_chance_spell(self.frostbolt_rank14))
-        self.assertEqual(0, self.char.spell_crit_chance_spell(self.fireball_rank14))
+        self.assertEqual(2.91, self.char.spell_crit_chance_spell(self.frostbolt_rank14))
+        self.assertEqual(0.91, self.char.spell_crit_chance_spell(self.fireball_rank14))
 
 
 @unittest.skip("Not yet implemented")
@@ -689,8 +689,8 @@ class TestEmpoweredFrostbolt(unittest.TestCase):
                          self.char.spell_power_coefficient(self.frostbolt_rank14))
         self.assertEqual(self.char.spell_handler.spell_power_coefficient(self.fireball_rank14),
                          self.char.spell_power_coefficient(self.fireball_rank14))
-        self.assertEqual(1, self.char.spell_crit_chance_spell(self.frostbolt_rank14))
-        self.assertEqual(0, self.char.spell_crit_chance_spell(self.fireball_rank14))
+        self.assertEqual(1.91, self.char.spell_crit_chance_spell(self.frostbolt_rank14))
+        self.assertEqual(0.91, self.char.spell_crit_chance_spell(self.fireball_rank14))
 
     def test_empowered_frostbolt_rank2(self):
         self.char.spell_handler.apply_spell_effect(self.empowered_frostbolt_rank2)
@@ -698,8 +698,8 @@ class TestEmpoweredFrostbolt(unittest.TestCase):
                          self.char.spell_power_coefficient(self.frostbolt_rank14))
         self.assertEqual(self.char.spell_handler.spell_power_coefficient(self.fireball_rank14),
                          self.char.spell_power_coefficient(self.fireball_rank14))
-        self.assertEqual(2, self.char.spell_crit_chance_spell(self.frostbolt_rank14))
-        self.assertEqual(0, self.char.spell_crit_chance_spell(self.fireball_rank14))
+        self.assertEqual(2.91, self.char.spell_crit_chance_spell(self.frostbolt_rank14))
+        self.assertEqual(0.91, self.char.spell_crit_chance_spell(self.fireball_rank14))
 
     def test_empowered_frostbolt_rank3(self):
         self.char.spell_handler.apply_spell_effect(self.empowered_frostbolt_rank3)
@@ -707,8 +707,8 @@ class TestEmpoweredFrostbolt(unittest.TestCase):
                          self.char.spell_power_coefficient(self.frostbolt_rank14))
         self.assertEqual(self.char.spell_handler.spell_power_coefficient(self.fireball_rank14),
                          self.char.spell_power_coefficient(self.fireball_rank14))
-        self.assertEqual(3, self.char.spell_crit_chance_spell(self.frostbolt_rank14))
-        self.assertEqual(0, self.char.spell_crit_chance_spell(self.fireball_rank14))
+        self.assertEqual(3.91, self.char.spell_crit_chance_spell(self.frostbolt_rank14))
+        self.assertEqual(0.91, self.char.spell_crit_chance_spell(self.fireball_rank14))
 
     def test_empowered_frostbolt_rank4(self):
         self.char.spell_handler.apply_spell_effect(self.empowered_frostbolt_rank4)
@@ -716,8 +716,8 @@ class TestEmpoweredFrostbolt(unittest.TestCase):
                          self.char.spell_power_coefficient(self.frostbolt_rank14))
         self.assertEqual(self.char.spell_handler.spell_power_coefficient(self.fireball_rank14),
                          self.char.spell_power_coefficient(self.fireball_rank14))
-        self.assertEqual(4, self.char.spell_crit_chance_spell(self.frostbolt_rank14))
-        self.assertEqual(0, self.char.spell_crit_chance_spell(self.fireball_rank14))
+        self.assertEqual(4.91, self.char.spell_crit_chance_spell(self.frostbolt_rank14))
+        self.assertEqual(0.91, self.char.spell_crit_chance_spell(self.fireball_rank14))
 
     def test_empowered_frostbolt_rank5(self):
         self.char.spell_handler.apply_spell_effect(self.empowered_frostbolt_rank5)
@@ -725,8 +725,8 @@ class TestEmpoweredFrostbolt(unittest.TestCase):
                          self.char.spell_power_coefficient(self.frostbolt_rank14))
         self.assertEqual(self.char.spell_handler.spell_power_coefficient(self.fireball_rank14),
                          self.char.spell_power_coefficient(self.fireball_rank14))
-        self.assertEqual(5, self.char.spell_crit_chance_spell(self.frostbolt_rank14))
-        self.assertEqual(0, self.char.spell_crit_chance_spell(self.fireball_rank14))
+        self.assertEqual(5.91, self.char.spell_crit_chance_spell(self.frostbolt_rank14))
+        self.assertEqual(0.91, self.char.spell_crit_chance_spell(self.fireball_rank14))
 
 
 @unittest.skip("Not yet implemented")

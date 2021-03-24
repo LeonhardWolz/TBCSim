@@ -149,18 +149,18 @@ class TestArcaneImpact(unittest.TestCase):
 
     def test_arcane_impact_rank1(self):
         self.char.spell_handler.apply_spell_effect(self.arcane_impact_rank1)
-        self.assertEqual(2, self.char.spell_crit_chance_spell(self.arcane_blast))
-        self.assertEqual(0, self.char.spell_crit_chance_spell(self.fireball_rank1))
+        self.assertEqual(2.91, self.char.spell_crit_chance_spell(self.arcane_blast))
+        self.assertEqual(0.91, self.char.spell_crit_chance_spell(self.fireball_rank1))
 
     def test_arcane_impact_rank2(self):
         self.char.spell_handler.apply_spell_effect(self.arcane_impact_rank2)
-        self.assertEqual(4, self.char.spell_crit_chance_spell(self.arcane_blast))
-        self.assertEqual(0, self.char.spell_crit_chance_spell(self.fireball_rank1))
+        self.assertEqual(4.91, self.char.spell_crit_chance_spell(self.arcane_blast))
+        self.assertEqual(0.91, self.char.spell_crit_chance_spell(self.fireball_rank1))
 
     def test_arcane_impact_rank3(self):
         self.char.spell_handler.apply_spell_effect(self.arcane_impact_rank3)
-        self.assertEqual(6, self.char.spell_crit_chance_spell(self.arcane_blast))
-        self.assertEqual(0, self.char.spell_crit_chance_spell(self.fireball_rank1))
+        self.assertEqual(6.91, self.char.spell_crit_chance_spell(self.arcane_blast))
+        self.assertEqual(0.91, self.char.spell_crit_chance_spell(self.fireball_rank1))
 
 
 @unittest.skip("Not yet implemented")
@@ -318,26 +318,26 @@ class TestArcaneInstability(unittest.TestCase):
     def test_arcane_instability_rank1(self):
         self.char.spell_handler.apply_spell_effect(self.arcane_instability_rank1)
         self.assertEqual(1.01, self.char.spell_dmg_multiplier(self.fireball_rank1))
-        self.assertEqual(1, self.char.spell_crit_chance_spell(self.fireball_rank1))
+        self.assertEqual(1.91, self.char.spell_crit_chance_spell(self.fireball_rank1))
 
         self.assertEqual(1.01, self.char.spell_dmg_multiplier(self.frostbolt_rank1))
-        self.assertEqual(1, self.char.spell_crit_chance_spell(self.frostbolt_rank1))
+        self.assertEqual(1.91, self.char.spell_crit_chance_spell(self.frostbolt_rank1))
 
     def test_arcane_instability_rank2(self):
         self.char.spell_handler.apply_spell_effect(self.arcane_instability_rank2)
         self.assertEqual(1.02, self.char.spell_dmg_multiplier(self.fireball_rank1))
-        self.assertEqual(2, self.char.spell_crit_chance_spell(self.fireball_rank1))
+        self.assertEqual(2.91, self.char.spell_crit_chance_spell(self.fireball_rank1))
 
         self.assertEqual(1.02, self.char.spell_dmg_multiplier(self.frostbolt_rank1))
-        self.assertEqual(2, self.char.spell_crit_chance_spell(self.frostbolt_rank1))
+        self.assertEqual(2.91, self.char.spell_crit_chance_spell(self.frostbolt_rank1))
 
     def test_arcane_instability_rank3(self):
         self.char.spell_handler.apply_spell_effect(self.arcane_instability_rank3)
         self.assertEqual(1.03, self.char.spell_dmg_multiplier(self.fireball_rank1))
-        self.assertEqual(3, self.char.spell_crit_chance_spell(self.fireball_rank1))
+        self.assertEqual(3.91, self.char.spell_crit_chance_spell(self.fireball_rank1))
 
         self.assertEqual(1.03, self.char.spell_dmg_multiplier(self.frostbolt_rank1))
-        self.assertEqual(3, self.char.spell_crit_chance_spell(self.frostbolt_rank1))
+        self.assertEqual(3.91, self.char.spell_crit_chance_spell(self.frostbolt_rank1))
 
 
 class TestArcanePotency(unittest.TestCase):
@@ -355,20 +355,20 @@ class TestArcanePotency(unittest.TestCase):
     def test_arcane_potency_rank1(self):
         self.char.spell_handler.apply_spell_effect(self.arcane_potency_rank1)
         self.char.spell_handler.apply_spell_effect(12536)
-        self.assertEqual(10, self.char.spell_crit_chance_spell(self.fireball_rank1))
-        self.assertEqual(0, self.char.spell_crit_chance_spell(self.fireball_rank1))
+        self.assertEqual(10.91, self.char.spell_crit_chance_spell(self.fireball_rank1))
+        self.assertEqual(0.91, self.char.spell_crit_chance_spell(self.fireball_rank1))
 
     def test_arcane_potency_rank2(self):
         self.char.spell_handler.apply_spell_effect(self.arcane_potency_rank2)
         self.char.spell_handler.apply_spell_effect(12536)
-        self.assertEqual(20, self.char.spell_crit_chance_spell(self.fireball_rank1))
-        self.assertEqual(0, self.char.spell_crit_chance_spell(self.fireball_rank1))
+        self.assertEqual(20.91, self.char.spell_crit_chance_spell(self.fireball_rank1))
+        self.assertEqual(0.91, self.char.spell_crit_chance_spell(self.fireball_rank1))
 
     def test_arcane_potency_rank3(self):
         self.char.spell_handler.apply_spell_effect(self.arcane_potency_rank3)
         self.char.spell_handler.apply_spell_effect(12536)
-        self.assertEqual(30, self.char.spell_crit_chance_spell(self.fireball_rank1))
-        self.assertEqual(0, self.char.spell_crit_chance_spell(self.fireball_rank1))
+        self.assertEqual(30.91, self.char.spell_crit_chance_spell(self.fireball_rank1))
+        self.assertEqual(0.91, self.char.spell_crit_chance_spell(self.fireball_rank1))
 
 
 class TestEmpoweredArcaneMissiles(unittest.TestCase):
