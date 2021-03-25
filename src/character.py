@@ -249,7 +249,7 @@ class Character:
     def spell_crit_chance_spell(self, spell_id=0, proc_auras=True):
         crit_chance_mod = 0
         if spell_id != 0:
-            # for aura in self.spell_handler.get_character_mod_auras(spell_id):
+
             for aura in self.spell_handler.active_auras:
                 if self.spell_handler.aura_applies_to_spell(aura, spell_id) and \
                         (aura.aura_id == 107 and aura.misc_value == 7 and
@@ -266,6 +266,7 @@ class Character:
                             self.spell_handler.spell_family_mask(spell_id) & 2 or \
                             self.spell_handler.spell_family_mask(spell_id) & 16:
                         crit_chance_mod += aura.value * aura.curr_stacks
+
                         if proc_auras:
                             self.spell_handler.proc_aura_charge(aura)
                 elif aura.spell_id in [11170, 12982, 12983, 12984, 12985] and \
@@ -280,15 +281,14 @@ class Character:
                     crit_chance_mod += shatter_crit_chance.get(aura.spell_id) * aura.curr_stacks
 
             for aura in self.spell_handler.enemy.active_auras:
-                if DB.get_spell_school(spell_id) == 16 and \
-                        any(aura.spell_id == 12579 for aura in self.spell_handler.enemy.active_auras):
-                    crit_chance_mod = aura.value * aura.curr_stacks
+                if DB.get_spell_school(spell_id) == 16 and aura.spell_id == 12579:
+                    crit_chance_mod += aura.value * aura.curr_stacks
 
         return round(self.spell_crit_chance + crit_chance_mod, 3)
 
     def spell_crit_dmg_multiplier(self, spell_id, proc_auras=True):
         crit_damage_mod = 0
-        # for aura in self.spell_handler.get_character_mod_auras(spell_id):
+
         for aura in self.spell_handler.active_auras:
             if self.spell_handler.aura_applies_to_spell(aura, spell_id) and \
                     (aura.aura_id == 108 and aura.misc_value == 15):
@@ -301,7 +301,6 @@ class Character:
     def spell_dmg_multiplier(self, spell_id, proc_auras=True):
         spell_damage_multiplier = 1
 
-        # for aura in self.spell_handler.get_character_mod_auras(spell_id):
         for aura in self.spell_handler.active_auras:
             if aura.aura_id == 108 and aura.misc_value == 22 or \
                     aura.aura_id == 108 and aura.misc_value == 0 and \
@@ -352,7 +351,7 @@ class Character:
         cast_time = self.cast_time_with_haste(self.spell_handler.spell_cast_time(spell_id) + cast_time_mod_flat) \
                     * cast_time_mod_pct
         if cast_time >= 0:
-            return cast_time
+            return round(cast_time)
         return 0
 
     def spell_resource_cost(self, spell_id, proc_auras=True):

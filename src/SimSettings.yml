@@ -7,6 +7,7 @@ character:
       - 38692 #Fireball rank14
       - 116
       - 38704
+      - 30451
     passive_buffs:
       - 27126 #arcane intellect
       - 27125 #mage armor
@@ -55,8 +56,8 @@ character:
       itemid: 22821
     19: #tabard
   talents:
-    talent_calc_link: "https://legacy-wow.com/tbc-talents/mage-talents/?tal=2302250000000000000000050520200230333005312500030000000000000000000" #fire
-    #talent_calc_link: "https://legacy-wow.com/tbc-talents/mage-talents/?tal=2300050000000000000000000000000000000000000000535323310033010251551"  #frost
+    #talent_calc_link: "https://legacy-wow.com/tbc-talents/mage-talents/?tal=2302250000000000000000050520200230333005312500030000000000000000000" #fire
+    talent_calc_link: "https://legacy-wow.com/tbc-talents/mage-talents/?tal=2300050000000000000000000000000000000000000000535323310033010251551"  #frost
     talent_list:
 enemy:
   boss: Yes

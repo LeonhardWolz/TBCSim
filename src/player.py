@@ -194,9 +194,9 @@ class Player(object):
 
         normalized_spell_time = max(spell_time, 1500)
 
-        spell_rating = spell_effect_weight / (normalized_spell_time * 1.2) / spell_mana_cost - 1
+        spell_rating = spell_effect_weight / (normalized_spell_time * 1.2) / (spell_mana_cost * 0.7) - 1
 
-        # self.logg(str(DB.get_spell_name(spell_id)) + str(spell_id) + ": " + str(spell_rating))
+        #self.logg(str(DB.get_spell_name(spell_id)) + str(spell_id) + ": " + str(spell_rating))
 
         return spell_rating
 
@@ -216,9 +216,12 @@ class Player(object):
         # non crit damage + per spell avg crit damage
         spell_crit_damage = spell_damage * spell_crit_damage_multiplier * spell_crit_chance_spell / 100
 
+        #self.logg(str(spell_id) + " " + str(spell_damage) + ", " + str(spell_crit_damage))
+
         # add avg ignite dmg
         if DB.get_spell_school(spell_id) & 4:
-            for aura in [aura for aura in self.char.spell_handler.active_auras if aura.spell_id in [11119, 11120, 12846, 12847, 12848]]:
+            for aura in [aura for aura in self.char.spell_handler.active_auras if
+                         aura.spell_id in [11119, 11120, 12846, 12847, 12848]]:
                 spell_crit_damage += spell_crit_damage * (enums.ignite_dmg_pct[aura.spell_id] / 100)
         return spell_damage + spell_crit_damage
 
@@ -307,7 +310,7 @@ class Player(object):
         self.char.cast_mana_spell(spell_id)
         self.char.spell_handler.spell_start_cooldown(spell_id)
         self.env.process(self.char.spell_handler.apply_spell_effect_delay(spell_id))
-        # self.char.spell_handler.apply_spell_effect(spell_id)
+
         if DB.get_spell(spell_id)[DB.spell_column_info["AttributesEx"]] & 4 or \
                 DB.get_spell(spell_id)[DB.spell_column_info["AttributesEx"]] & 64:
             yield self.env.timeout(spell_duration if spell_duration >= 0 else 0)

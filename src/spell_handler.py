@@ -104,7 +104,7 @@ class SpellHandler:
                     aura.misc_value == spell_info[DB.spell_column_info["EffectMiscValue" + str(effect_slot)]]:
                 if aura.stack_limit is not aura.curr_stacks:
                     aura.curr_stacks += 1
-                    aura.create_time = self.env.now if self.env else 0
+                aura.create_time = self.env.now if self.env else 0
                 modified_aura = True
 
         if not modified_aura:
@@ -118,7 +118,7 @@ class SpellHandler:
                     aura.misc_value == spell_info[DB.spell_column_info["EffectMiscValue" + str(effect_slot)]]:
                 if aura.stack_limit is not aura.curr_stacks:
                     aura.curr_stacks += 1
-                    aura.create_time = self.env.now
+                aura.create_time = self.env.now
                 modified_aura = True
 
         if not modified_aura:
@@ -248,6 +248,7 @@ class SpellHandler:
         return random.uniform(0.00, 100.00) < self.char.spell_crit_chance_spell(spell_id)
 
     def process_direct_damage_spell(self, spell_info, effect_slot):
+        self.on_impact(spell_info)
         if self.spell_does_hit(spell_info[0]):
             spell_base_damage = self.get_effect_strength(spell_info, effect_slot)
             spell_spell_power = self.char.spell_spell_power(spell_info[0])
@@ -270,7 +271,6 @@ class SpellHandler:
                 self.logg(DB.get_spell_name(spell_info[0]) + " " +
                           spell_info[DB.spell_column_info["Rank1"]] + " damage: " + str(spell_damage))
                 self.results.damage_spell_hit(spell_info[0], spell_damage)
-            self.on_damage(spell_info)
         else:
             self.logg(DB.get_spell_name(spell_info[0]) + " " +
                       spell_info[DB.spell_column_info["Rank1"]] + " resisted")
@@ -361,6 +361,10 @@ class SpellHandler:
             if aura.duration_index != 0 and \
                     self.env.now - aura.create_time > enums.duration_index[aura.duration_index] != -1:
                 self.active_auras.remove(aura)
+        for aura in self.enemy.active_auras:
+            if aura.duration_index != 0 and \
+                    self.env.now - aura.create_time > enums.duration_index[aura.duration_index] != -1:
+                self.enemy.active_auras.remove(aura)
 
     def proc_aura_charge(self, aura):
         aura.procced()
@@ -379,7 +383,7 @@ class SpellHandler:
     def logg(self, info):
         self.results.logg("{:8s} {}".format(self.curr_sim_time_str(), info))
 
-    def on_damage(self, spell_info):
+    def on_impact(self, spell_info):
         # Mage
         if spell_info[DB.spell_column_info["SpellFamilyName"]] == 3:
             # Arcane Blast
