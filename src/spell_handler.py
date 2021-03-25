@@ -24,6 +24,13 @@ class SpellHandler:
         self.cooldown_item_id = {}
         self.cooldown_item_family_mask = {}
 
+    def apply_spell_effect_delay(self, spell_id):
+        spell_info = DB.get_spell(spell_id)
+        speed = spell_info[DB.spell_column_info["Speed"]]
+        if speed != 0:
+            yield self.env.timeout(int(self.enemy.distance / speed * 1000))
+        self.apply_spell_effect(spell_id)
+
     def apply_spell_effect(self, spell_id, item_id=0):
         spell_info = DB.get_spell(spell_id)
 
@@ -458,19 +465,9 @@ class SpellHandler:
 
     def handle_ignite_crit(self, spell_id, damage):
         ignite = list(DB.get_spell(12654))
-        ignite_dmg_pct = 0
-        if spell_id == 11119:
-            ignite_dmg_pct = 8
-        elif spell_id == 11120:
-            ignite_dmg_pct = 16
-        elif spell_id == 12846:
-            ignite_dmg_pct = 24
-        elif spell_id == 12847:
-            ignite_dmg_pct = 32
-        elif spell_id == 12848:
-            ignite_dmg_pct = 40
 
-        ignite[DB.spell_column_info["EffectBasePoints1"]] = round((damage * ignite_dmg_pct / 100) / 3) - 1
+        ignite[DB.spell_column_info["EffectBasePoints1"]] = \
+            round((damage * enums.ignite_dmg_pct[spell_id] / 100) / 3) - 1
 
         self.process_dot_damage_spell(ignite, 1)
 

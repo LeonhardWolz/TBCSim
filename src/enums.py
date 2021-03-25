@@ -235,6 +235,14 @@ socket_color_name = {
     8: "Blue"
 }
 
+ignite_dmg_pct = {
+    11119: 8,
+    11120: 16,
+    12846: 24,
+    12847: 32,
+    12848: 40
+}
+
 socket_bitmask = {
     1: 1,
     2: 2,

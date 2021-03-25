@@ -162,47 +162,26 @@ class Player(object):
     def get_offensive_spell_rating(self, spell_id):
         spell_info = DB.get_spell(spell_id)
 
-        spell_damage = 0
+        spell_effect_weight = 0
         for i in range(1, 4):
             # TODO consider other effects
+            # Direct spell damage
             if spell_info[DB.spell_column_info["Effect" + str(i)]] == 2 and \
                     spell_info[DB.spell_column_info["EffectImplicitTargetA" + str(i)]] in [6, 77]:
-                spell_damage += self.get_direct_spell_damage(i, spell_id, spell_info)
+                spell_effect_weight += self.get_direct_spell_damage(i, spell_id, spell_info)
 
+            # Dot spell damage
             elif spell_info[DB.spell_column_info["Effect" + str(i)]] == 6 and \
                     spell_info[DB.spell_column_info["EffectImplicitTargetA" + str(i)]] in [6, 25] and \
                     spell_info[DB.spell_column_info["EffectApplyAuraName" + str(i)]] == 3:
-                spell_base_damage = self.get_avg_effect_strength(spell_info, i)
-                spell_base_damage = spell_base_damage * \
-                                    enums.duration_index[spell_info[DB.spell_column_info["DurationIndex"]]] / \
-                                    spell_info[DB.spell_column_info["EffectAmplitude" + str(i)]]
+                spell_effect_weight += self.get_dot_spell_damage(i, spell_id, spell_info)
 
-                spell_damage_multiplier = self.char.spell_dmg_multiplier(spell_id, proc_auras=False) \
-                                          * self.char.spell_handler.enemy_damage_taken_mod(spell_info[0])
-
-                spell_damage += round(spell_base_damage *
-                                      spell_damage_multiplier)
+            # Channelled spell triggered spell damage
             elif spell_info[DB.spell_column_info["Effect" + str(i)]] == 6 and \
                     spell_info[DB.spell_column_info["EffectApplyAuraName" + str(i)]] in [23]:
+                spell_effect_weight += self.get_channelled_spell_damage(i, spell_info)
 
-                triggered_spell_id = spell_info[DB.spell_column_info["EffectTriggerSpell" + str(i)]]
-                triggered_spell_info = DB.get_spell(triggered_spell_id)
-                triggered_spell_total_damage = 0
-
-                for triggered_spell_slot in range(1, 4):
-                    if triggered_spell_info[DB.spell_column_info["Effect" + str(triggered_spell_slot)]] == 2 and \
-                            triggered_spell_info[
-                                DB.spell_column_info["EffectImplicitTargetA" + str(triggered_spell_slot)]] in [6, 77]:
-                        triggered_spell_total_damage += self.get_direct_spell_damage(triggered_spell_slot,
-                                                                                     triggered_spell_id,
-                                                                                     triggered_spell_info)
-
-                channel_duration, channel_interval = self.char.spell_handler.periodic_effect_behaviour(spell_info, i)
-                triggered_spell_total_damage *= channel_duration / channel_interval + 1
-
-                spell_damage += triggered_spell_total_damage
-
-        spell_damage = spell_damage * spell_damage * 0.7
+        spell_effect_weight = spell_effect_weight * spell_effect_weight * 0.7
 
         spell_mana_cost = self.char.spell_resource_cost(spell_id, proc_auras=False)
         spell_mana_cost = spell_mana_cost if spell_mana_cost != 0 else 1
@@ -215,14 +194,15 @@ class Player(object):
 
         normalized_spell_time = max(spell_time, 1500)
 
-        spell_rating = spell_damage / normalized_spell_time / spell_mana_cost - 1
+        spell_rating = spell_effect_weight / (normalized_spell_time * 1.2) / spell_mana_cost - 1
 
-        # print(DB.get_spell_name(spell_id) + str(spell_id), spell_rating)
+        # self.logg(str(DB.get_spell_name(spell_id)) + str(spell_id) + ": " + str(spell_rating))
 
         return spell_rating
 
-    def get_direct_spell_damage(self, i, spell_id, spell_info):
-        spell_base_damage = self.get_avg_effect_strength(spell_info, i)
+    def get_direct_spell_damage(self, effect_slot, spell_id, spell_info):
+        """Calculates avg direct spell damage, including critical hits and any triggered effects"""
+        spell_base_damage = self.get_avg_effect_strength(spell_info, effect_slot)
         spell_spell_power = self.char.spell_spell_power(spell_id)
         spell_power_coefficient = self.char.spell_power_coefficient(spell_id, proc_auras=False)
         spell_damage_multiplier = self.char.spell_dmg_multiplier(spell_id, proc_auras=False) \
@@ -232,8 +212,40 @@ class Player(object):
 
         # non crit damage
         spell_damage = (spell_base_damage + spell_spell_power * spell_power_coefficient) * spell_damage_multiplier
-        # return non crit damage + avg per spell crit damage
-        return round(spell_damage + spell_damage * spell_crit_damage_multiplier * spell_crit_chance_spell / 100)
+
+        # non crit damage + per spell avg crit damage
+        spell_crit_damage = spell_damage * spell_crit_damage_multiplier * spell_crit_chance_spell / 100
+
+        # add avg ignite dmg
+        if DB.get_spell_school(spell_id) & 4:
+            for aura in [aura for aura in self.char.spell_handler.active_auras if aura.spell_id in [11119, 11120, 12846, 12847, 12848]]:
+                spell_crit_damage += spell_crit_damage * (enums.ignite_dmg_pct[aura.spell_id] / 100)
+        return spell_damage + spell_crit_damage
+
+    def get_dot_spell_damage(self, effect_slot, spell_id, spell_info):
+        spell_base_damage = self.get_avg_effect_strength(spell_info, effect_slot)
+        spell_base_damage = spell_base_damage * \
+                            enums.duration_index[spell_info[DB.spell_column_info["DurationIndex"]]] / \
+                            spell_info[DB.spell_column_info["EffectAmplitude" + str(effect_slot)]]
+        spell_damage_multiplier = self.char.spell_dmg_multiplier(spell_id, proc_auras=False) \
+                                  * self.char.spell_handler.enemy_damage_taken_mod(spell_info[0])
+
+        return round(spell_base_damage * spell_damage_multiplier)
+
+    def get_channelled_spell_damage(self, effect_slot, spell_info):
+        triggered_spell_id = spell_info[DB.spell_column_info["EffectTriggerSpell" + str(effect_slot)]]
+        triggered_spell_info = DB.get_spell(triggered_spell_id)
+        triggered_spell_total_damage = 0
+        for triggered_spell_slot in range(1, 4):
+            if triggered_spell_info[DB.spell_column_info["Effect" + str(triggered_spell_slot)]] == 2 and \
+                    triggered_spell_info[
+                        DB.spell_column_info["EffectImplicitTargetA" + str(triggered_spell_slot)]] in [6, 77]:
+                triggered_spell_total_damage += self.get_direct_spell_damage(triggered_spell_slot,
+                                                                             triggered_spell_id,
+                                                                             triggered_spell_info)
+        channel_duration, channel_interval = self.char.spell_handler.periodic_effect_behaviour(spell_info, effect_slot)
+
+        return triggered_spell_total_damage * channel_duration / channel_interval + 1
 
     @lru_cache
     def get_avg_effect_strength(self, spell_info, effect_slot):
@@ -282,15 +294,20 @@ class Player(object):
         self.start_gcd(spell_id)
         yield self.env.timeout(spell_cast_time)
 
+        if spell_cast_time != 0 and (not DB.get_spell(spell_id)[DB.spell_column_info["AttributesEx"]] & 4 and
+                                     not DB.get_spell(spell_id)[DB.spell_column_info["AttributesEx"]] & 64):
+            self.logg("Cast Completed " + DB.get_spell_name(spell_id) + " " +
+                      DB.get_spell(spell_id)[DB.spell_column_info["Rank1"]])
+
         self.env.process(self.five_second_rule())
-        self.five_second_rule()
         if not DB.get_spell(spell_id)[DB.spell_column_info["AttributesEx"]] & 4 and \
                 not DB.get_spell(spell_id)[DB.spell_column_info["AttributesEx"]] & 64:
             self.results.spell_cast(spell_id, self.env.now)
 
         self.char.cast_mana_spell(spell_id)
         self.char.spell_handler.spell_start_cooldown(spell_id)
-        self.char.spell_handler.apply_spell_effect(spell_id)
+        self.env.process(self.char.spell_handler.apply_spell_effect_delay(spell_id))
+        # self.char.spell_handler.apply_spell_effect(spell_id)
         if DB.get_spell(spell_id)[DB.spell_column_info["AttributesEx"]] & 4 or \
                 DB.get_spell(spell_id)[DB.spell_column_info["AttributesEx"]] & 64:
             yield self.env.timeout(spell_duration if spell_duration >= 0 else 0)
@@ -316,7 +333,7 @@ class Player(object):
 
                 self.char.active_consumables[item_id] += 1
                 # delete some active items after charges used eg. mana gems
-                if item_info[DB.item_column_info["spellcharges_" + str(i)]]\
+                if item_info[DB.item_column_info["spellcharges_" + str(i)]] \
                         + self.char.active_consumables[item_id] == 0 \
                         and item_info[DB.item_column_info["spellcategory_" + str(i)]] == 1153:
                     del self.char.active_consumables[item_id]

@@ -71,7 +71,7 @@ enemy:
     shadow_resistance: 0
 simulation:
   sim_type: dps
-  sim_duration: 500
-  sim_iterations: 500
+  sim_duration: 300
+  sim_iterations: 1
   results_file_path: "C:\\Users\\Leo\\Documents\\TBCSimLogs\\"
   full_log_for_best: True

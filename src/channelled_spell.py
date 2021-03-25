@@ -26,4 +26,4 @@ class ChannelledSpell(object):
                 self.results.misc_effect(self.spell_id, mana_restore_amount)
                 self.spell_handler.char.current_mana += mana_restore_amount
             elif self.channel_aura == 23:
-                self.spell_handler.apply_spell_effect(self.trigger_spell)
+                self.env.process(self.spell_handler.apply_spell_effect_delay(self.trigger_spell))
