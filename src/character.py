@@ -291,12 +291,13 @@ class Character:
 
         for aura in self.spell_handler.active_auras:
             if self.spell_handler.aura_applies_to_spell(aura, spell_id) and \
-                    (aura.aura_id == 108 and aura.misc_value == 15):
+                    aura.aura_id == 108 and aura.misc_value == 15 or \
+                    aura.aura_id == 163 and aura.misc_value == 895:
                 crit_damage_mod += aura.value * aura.curr_stacks
 
                 if proc_auras:
                     self.spell_handler.proc_aura_charge(aura)
-        return 1.5 + crit_damage_mod / 100
+        return 1.5 * (1 + crit_damage_mod / 100)
 
     def spell_dmg_multiplier(self, spell_id, proc_auras=True):
         spell_damage_multiplier = 1
@@ -335,7 +336,8 @@ class Character:
         # for aura in self.spell_handler.get_character_mod_auras(spell_id):
         for aura in self.spell_handler.active_auras:
             if self.spell_handler.aura_applies_to_spell(aura, spell_id):
-                if aura.aura_id == 107 and aura.misc_value == 10:
+                if aura.aura_id == 107 and aura.misc_value == 10 and\
+                        (aura.spell_id not in [11069, 12338, 12339, 12340, 12341] or DB.get_spell_family(spell_id) & 1):
                     cast_time_mod_flat += aura.value * aura.curr_stacks
                     if proc_auras:
                         self.spell_handler.proc_aura_charge(aura)

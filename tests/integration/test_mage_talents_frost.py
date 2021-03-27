@@ -130,27 +130,27 @@ class TestIceShards(unittest.TestCase):
 
     def test_ice_shards_rank1(self):
         self.char.spell_handler.apply_spell_effect(self.ice_shards_rank1)
-        self.assertEqual(1.70, self.char.spell_crit_dmg_multiplier(self.frostbolt_rank14))
+        self.assertEqual(1.50 * 1.2, self.char.spell_crit_dmg_multiplier(self.frostbolt_rank14))
         self.assertEqual(1.50, self.char.spell_crit_dmg_multiplier(self.fireball_rank14))
 
     def test_ice_shards_rank2(self):
         self.char.spell_handler.apply_spell_effect(self.ice_shards_rank2)
-        self.assertEqual(1.90, self.char.spell_crit_dmg_multiplier(self.frostbolt_rank14))
+        self.assertEqual(1.50 * 1.4, self.char.spell_crit_dmg_multiplier(self.frostbolt_rank14))
         self.assertEqual(1.50, self.char.spell_crit_dmg_multiplier(self.fireball_rank14))
 
     def test_ice_shards_rank3(self):
         self.char.spell_handler.apply_spell_effect(self.ice_shards_rank3)
-        self.assertEqual(2.10, self.char.spell_crit_dmg_multiplier(self.frostbolt_rank14))
+        self.assertEqual(1.50 * 1.6, self.char.spell_crit_dmg_multiplier(self.frostbolt_rank14))
         self.assertEqual(1.50, self.char.spell_crit_dmg_multiplier(self.fireball_rank14))
 
     def test_ice_shards_rank4(self):
         self.char.spell_handler.apply_spell_effect(self.ice_shards_rank4)
-        self.assertEqual(2.30, self.char.spell_crit_dmg_multiplier(self.frostbolt_rank14))
+        self.assertEqual(1.50 * 1.8, self.char.spell_crit_dmg_multiplier(self.frostbolt_rank14))
         self.assertEqual(1.50, self.char.spell_crit_dmg_multiplier(self.fireball_rank14))
 
     def test_ice_shards_rank5(self):
         self.char.spell_handler.apply_spell_effect(self.ice_shards_rank5)
-        self.assertEqual(2.50, self.char.spell_crit_dmg_multiplier(self.frostbolt_rank14))
+        self.assertEqual(1.50 * 2, self.char.spell_crit_dmg_multiplier(self.frostbolt_rank14))
         self.assertEqual(1.50, self.char.spell_crit_dmg_multiplier(self.fireball_rank14))
 
 

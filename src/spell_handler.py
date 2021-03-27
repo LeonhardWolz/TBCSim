@@ -209,7 +209,7 @@ class SpellHandler:
                 if x in [DB.get_spell(spell_id)[DB.spell_column_info["EffectImplicitTargetA" + str(1)]],
                          DB.get_spell(spell_id)[DB.spell_column_info["EffectImplicitTargetA" + str(2)]],
                          DB.get_spell(spell_id)[DB.spell_column_info["EffectImplicitTargetA" + str(3)]]]:
-                    return 3
+                    return 2
             return 1
 
         def spell_slow_multiplier():

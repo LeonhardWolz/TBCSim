@@ -1,3 +1,4 @@
+import random
 import re
 from urllib.parse import urlparse
 
@@ -45,11 +46,12 @@ def load_settings():
 
 
 def load_sim_settings(sim_settings):
-    simSettings.sim_type = sim_settings["sim_type"] if sim_settings["sim_type"] else "dps"
-    simSettings.sim_duration = sim_settings["sim_duration"] * 1000 if sim_settings["sim_duration"] else 6000
-    simSettings.sim_iterations = sim_settings["sim_iterations"] if sim_settings["sim_iterations"] else 1
-    simSettings.results_file_path = sim_settings["results_file_path"] if sim_settings["results_file_path"] else None
-    simSettings.full_log_for_best = sim_settings["full_log_for_best"] if sim_settings["full_log_for_best"] else False
+    simSettings.sim_type = sim_settings["sim_type"] if "sim_type" in sim_settings else "dps"
+    simSettings.sim_duration = sim_settings["sim_duration"] * 1000 if "sim_duration" in sim_settings else 300000
+    simSettings.sim_iterations = sim_settings["sim_iterations"] if "sim_iterations" in sim_settings else 1
+    simSettings.results_file_path = sim_settings["results_file_path"] if "results_file_path" in sim_settings else None
+    simSettings.full_log_for_best = sim_settings["full_log_for_best"] if "full_log_for_best" in sim_settings else False
+    simSettings.sim_combat_rater = sim_settings["sim_combat_rater"] if "sim_combat_rater" in sim_settings else None
 
 
 def load_enemy_settings(enemy_settings):
@@ -282,9 +284,32 @@ def check_gem_socket_bonus(inventory_slot):
 
 
 def apply_enchantment(enchantment_info):
-    for i in range(1, 4):
-        if enchantment_info[DB.enchant_column_info["m_effect" + str(i)]] == 3:
-            char.spell_handler.apply_spell_effect(enchantment_info[DB.enchant_column_info["m_effectArg" + str(i)]])
+    for effect_slot in range(1, 4):
+        # 1: combat spell
+        if enchantment_info[DB.enchant_column_info["m_effect" + str(effect_slot)]] == 1:
+            pass
+        # 2: damage
+        elif enchantment_info[DB.enchant_column_info["m_effect" + str(effect_slot)]] == 2:
+            pass
+        # 3: apply spell
+        elif enchantment_info[DB.enchant_column_info["m_effect" + str(effect_slot)]] == 3:
+            char.spell_handler.apply_spell_effect(
+                enchantment_info[DB.enchant_column_info["m_effectArg" + str(effect_slot)]])
+        # 4: resistance mod
+        elif enchantment_info[DB.enchant_column_info["m_effect" + str(effect_slot)]] == 4:
+            pass
+        # 5: stat modification
+        elif enchantment_info[DB.enchant_column_info["m_effect" + str(effect_slot)]] == 5:
+            char.modify_stat(enchantment_info[DB.enchant_column_info["m_effectArg" + str(effect_slot)]],
+                             enchant_effect_strength(enchantment_info, effect_slot))
+        # 6: totem
+        elif enchantment_info[DB.enchant_column_info["m_effect" + str(effect_slot)]] == 6:
+            pass
+
+
+def enchant_effect_strength(enchantment, effect_slot):
+    return random.randint(enchantment[DB.enchant_column_info["m_effectPointsMin" + str(effect_slot)]],
+                          enchantment[DB.enchant_column_info["m_effectPointsMax" + str(effect_slot)]])
 
 
 def load_character_item(inventory_slot, item_from_db):

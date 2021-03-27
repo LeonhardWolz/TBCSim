@@ -18,6 +18,7 @@ class TestImprovedFireball(unittest.TestCase):
 
     fireball_rank14 = 38692
     frostbolt_rank14 = 38697
+    scorch_rank9 = 27074
 
     def setUp(self) -> None:
         self.char = Char()
@@ -28,30 +29,35 @@ class TestImprovedFireball(unittest.TestCase):
 
         self.assertEqual(3400, self.char.spell_cast_time(self.fireball_rank14))
         self.assertEqual(3000, self.char.spell_cast_time(self.frostbolt_rank14))
+        self.assertEqual(1500, self.char.spell_cast_time(self.scorch_rank9))
 
     def test_improved_fireball_rank2(self):
         self.char.spell_handler.apply_spell_effect(self.improved_fireball_rank2)
 
         self.assertEqual(3300, self.char.spell_cast_time(self.fireball_rank14))
         self.assertEqual(3000, self.char.spell_cast_time(self.frostbolt_rank14))
+        self.assertEqual(1500, self.char.spell_cast_time(self.scorch_rank9))
 
     def test_improved_fireball_rank3(self):
         self.char.spell_handler.apply_spell_effect(self.improved_fireball_rank3)
 
         self.assertEqual(3200, self.char.spell_cast_time(self.fireball_rank14))
         self.assertEqual(3000, self.char.spell_cast_time(self.frostbolt_rank14))
+        self.assertEqual(1500, self.char.spell_cast_time(self.scorch_rank9))
 
     def test_improved_fireball_rank4(self):
         self.char.spell_handler.apply_spell_effect(self.improved_fireball_rank4)
 
         self.assertEqual(3100, self.char.spell_cast_time(self.fireball_rank14))
         self.assertEqual(3000, self.char.spell_cast_time(self.frostbolt_rank14))
+        self.assertEqual(1500, self.char.spell_cast_time(self.scorch_rank9))
 
     def test_improved_fireball_rank5(self):
         self.char.spell_handler.apply_spell_effect(self.improved_fireball_rank5)
 
         self.assertEqual(3000, self.char.spell_cast_time(self.fireball_rank14))
         self.assertEqual(3000, self.char.spell_cast_time(self.frostbolt_rank14))
+        self.assertEqual(1500, self.char.spell_cast_time(self.scorch_rank9))
 
 
 @unittest.skip("Not yet implemented")

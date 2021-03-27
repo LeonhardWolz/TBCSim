@@ -8,6 +8,7 @@ character:
       - 116
       - 38704
       - 30451
+      - 27074
     passive_buffs:
       - 27126 #arcane intellect
       - 27125 #mage armor
@@ -27,6 +28,7 @@ character:
       itemid: 29076
       gems:
         1: 34220
+        #1: 25893
         2: 32215
     2:  #neck
     3:  #shoulder
@@ -56,8 +58,8 @@ character:
       itemid: 22821
     19: #tabard
   talents:
-    #talent_calc_link: "https://legacy-wow.com/tbc-talents/mage-talents/?tal=2302250000000000000000050520200230333005312500030000000000000000000" #fire
-    talent_calc_link: "https://legacy-wow.com/tbc-talents/mage-talents/?tal=2300050000000000000000000000000000000000000000535323310033010251551"  #frost
+    talent_calc_link: "https://legacy-wow.com/tbc-talents/mage-talents/?tal=2302250000000000000000050520200230333005312500030000000000000000000" #fire
+    #talent_calc_link: "https://legacy-wow.com/tbc-talents/mage-talents/?tal=2300050000000000000000000000000000000000000000535323310033010251551"  #frost
     talent_list:
 enemy:
   boss: Yes
@@ -74,5 +76,6 @@ simulation:
   sim_type: dps
   sim_duration: 300
   sim_iterations: 1
+  sim_combat_rater: "FireMageCAR"
   results_file_path: "C:\\Users\\Leo\\Documents\\TBCSimLogs\\"
   full_log_for_best: True

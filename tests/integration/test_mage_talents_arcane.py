@@ -455,14 +455,14 @@ class TestSpellPower(unittest.TestCase):
     def test_spell_power_rank1(self):
         self.char.spell_handler.apply_spell_effect(self.spell_power_rank1)
 
-        self.assertEqual(1.75, self.char.spell_crit_dmg_multiplier(self.fireball_rank1))
-        self.assertEqual(1.75, self.char.spell_crit_dmg_multiplier(self.frostbolt_rank1))
+        self.assertEqual(1.5 * 1.25, self.char.spell_crit_dmg_multiplier(self.fireball_rank1))
+        self.assertEqual(1.5 * 1.25, self.char.spell_crit_dmg_multiplier(self.frostbolt_rank1))
 
     def test_spell_power_rank2(self):
         self.char.spell_handler.apply_spell_effect(self.spell_power_rank2)
 
-        self.assertEqual(2, self.char.spell_crit_dmg_multiplier(self.fireball_rank1))
-        self.assertEqual(2, self.char.spell_crit_dmg_multiplier(self.frostbolt_rank1))
+        self.assertEqual(1.5 * 1.5, self.char.spell_crit_dmg_multiplier(self.fireball_rank1))
+        self.assertEqual(1.5 * 1.5, self.char.spell_crit_dmg_multiplier(self.frostbolt_rank1))
 
 
 class TestMindMastery(unittest.TestCase):
