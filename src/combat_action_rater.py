@@ -99,7 +99,7 @@ class CombatActionRater(object):
 
     def get_boost_spell_base_rating(self):
         spell_rating = -1
-        spell_rating += (self.player.char.current_mana / self.player.char.total_mana) + 0.7
+        spell_rating += (self.player.char.current_mana / self.player.char.total_mana)
 
         if self.player.env.now / self.player.results.sim_length > 0.65:
             spell_rating += self.player.env.now / self.player.results.sim_length

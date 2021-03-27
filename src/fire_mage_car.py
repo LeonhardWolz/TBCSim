@@ -5,6 +5,39 @@ import src.db_connector as DB
 
 
 class FireMageCAR(MageCAR):
+    def get_consumable_rating(self, item_id):
+        consumable_rating = 0
+        item_info = DB.get_item(item_id)
+        for i in range(1, 6):
+            item_spell = DB.get_spell(item_info[DB.item_column_info["spellid_" + str(i)]])
+            if item_spell:
+                if item_id in (5513, 5514, 8007, 8008, 22044, 22832):
+                    for effect_slot in range(1, 4):
+                        max_value = item_spell[DB.spell_column_info["EffectBasePoints" + str(effect_slot)]] + \
+                                    (item_spell[DB.spell_column_info["EffectBaseDice" + str(effect_slot)]] *
+                                     item_spell[DB.spell_column_info["EffectDieSides" + str(effect_slot)]])
+                        if max_value != 0:
+                            consumable_rating += -0.8 + max_value / self.player.char.total_mana + \
+                                                 (self.player.char.total_mana - self.player.char.current_mana) \
+                                                 / self.player.char.total_mana
+                elif item_id in (22839,):
+                    if self.player.char.current_mana / self.player.char.total_mana > 0.35:
+                        consumable_rating += -0.8\
+                                             + self.player.char.current_mana / self.player.char.total_mana\
+                                             + self.scorch_modifier()
+
+        return consumable_rating
+
+    def get_boost_spell_rating(self, spell_id):
+        return super().get_boost_spell_base_rating() + self.scorch_modifier()
+
+    def scorch_modifier(self):
+        aura = [aura for aura in self.player.char.spell_handler.enemy.active_auras if aura.spell_id == 22959]
+        if not aura or aura[0].curr_stacks != 5:
+            return -0.3
+        else:
+            return 0.4
+
     def get_offensive_spell_rating(self, spell_id):
         spell_info = DB.get_spell(spell_id)
 
@@ -38,18 +71,25 @@ class FireMageCAR(MageCAR):
 
         normalized_spell_time = max(spell_time, 1500)
 
-        spell_rating = -1 + (spell_effect_weight * 2.2 / normalized_spell_time) - spell_mana_cost * 0.0002 + spell_effect_weight / (spell_mana_cost * 20)
+        spell_rating = -1 + (spell_effect_weight * 2.2 / normalized_spell_time) \
+                       - spell_mana_cost * 0.0002 \
+                       + spell_effect_weight / (spell_mana_cost * 20)
 
-        #scorch rating modification
+        # scorch rating modification
         if spell_info[DB.spell_column_info["SpellFamilyFlags"]] & 16:
             aura = [aura for aura in self.player.char.spell_handler.enemy.active_auras if aura.spell_id == 22959]
-            stacks = aura[0].curr_stacks if aura else 0
-            if stacks != 5 or aura and\
-                    (aura[0].create_time + enums.duration_index[aura[0].duration_index] - 10000) < self.player.env.now:
-                spell_rating *= 1.3
-            else:
-                spell_rating *= 0.9
 
-        self.player.logg(str(DB.get_spell_name(spell_id)) + str(spell_id) + ": " + str(spell_rating) + ": " + str(spell_effect_weight) + ": " + str(spell_time) + ": " + str(normalized_spell_time))
+            if not aura or aura[0].curr_stacks != 5:
+                # Apply 5 stacks of improved scorch
+                spell_rating *= 0.9 + (self.player.char.current_mana / self.player.char.total_mana) * 0.4
+            elif aura[0].create_time + enums.duration_index[aura[0].duration_index] - 10000 < self.player.env.now:
+                # Refresh of improved scorch more urgent the closer it is to running out
+                mod = (self.player.env.now -
+                       (aura[0].create_time + enums.duration_index[aura[0].duration_index] - 10000)) \
+                      / 10000
+                spell_rating *= 1 + mod * 0.4
+            else:
+                # Small penalty if improved scorch already applied
+                spell_rating *= 0.9
 
         return spell_rating

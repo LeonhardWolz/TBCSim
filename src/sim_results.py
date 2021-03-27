@@ -402,7 +402,7 @@ class EquippedItem:
         if self.sockets:
             str_repr += "\n\tSockets:"
             for socket in self.sockets:
-                str_repr += "\n\t\t" + enums.socket_color_name[socket[0]] + " Socket: \t"
+                str_repr += "\n\t\t" + enums.socket_color_name[socket[0]] + " Socket: \t\t"
                 if socket[2] is not None:
                     str_repr += str(socket[2]) + ": " + str(socket[3])
                     if socket[1] & 1 and socket[4]:
@@ -413,8 +413,8 @@ class EquippedItem:
                     str_repr += "Socket Empty"
         if self.socket_bonus != 0:
             socket_bonus_name = DB.get_enchant(self.socket_bonus)[DB.enchant_column_info["m_name_lang_1"]]
-            str_repr += "\n\t\tSocket Bonus {}: ".format("Active" if self.socket_bonus_met else "Inactive") + \
-                        socket_bonus_name
+            str_repr += "\n\t\tSocket Bonus {}: \t".format("Active" if self.socket_bonus_met else "Inactive")\
+                        + socket_bonus_name
         return str_repr
 
 

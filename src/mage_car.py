@@ -39,9 +39,7 @@ class MageCAR(CombatActionRater):
         return consumable_rating
 
     def get_boost_spell_rating(self, spell_id):
-        spell_info = DB.get_spell(spell_id)
         spell_rating = self.get_boost_spell_base_rating()
-        # TODO consider spell specific conditions
 
         return spell_rating
 
