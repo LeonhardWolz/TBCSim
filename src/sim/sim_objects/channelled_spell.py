@@ -1,4 +1,4 @@
-import src.db_connector as DB
+import src.db.db_connector as DB
 
 
 class ChannelledSpell(object):

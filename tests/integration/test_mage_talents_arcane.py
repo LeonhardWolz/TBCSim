@@ -1,7 +1,7 @@
 import unittest
 
-from src.character import Character as Char
-from src.enemy import Enemy
+from src.sim.sim_objects.character import Character as Char
+from src.sim.sim_objects.enemy import Enemy
 
 
 @unittest.skip("Not yet implemented")

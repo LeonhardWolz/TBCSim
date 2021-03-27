@@ -1,7 +1,7 @@
 from src import enums
-from src.mage_car import MageCAR
+from src.sim.logic.combat_raters.mage_car import MageCAR
 
-import src.db_connector as DB
+import src.db.db_connector as DB
 
 
 class FireMageCAR(MageCAR):

@@ -1,8 +1,8 @@
-import src.db_connector as DB
+import src.db.db_connector as DB
 from src import enums
 from src.enums import CombatAction
-from src.fire_mage_car import FireMageCAR
-from src.mage_car import MageCAR
+from src.sim.logic.combat_raters.fire_mage_car import FireMageCAR
+from src.sim.logic.combat_raters.mage_car import MageCAR
 
 combat_action_raters = {
     "Default": MageCAR,

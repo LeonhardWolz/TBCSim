@@ -1,12 +1,12 @@
 import random
 from functools import lru_cache
 
-import src.db_connector as DB
+import src.db.db_connector as DB
 
 from src import enums
-from src.aura import Aura
-from src.channelled_spell import ChannelledSpell
-from src.dot_spell import DotSpell
+from src.sim.sim_objects.aura import Aura
+from src.sim.sim_objects.channelled_spell import ChannelledSpell
+from src.sim.sim_objects.dot_spell import DotSpell
 
 
 class SpellHandler:

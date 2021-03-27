@@ -1,7 +1,7 @@
 from src import enums
-from src.combat_action_rater import CombatActionRater
+from src.sim.logic.combat_raters.combat_action_rater import CombatActionRater
 
-import src.db_connector as DB
+import src.db.db_connector as DB
 
 
 class MageCAR(CombatActionRater):

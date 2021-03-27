@@ -2,7 +2,7 @@ import time
 from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Dict, List
-import src.db_connector as DB
+import src.db.db_connector as DB
 from src import enums
 
 used_consumables_line_format = "    {:24s}|{:12s}|{:16s}"

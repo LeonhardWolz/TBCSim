@@ -2,9 +2,9 @@ import unittest
 from datetime import datetime
 from unittest.mock import Mock, MagicMock
 
-from src.character import Character as Char
-from src.enemy import Enemy
-from src.sim_results import SimResult
+from src.sim.sim_objects.character import Character as Char
+from src.sim.sim_objects.enemy import Enemy
+from src.results.sim_results import SimResult
 
 
 @unittest.skip("Not yet implemented")

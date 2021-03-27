@@ -4,9 +4,9 @@ from unittest.mock import MagicMock, Mock
 
 import simpy
 
-from src.character import Character as Char
-from src.enemy import Enemy
-from src.sim_results import SimResult
+from src.sim.sim_objects.character import Character as Char
+from src.sim.sim_objects.enemy import Enemy
+from src.results.sim_results import SimResult
 
 
 class TestImprovedFireball(unittest.TestCase):

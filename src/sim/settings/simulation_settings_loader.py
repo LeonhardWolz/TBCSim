@@ -5,13 +5,13 @@ from urllib.parse import urlparse
 import yaml
 import copy
 
-from src import db_connector as DB
+from src.db import db_connector as DB
 from src import enums
-from src.enemy import Enemy
+from src.sim.sim_objects.enemy import Enemy
 
-from src.sim_settings import SimSettings
-from src.character import Character
-from src.sim_results import EquippedItem
+from src.sim.settings.sim_settings import SimSettings
+from src.sim.sim_objects.character import Character
+from src.results.sim_results import EquippedItem
 
 char = Character()
 enemy = Enemy()
@@ -28,7 +28,7 @@ mage_mana_spells = (12051,)
 
 def load_settings():
     # load settings file
-    with open('SimSettings.yml', 'r') as settings_yaml:
+    with open('../../SimSettings.yml', 'r') as settings_yaml:
         cfg = yaml.safe_load(settings_yaml)
 
     # load sim settings

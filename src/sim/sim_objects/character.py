@@ -1,5 +1,5 @@
-from src.spell_handler import SpellHandler
-import src.db_connector as DB
+from src.sim.handlers.spell_handler import SpellHandler
+import src.db.db_connector as DB
 
 
 class Character:

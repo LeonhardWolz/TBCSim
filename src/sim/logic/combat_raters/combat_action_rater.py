@@ -1,6 +1,6 @@
 from functools import lru_cache
 
-import src.db_connector as DB
+import src.db.db_connector as DB
 from src import enums
 from src.enums import CombatAction
 

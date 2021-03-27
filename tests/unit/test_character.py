@@ -1,8 +1,7 @@
 import unittest
 from unittest.mock import MagicMock
 
-from src import character
-from src import aura
+from src.sim.sim_objects import character, aura
 
 
 class AuraSpellPowerTests(unittest.TestCase):
