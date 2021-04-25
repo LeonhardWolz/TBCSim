@@ -6,7 +6,7 @@ import simpy
 
 from src.sim.sim_objects.character import Character as Char
 from src.sim.sim_objects.enemy import Enemy
-from src.results.sim_results import SimResult
+from src.sim.results.sim_results import SimResult
 
 
 class TestImprovedFireball(unittest.TestCase):

@@ -3,6 +3,8 @@ from functools import lru_cache
 import mysql.connector
 import logging
 
+from src import enums
+
 spell_cache = {}
 spell_affected_cache = {}
 item_cache = {}
@@ -97,6 +99,7 @@ def get_enchant_condition_columns():
         return tbcdb_cursor.fetchall()
     except mysql.connector.Error as ex:
         logging.critical("DB Error during enchant condition column name retrieval: {}".format(ex))
+
 
 @lru_cache
 def get_spell(spell_id):
@@ -206,6 +209,7 @@ def get_item_name(item_id):
             return str(tbcdb_cursor.fetchone()[0])
         except mysql.connector.Error as ex:
             logging.critical("DB Error during item name retrieval: {}".format(ex))
+            raise ValueError
 
 
 @lru_cache
@@ -215,6 +219,15 @@ def get_enchant(enchantment_id):
         return tbcdb_cursor.fetchone()
     except mysql.connector.Error as ex:
         logging.critical("DB Error during enchantment retrieval: {}".format(ex))
+
+
+@lru_cache
+def get_enchant_name(enchantment_id):
+    try:
+        tbcdb_cursor.execute("SELECT SpellName FROM simdata.spell_template WHERE id={}".format(enchantment_id))
+        return str(tbcdb_cursor.fetchone()[0])
+    except mysql.connector.Error as ex:
+        logging.critical("DB Error during enchantment name retrieval: {}".format(ex))
 
 
 @lru_cache
@@ -244,12 +257,32 @@ def get_base_stats(player_class, race):
         logging.critical("DB Error during base stats retrieval: {}".format(ex))
 
 
-def get_class_talents(class_id, talent_index, talent_rank):
+#
+# def get_class_talents(class_id, talent_index, talent_rank):
+#     try:
+#         tbcdb_cursor.execute(class_talent_query.format(talent_rank, class_id, talent_index))
+#         return tbcdb_cursor.fetchall()
+#     except mysql.connector.Error as ex:
+#         logging.critical("DB Error during class talent retrieval: {}".format(ex))
+
+@lru_cache
+def get_talent_tab_id(player_class_id, tab_pos):
     try:
-        tbcdb_cursor.execute(class_talent_query.format(talent_rank, class_id, talent_index))
-        return tbcdb_cursor.fetchall()
+        tbcdb_cursor.execute(f"select id from simdata.dbc_talenttab "
+                             f"where class_mask&1<<({player_class_id}-1) and tab_pos={tab_pos}")
+        return tbcdb_cursor.fetchone()[0]
     except mysql.connector.Error as ex:
-        logging.critical("DB Error during class talent retrieval: {}".format(ex))
+        logging.critical("DB Error during talent tab id retrieval: {}".format(ex))
+
+
+@lru_cache
+def get_talent_id(talent_tab_id, talent_index, talent_rank):
+    try:
+        tbcdb_cursor.execute(f"select rank{talent_rank} from simdata.dbc_talent "
+                             f"where tab={talent_tab_id} order by row, col")
+        return tbcdb_cursor.fetchall()[talent_index][0]
+    except mysql.connector.Error as ex:
+        logging.critical("DB Error during talent retrieval: {}".format(ex))
 
 
 def get_item_set(item_set_id):
@@ -259,6 +292,96 @@ def get_item_set(item_set_id):
         return tbcdb_cursor.fetchone()
     except mysql.connector.Error as ex:
         logging.critical("DB Error during item set retrieval: {}".format(ex))
+
+
+@lru_cache
+def get_gui_spell_dict():
+    try:
+        tbcdb_cursor.execute("SELECT Id, SpellName, Rank1 FROM simdata.spell_template where SpellFamilyFlags != 0")
+        spell_dict = {}
+        for result in tbcdb_cursor.fetchall():
+            spell_dict[result[0]] = (result[1] + " " + (result[2] or ""),)
+        return spell_dict
+    except mysql.connector.Error as ex:
+        logging.critical("DB Error during gui spell list retrieval: {}".format(ex))
+
+
+@lru_cache
+def get_gui_consumable_dict():
+    try:
+        tbcdb_cursor.execute("SELECT entry, name FROM simdata.item_template where class=0")
+        consumable_dict = {}
+        for result in tbcdb_cursor.fetchall():
+            consumable_dict[result[0]] = (result[1],)
+        return consumable_dict
+    except mysql.connector.Error as ex:
+        logging.critical("DB Error during gui consumable list retrieval: {}".format(ex))
+
+
+@lru_cache
+def get_gui_gem_dict():
+    try:
+        tbcdb_cursor.execute("SELECT entry, name, m_name_lang_1"
+                             " FROM"
+                             " (SELECT entry, name, GemProperties, id, SpellItemEnchantment, m_ID, m_name_lang_1"
+                             " FROM simdata.item_template, simdata.dbc_gemproperties, simdata.dbc_spellitemenchantment"
+                             " WHERE GemProperties!=0 AND GemProperties=id AND SpellItemEnchantment=m_ID) as gems")
+        gem_dict = {}
+        for result in tbcdb_cursor.fetchall():
+            gem_dict[result[0]] = (result[1], result[2])
+        return gem_dict
+    except mysql.connector.Error as ex:
+        logging.critical("DB Error during gui gem list retrieval: {}".format(ex))
+
+
+@lru_cache
+def get_gui_enchantments_dict(item_class, item_subclass_mask=0, inventory_type_mask=0):
+    if item_class == 4:
+        my_where_statement = f" and EquippedItemInventoryTypeMask&{inventory_type_mask}"
+    elif item_class == 2:
+        my_where_statement = f" and EquippedItemClass=2 and EquippedItemSubClassMask&{item_subclass_mask}"
+    else:
+        my_where_statement = ""
+
+    myquery = "SELECT Id as Id, SpellName as Name, m_name_lang_1 as Description FROM " \
+              "(SELECT Id, m_ID, EffectMiscValue1, SpellName, m_name_lang_1 " \
+              "FROM simdata.spell_template, simdata.dbc_spellitemenchantment " \
+              f"WHERE Effect1=53 and Rank1!=\"QASpell\" and m_ID=EffectMiscValue1 {my_where_statement}) as Enchants"
+
+    try:
+        tbcdb_cursor.execute(myquery)
+        enchants_dict = {}
+        for result in tbcdb_cursor.fetchall():
+            enchants_dict[result[0]] = (result[1], result[2])
+        return enchants_dict
+    except mysql.connector.Error as ex:
+        logging.critical("DB Error during gui enchantment list retrieval: {}".format(ex))
+
+
+@lru_cache
+def get_gear_items_for_slot(inv_slot):
+    query_str = "SELECT entry, name FROM simdata.item_template"
+    for index, inv_type in enumerate(enums.inv_type_in_slot[inv_slot]):
+        if index == 0:
+            query_str += " where ("
+        else:
+            query_str += " or"
+        query_str += " InventoryType=" + str(inv_type)
+
+    # add filter for placeholder items in slots with durability
+    if inv_slot not in (0, 2, 4, 11, 12, 13, 14, 15, 19):
+        query_str += ") and MaxDurability != 0"
+    else:
+        query_str += ")"
+
+    try:
+        tbcdb_cursor.execute(query_str)
+        gear_dict = {}
+        for result in tbcdb_cursor.fetchall():
+            gear_dict[result[0]] = (result[1],)
+        return gear_dict
+    except mysql.connector.Error as ex:
+        logging.critical("DB Error during gear item retrieval: {}".format(ex))
 
 
 def good_startup():

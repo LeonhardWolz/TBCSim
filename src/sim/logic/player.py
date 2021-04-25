@@ -9,6 +9,7 @@ combat_action_raters = {
     "FireMageCAR": FireMageCAR
 }
 
+
 class Player(object):
     time_padding = 1
     max_spell_damage = 0

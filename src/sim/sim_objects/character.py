@@ -1,4 +1,4 @@
-from src.sim.handlers.spell_handler import SpellHandler
+from src.sim.sim_objects.spell_handler import SpellHandler
 import src.db.db_connector as DB
 
 

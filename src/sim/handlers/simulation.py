@@ -3,7 +3,7 @@ from datetime import datetime
 import simpy
 
 from src.sim.logic.player import Player
-from src.results.sim_results import SimResult
+from src.sim.results.sim_results import SimResult
 
 
 def start_simulation(settings, char, sim_num):

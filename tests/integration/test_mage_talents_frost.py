@@ -4,7 +4,7 @@ from unittest.mock import Mock, MagicMock
 
 from src.sim.sim_objects.character import Character as Char
 from src.sim.sim_objects.enemy import Enemy
-from src.results.sim_results import SimResult
+from src.sim.results.sim_results import SimResult
 
 
 @unittest.skip("Not yet implemented")

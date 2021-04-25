@@ -1,19 +1,18 @@
 character:
   race: Troll
-  player_class: Mage
-  spells:
-    mage_spells_to_use:
-      - 38697 #Frostbolt rank14
-      - 38692 #Fireball rank14
-      - 116
-      - 38704
-      - 30451
-      - 27074
-    passive_buffs:
-      - 27126 #arcane intellect
-      - 27125 #mage armor
-      - 25312 #divine spirit
-      - 25389 #powerword fortitude
+  class: Mage
+  active_spells:
+    - 38697 #Frostbolt rank14
+    - 38692 #Fireball rank14
+    - 116
+    - 38704
+    - 30451
+    - 27074
+  passive_spells:
+    - 27126 #arcane intellect
+    - 27125 #mage armor
+    - 25312 #divine spirit
+    - 25389 #powerword fortitude
   passive_consumables:
     - 22866 #flask of pure death
     - 27657 #blackened basilisk
@@ -25,17 +24,17 @@ character:
   gear:
     0:  #ammo
     1:  #head
-      itemid: 29076
+      item_id: 29076
       gems:
         1: 34220
         #1: 25893
         2: 32215
     2:  #neck
     3:  #shoulder
-      itemid: 22983
+      item_id: 22983
     4:  #body (shirt)
     5:  #chest
-      itemid: 29077
+      item_id: 29077
       enchant: 2661
       gems:
         1: 32221
@@ -43,7 +42,7 @@ character:
         3: 32215
     6:  #waist (belt)
     7:  #legs
-      itemid: 23262
+      item_id: 23262
     8:  #feet
     9:  #wrist
     10: #hand
@@ -55,14 +54,13 @@ character:
     16: #mainhand
     17: #offhand
     18: #ranged
-      itemid: 22821
+      item_id: 22821
     19: #tabard
-  talents:
-    talent_calc_link: "https://legacy-wow.com/tbc-talents/mage-talents/?tal=2302250000000000000000050520200230333005312500030000000000000000000" #fire
-    #talent_calc_link: "https://legacy-wow.com/tbc-talents/mage-talents/?tal=2300050000000000000000000000000000000000000000535323310033010251551"  #frost
-    talent_list:
+  talent_calc_link: "https://tbc.wowhead.com/talent-calc/mage/230225-505202002303330053125-003" # fire
+# talent_calc_link: "https://legacy-wow.com/tbc-talents/mage-talents/?tal=2302250000000000000000050520200230333005312500030000000000000000000" #fire
+  #talent_calc_link: "https://legacy-wow.com/tbc-talents/mage-talents/?tal=2300050000000000000000000000000000000000000000535323310033010251551"  #frost
 enemy:
-  boss: Yes
+  boss: True
   level: 73
   attributes:
     armor: 0
@@ -75,7 +73,7 @@ enemy:
 simulation:
   sim_type: dps
   sim_duration: 300
-  sim_iterations: 1
+  sim_iterations: 2
   sim_combat_rater: "FireMageCAR"
   results_file_path: "C:\\Users\\Leo\\Documents\\TBCSimLogs\\"
   full_log_for_best: True
