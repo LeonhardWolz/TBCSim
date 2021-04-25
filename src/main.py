@@ -24,7 +24,7 @@ def main():
     m_window_view = MainWindowView(m_window_model)
     m_window_view.show()
 
-    app.setWindowIcon(QIcon("arcane_intellect.jpg"))
+    app.setWindowIcon(QIcon("icons/arcane_intellect.jpg"))
     sys.exit(app.exec_())
 
 

@@ -20,6 +20,7 @@ class GearView(QWidget):
 
         ch_settings_gear_layout = QVBoxLayout()
         ch_settings_gear_layout.setAlignment(Qt.AlignTop)
+        ch_settings_gear_layout.setContentsMargins(0, 0, 11, 0)
         self.setLayout(ch_settings_gear_layout)
 
         ch_gear_header_label = QLabel("Gear")
@@ -48,6 +49,7 @@ class GearView(QWidget):
         for i, gear_slot_entry in enumerate(settings_model.equipped_gear.items()):
             gear_slot = QHBoxLayout()
             gear_slot.setAlignment(Qt.AlignTop)
+            gear_slot.setContentsMargins(0, 0, 0, 0)
 
             gear_lvbox_layout = QVBoxLayout()
 
@@ -124,7 +126,7 @@ class GearItem(QWidget):
         self.model = model
         self.inventory_slot = inventory_slot
         self.setLayout(QVBoxLayout())
-        self.layout().setContentsMargins(11, 0, 11, 0)
+        self.layout().setContentsMargins(0, 0, 0, 0)
 
         self.name_label = QLabel("--- Slot Empty ---")
         self.name_label.setAlignment(Qt.AlignLeft)

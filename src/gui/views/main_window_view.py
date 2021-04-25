@@ -1,18 +1,29 @@
+import sys
+
 from PyQt5.QtCore import pyqtSlot, Qt
-from PyQt5.QtGui import QFont, QIcon
+from PyQt5.QtGui import QFont, QIcon, QPixmap
 from PyQt5.QtWidgets import (QWidget, QMainWindow, QPushButton, QHBoxLayout, QVBoxLayout,
-                             QTabWidget, QProgressBar, QTextBrowser, QScrollArea, QMenuBar, QMenu, QAction, QFileDialog)
+                             QTabWidget, QProgressBar, QTextBrowser, QScrollArea, QMenuBar, QMenu, QAction, QFileDialog,
+                             QMessageBox)
 
 from src.gui.views.settings_view import SettingsView
 
 
 class MainWindowView(QMainWindow):
+    ABOUT = "DMG Simulation for World of Warcraft TBC<br>" \
+            "Feel free to contribute at: " \
+            "<a href=https://github.com/LeonhardWolz/TBCSim>https://github.com/LeonhardWolz/TBCSim</a><br><br>" \
+            "Made using:" \
+            "<br>Linea Icons <a href=https://linea.io>linea.io</a> by Dario Ferrando under " \
+            "<a href=https://creativecommons.org/licenses/by/4.0>CC BY 4.0</a><br>" \
+            "<br>made by Leonhard Wolz, 2021"
+
     def __init__(self, mw_model):
         super(QMainWindow, self).__init__()
         self.model = mw_model
 
         self.setWindowTitle('WoW TBC Combat Simulation')
-        self.setWindowIcon(QIcon("arcane_intellect.jpg"))
+        self.setWindowIcon(QIcon("icons/arcane_intellect.jpg"))
         self.resize(1600, 900)
         self._create_menu_bar()
         self._ui_components()
@@ -27,14 +38,21 @@ class MainWindowView(QMainWindow):
         file_menu = QMenu("&Actions", self)
 
         self.new_action = QAction("&New Sim Settings", self)
+        self.new_action.setIcon(QIcon("icons/basic_sheet_txt .svg"))
         self.load_action = QAction("&Load Sim Settings", self)
+        self.load_action.setIcon(QIcon("icons/basic_folder.svg"))
         self.save_action = QAction("&Save Sim Settings", self)
+        self.save_action.setIcon(QIcon("icons/basic_floppydisk.svg"))
         self.save_action.setShortcut("Ctrl+S")
+        self.about_action = QAction("&About", self)
+        self.about_action.setIcon(QIcon("icons/basic_info.svg"))
         self.exit_action = QAction("&Exit", self)
 
         file_menu.addAction(self.new_action)
         file_menu.addAction(self.load_action)
         file_menu.addAction(self.save_action)
+        file_menu.addSeparator()
+        file_menu.addAction(self.about_action)
         file_menu.addSeparator()
         file_menu.addAction(self.exit_action)
 
@@ -93,8 +111,8 @@ class MainWindowView(QMainWindow):
         self.results_text_browser.setLineWrapMode(QTextBrowser.NoWrap)
         self.results_text_browser.setFont(QFont("Courier"))
 
-        results_vbox_layout.addWidget(self.results_text_browser)
         results_vbox_layout.addLayout(self._controls_layout())
+        results_vbox_layout.addWidget(self.results_text_browser)
 
         return results_widget
 
@@ -109,6 +127,10 @@ class MainWindowView(QMainWindow):
         self.new_action.triggered.connect(self.model.new_sim_settings)
         self.load_action.triggered.connect(self._load_sim_settings)
         self.save_action.triggered.connect(self._save_sim_settings)
+
+        self.about_action.triggered.connect(self.open_about)
+
+        self.exit_action.triggered.connect(self.close)
 
     def _load_sim_settings(self):
         dialog = QFileDialog(self)
@@ -129,6 +151,30 @@ class MainWindowView(QMainWindow):
         dialog.exec_()
         if dialog.selectedFiles():
             self.model.save_sim_settings(dialog.selectedFiles())
+
+    def open_about(self):
+        about_window = QMessageBox()
+        about_window.setTextFormat(Qt.RichText)
+        about_window.setWindowTitle("About")
+        about_window.setText(self.ABOUT)
+        about_window.setIconPixmap(QPixmap("icons/basic_info.svg"))
+        about_window.setStandardButtons(QMessageBox.Ok)
+        about_window.exec_()
+
+    def closeEvent(self, close_event) -> None:
+        close_msg = "Unsaved settings will be lost. Are you sure you want to quit?"
+        close_window = QMessageBox()
+        close_window.setWindowTitle("Quit?")
+        close_window.setText(close_msg)
+        close_window.setIconPixmap(QPixmap("icons/basic_question.svg"))
+        close_window.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+        close_window.setDefaultButton(QMessageBox.No)
+        reply = close_window.exec_()
+
+        if reply == QMessageBox.Yes:
+            close_event.accept()
+        else:
+            close_event.ignore()
 
     @pyqtSlot(int)
     def progress_value(self, value):

@@ -1,5 +1,5 @@
 from PyQt5.QtCore import pyqtSlot, Qt
-from PyQt5.QtGui import QIntValidator
+from PyQt5.QtGui import QIntValidator, QFontDatabase
 from PyQt5.QtWidgets import (QLabel, QWidget, QPushButton, QHBoxLayout, QVBoxLayout, QFormLayout, QComboBox, QLineEdit,
                              QCheckBox, QListWidget, QAbstractItemView)
 
@@ -13,13 +13,15 @@ class SettingsView(QWidget):
         super().__init__()
         self.settings_model = settings_model
         settings_hbox_layout = QHBoxLayout()
-        settings_hbox_layout.setContentsMargins(0, 11, 0, 11)
+        settings_hbox_layout.setContentsMargins(11, 11, 0, 11)
         self.setLayout(settings_hbox_layout)
 
         settings_left_widget = QWidget()
+        settings_left_widget.setMinimumWidth(400)
         settings_left_widget.setMaximumWidth(500)
 
         settings_lvbox_layout = QVBoxLayout()
+        settings_lvbox_layout.setContentsMargins(0, 0, 0, 0)
 
         sim_settings_vbox_layout = QVBoxLayout()
 
@@ -164,8 +166,9 @@ class SettingsView(QWidget):
         self.active_spells_list = QListWidget()
         self.active_spells_list.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.active_spells_list.setSelectionMode(QAbstractItemView.ExtendedSelection)
-        self.active_spells_list.setMinimumHeight(60)
+        self.active_spells_list.setMinimumHeight(50)
         self.active_spells_list.setMaximumHeight(200)
+        self.active_spells_list.setFont(QFontDatabase.systemFont(QFontDatabase.FixedFont))
 
         active_spells_buttons = QVBoxLayout()
 
@@ -193,8 +196,9 @@ class SettingsView(QWidget):
         self.passive_spells_list = QListWidget()
         self.passive_spells_list.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.passive_spells_list.setSelectionMode(QAbstractItemView.ExtendedSelection)
-        self.passive_spells_list.setMinimumHeight(60)
+        self.passive_spells_list.setMinimumHeight(50)
         self.passive_spells_list.setMaximumHeight(200)
+        self.passive_spells_list.setFont(QFontDatabase.systemFont(QFontDatabase.FixedFont))
 
         passive_spells_buttons = QVBoxLayout()
 
@@ -211,34 +215,6 @@ class SettingsView(QWidget):
         ch_passive_spells.addWidget(self.passive_spells_list)
         ch_passive_spells.addLayout(passive_spells_buttons)
 
-        ch_passive_consumables = QHBoxLayout()
-
-        passive_consumables_label = QLabel("<b>Passive Consumables:</b>")
-        passive_consumables_label.setToolTip("Consumables that are already applied when the simulation begins.")
-        passive_consumables_label.setFixedWidth(125)
-        passive_consumables_label.setAlignment(Qt.AlignTop)
-
-        self.passive_consumables_list = QListWidget()
-        self.passive_consumables_list.setEditTriggers(QAbstractItemView.NoEditTriggers)
-        self.passive_consumables_list.setSelectionMode(QAbstractItemView.ExtendedSelection)
-        self.passive_consumables_list.setMinimumHeight(60)
-        self.passive_consumables_list.setMaximumHeight(200)
-
-        passive_consumables_buttons = QVBoxLayout()
-
-        self.passive_consumables_add_button = QPushButton("Add")
-        self.passive_consumables_add_button.setFixedWidth(50)
-
-        self.passive_consumables_remove_button = QPushButton("Remove")
-        self.passive_consumables_remove_button.setFixedWidth(50)
-
-        passive_consumables_buttons.addWidget(self.passive_consumables_add_button)
-        passive_consumables_buttons.addWidget(self.passive_consumables_remove_button)
-
-        ch_passive_consumables.addWidget(passive_consumables_label)
-        ch_passive_consumables.addWidget(self.passive_consumables_list)
-        ch_passive_consumables.addLayout(passive_consumables_buttons)
-
         ch_active_consumables = QHBoxLayout()
 
         active_consumables_label = QLabel("<b>Active Consumables:</b>")
@@ -249,8 +225,9 @@ class SettingsView(QWidget):
         self.active_consumables_list = QListWidget()
         self.active_consumables_list.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.active_consumables_list.setSelectionMode(QAbstractItemView.ExtendedSelection)
-        self.active_consumables_list.setMinimumHeight(60)
+        self.active_consumables_list.setMinimumHeight(50)
         self.active_consumables_list.setMaximumHeight(200)
+        self.active_consumables_list.setFont(QFontDatabase.systemFont(QFontDatabase.FixedFont))
 
         active_consumables_buttons = QVBoxLayout()
 
@@ -267,11 +244,40 @@ class SettingsView(QWidget):
         ch_active_consumables.addWidget(self.active_consumables_list)
         ch_active_consumables.addLayout(active_consumables_buttons)
 
+        ch_passive_consumables = QHBoxLayout()
+
+        passive_consumables_label = QLabel("<b>Passive Consumables:</b>")
+        passive_consumables_label.setToolTip("Consumables that are already applied when the simulation begins.")
+        passive_consumables_label.setFixedWidth(125)
+        passive_consumables_label.setAlignment(Qt.AlignTop)
+
+        self.passive_consumables_list = QListWidget()
+        self.passive_consumables_list.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.passive_consumables_list.setSelectionMode(QAbstractItemView.ExtendedSelection)
+        self.passive_consumables_list.setMinimumHeight(50)
+        self.passive_consumables_list.setMaximumHeight(200)
+        self.passive_consumables_list.setFont(QFontDatabase.systemFont(QFontDatabase.FixedFont))
+
+        passive_consumables_buttons = QVBoxLayout()
+
+        self.passive_consumables_add_button = QPushButton("Add")
+        self.passive_consumables_add_button.setFixedWidth(50)
+
+        self.passive_consumables_remove_button = QPushButton("Remove")
+        self.passive_consumables_remove_button.setFixedWidth(50)
+
+        passive_consumables_buttons.addWidget(self.passive_consumables_add_button)
+        passive_consumables_buttons.addWidget(self.passive_consumables_remove_button)
+
+        ch_passive_consumables.addWidget(passive_consumables_label)
+        ch_passive_consumables.addWidget(self.passive_consumables_list)
+        ch_passive_consumables.addLayout(passive_consumables_buttons)
+
         ch_s_spells_vbox_layout.addLayout(ch_settings_lform_layout)
         ch_s_spells_vbox_layout.addLayout(ch_active_spells)
         ch_s_spells_vbox_layout.addLayout(ch_passive_spells)
-        ch_s_spells_vbox_layout.addLayout(ch_passive_consumables)
         ch_s_spells_vbox_layout.addLayout(ch_active_consumables)
+        ch_s_spells_vbox_layout.addLayout(ch_passive_consumables)
 
         character_settings_vbox_layout.addLayout(ch_s_spells_vbox_layout)
 
@@ -498,7 +504,7 @@ class SettingsView(QWidget):
 
         for key, spell in [(spell_key, dictionary[spell_key][0])
                            for spell_key in dictionary.keys() if spell_key not in current_keys]:
-            QListWidgetItemID(str(key) + " \t" + spell, list_widget, key)
+            QListWidgetItemID("{:7s}{}".format(str(key), spell), list_widget, key)
 
     @staticmethod
     def get_list_items(list_widget):
