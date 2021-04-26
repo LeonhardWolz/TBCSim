@@ -4,7 +4,7 @@ from PyQt5.QtCore import pyqtSlot, Qt
 from PyQt5.QtGui import QFont, QIcon, QPixmap
 from PyQt5.QtWidgets import (QWidget, QMainWindow, QPushButton, QHBoxLayout, QVBoxLayout,
                              QTabWidget, QProgressBar, QTextBrowser, QScrollArea, QMenuBar, QMenu, QAction, QFileDialog,
-                             QMessageBox)
+                             QMessageBox, QDesktopWidget)
 
 from src.gui.views.settings_view import SettingsView
 
@@ -24,7 +24,9 @@ class MainWindowView(QMainWindow):
 
         self.setWindowTitle('WoW TBC Combat Simulation')
         self.setWindowIcon(QIcon("icons/arcane_intellect.jpg"))
-        self.resize(1600, 900)
+        self.resize(1750, 920)
+        self.center()
+
         self._create_menu_bar()
         self._ui_components()
 
@@ -32,31 +34,51 @@ class MainWindowView(QMainWindow):
 
         self.model.set_default_values()
 
+    def center(self):
+        geometry = self.frameGeometry()
+        center_point = QDesktopWidget().availableGeometry().center()
+        geometry.moveCenter(center_point)
+        self.move(geometry.topLeft())
+
     def _create_menu_bar(self):
         menu_bar = QMenuBar()
 
         file_menu = QMenu("&Actions", self)
 
         self.new_action = QAction("&New Sim Settings", self)
-        self.new_action.setIcon(QIcon("icons/basic_sheet_txt .svg"))
+        self.new_action.setIcon(QIcon("icons/basic_sheet_txt.svg"))
+
         self.load_action = QAction("&Load Sim Settings", self)
-        self.load_action.setIcon(QIcon("icons/basic_folder.svg"))
+        self.load_action.setIcon(QIcon("icons/basic_folder_multiple.svg"))
+        self.load_action.setShortcut("Ctrl+O")
+
         self.save_action = QAction("&Save Sim Settings", self)
         self.save_action.setIcon(QIcon("icons/basic_floppydisk.svg"))
         self.save_action.setShortcut("Ctrl+S")
-        self.about_action = QAction("&About", self)
-        self.about_action.setIcon(QIcon("icons/basic_info.svg"))
+
         self.exit_action = QAction("&Exit", self)
+        self.exit_action.setIcon(QIcon("icons/arrows_circle_remove.svg"))
 
         file_menu.addAction(self.new_action)
         file_menu.addAction(self.load_action)
         file_menu.addAction(self.save_action)
         file_menu.addSeparator()
-        file_menu.addAction(self.about_action)
-        file_menu.addSeparator()
         file_menu.addAction(self.exit_action)
 
+        help_menu = QMenu("&Help", self)
+
+        self.help_action = QAction("&Help", self)
+        self.help_action.setIcon(QIcon("icons/basic_question.svg"))
+
+        self.about_action = QAction("&About", self)
+        self.about_action.setIcon(QIcon("icons/basic_info.svg"))
+
+        help_menu.addAction(self.help_action)
+        help_menu.addSeparator()
+        help_menu.addAction(self.about_action)
+
         menu_bar.addMenu(file_menu)
+        menu_bar.addMenu(help_menu)
 
         self.setMenuBar(menu_bar)
 
@@ -64,6 +86,7 @@ class MainWindowView(QMainWindow):
         central_widget = QWidget()
 
         main_layout = QVBoxLayout()
+        main_layout.setContentsMargins(0, 0, 0, 0)
 
         tabs = QTabWidget()
         tabs.addTab(self._settings_tab(), "Settings")
