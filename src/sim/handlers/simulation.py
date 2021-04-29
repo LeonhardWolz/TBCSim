@@ -1,4 +1,6 @@
 from datetime import datetime
+import traceback
+import sys
 
 import simpy
 
@@ -14,8 +16,13 @@ def start_simulation(settings, char, sim_num):
     char.spell_handler.env = env
     char.spell_handler.results = results
     char.spell_handler.sim_num = sim_num
-    player = Player(env, char, results, settings.sim_combat_rater)
-    env.process(player.rotation())
-    env.process(player.mana_regeneration())
-    env.run(until=settings.sim_duration)
+    try:
+        player = Player(env, char, results, settings.sim_combat_rater)
+        env.process(player.rotation())
+        env.process(player.mana_regeneration())
+        env.run(until=settings.sim_duration)
+    except Exception as ex:
+        results.errors_short = f"Error during Simulation Nr. {sim_num + 1}\n" \
+                               f"{traceback.format_exc()}"
+
     return results

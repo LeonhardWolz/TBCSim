@@ -1,11 +1,11 @@
 import enum
 
 inventory_slot = {
-    0: "Ammo",
+    #0: "Ammo",
     1: "Head",
     2: "Neck",
     3: "Shoulder",
-    4: "Body",
+    #4: "Body",
     5: "Chest",
     6: "Waist",
     7: "Legs",
@@ -20,7 +20,7 @@ inventory_slot = {
     16: "Mainhand",
     17: "Offhand",
     18: "Ranged",
-    19: "Tabard"
+    #19: "Tabard"
 }
 
 inv_type_in_slot = {

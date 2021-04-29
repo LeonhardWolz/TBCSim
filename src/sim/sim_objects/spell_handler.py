@@ -4,6 +4,7 @@ from functools import lru_cache
 import src.db.db_connector as DB
 
 from src import enums
+from src.sim.exceptions.exceptions import NotImplementedWarning
 from src.sim.sim_objects.aura import Aura
 from src.sim.sim_objects.channelled_spell import ChannelledSpell
 from src.sim.sim_objects.dot_spell import DotSpell
@@ -44,7 +45,7 @@ class SpellHandler:
                     spell_info[DB.spell_column_info["EffectImplicitTargetA" + str(j)]] == 1:
 
                 # Deal spell school damage to character
-                raise NotImplementedError("Damage to character not implemented")
+                raise NotImplementedWarning("Damage to character not implemented")
 
             elif spell_info[DB.spell_column_info["Effect" + str(j)]] == 4 and \
                     spell_info[DB.spell_column_info["EffectImplicitTargetA" + str(j)]] == 1:

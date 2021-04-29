@@ -7,11 +7,55 @@ row_divider = "---------------------------------------------------------------" 
 
 @dataclass
 class SimCumResult:
-    def __init__(self, settings, results, start_time, actual_time):
-        self.settings = settings
-        self.results = results
-        self.start_time = start_time
-        self.actual_time = actual_time
+    def __init__(self):
+        self.settings = None
+        self.results = None
+        self.start_time = None
+        self.run_time = None
+        self.errors = []
+
+    @property
+    def settings(self):
+        return self._settings
+
+    @settings.setter
+    def settings(self, value):
+        self._settings = value
+
+    @property
+    def results(self):
+        return self._results
+
+    @results.setter
+    def results(self, value):
+        self._results = value
+
+    @property
+    def start_time(self):
+        return self._start_time
+
+    @start_time.setter
+    def start_time(self, value):
+        self._start_time = value
+
+    @property
+    def run_time(self):
+        return self._run_time
+
+    @run_time.setter
+    def run_time(self, value):
+        self._run_time = value
+
+    @property
+    def errors(self):
+        return self._errors
+
+    @errors.setter
+    def errors(self, value):
+        self._errors = value
+
+    def all_errors_short(self):
+        return self.errors + [result.errors_short for result in self.results if result.errors_short != ""]
 
     def __str__(self):
         str_repr = "Results for TBC Combat Simulation from: {}\n\n".format(
@@ -29,9 +73,16 @@ class SimCumResult:
         str_repr += str(max(self.results, key=lambda res: res.dps))
         str_repr += row_divider
 
-        str_repr += f"\nCompleted {self.settings.sim_iterations} Iteration(s) in {self.actual_time} seconds"
-        str_repr += "\n----------------------- Cumulative Sim Results -----------------------"
-        str_repr += f"\nAvg DPS: {self.avg_dps}"
+        str_repr += "\n\n----------------------------- Cumulative Sim Results -----------------------------"
+        str_repr += f"\nCompleted {self.settings.sim_iterations} Iteration(s) in {self.run_time} seconds"
+        str_repr += f"\n\nAvg DPS: {self.avg_dps}"
+
+        if self.errors:
+            str_repr += "\n\nErrors during Simulation:\n"
+            str_repr += "-----------------------------------------\n"
+            for x, error in enumerate(self.all_errors_short()):
+                str_repr += f"Error {x+1}:    " + error + "\n\n"
+            str_repr += "\n\n"
 
         return str_repr
 

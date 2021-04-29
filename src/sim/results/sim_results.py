@@ -11,11 +11,11 @@ consumable_row_divider = "    --------------------------------------------------
 misc_combat_action_line_format = "    {:24s}|{:12s}|{:16s}"
 misc_combat_action_row_divider = "    ------------------------------------------------------"
 
-off_combat_action_line_format = "    {:24s}|{:12s}|{:12s}|{:12s}|{:16s}|{:14s}|{:8s}|" \
-                                "{:16s}|{:16s}|{:14s}|{:16s}|{:8s}|{:10s}|{:16s}"
+off_combat_action_line_format = "    {:34s}|{:8s}|{:8s}|{:8s}|{:10s}|{:10s}|{:8s}|" \
+                                "{:10s}|{:10s}|{:10s}|{:12s}|{:10s}|{:12s}|{:16s}"
 off_combat_action_row_divider = "    ----------------------------------------------------------------------------" \
                                 "----------------------------------------------------------------------------" \
-                                "-------------------------------------------------------"
+                                "---------------------------"
 
 
 @dataclass
@@ -27,6 +27,7 @@ class SimResult:
     action_order: List = field(default_factory=lambda: [])
     equipped_items: Dict = field(default_factory=lambda: {})
     full_combat_log: str = ""
+    errors_short: str = ""
 
     def spell_cast(self, spell_id, sim_time):
         self.action_order.append((sim_time, DB.get_spell_name(spell_id) + " "
@@ -66,8 +67,6 @@ class SimResult:
                                                                      direct_hit_damage=damage,
                                                                      damage_action=True)
 
-        # self.total_damage_dealt += damage
-
     def damage_spell_crit(self, spell_id, damage):
         if (spell_id, 1) in self.combat_actions.keys():
             action_result = self.combat_actions.get((spell_id, 1))
@@ -84,8 +83,6 @@ class SimResult:
                                                                      crits=1,
                                                                      direct_hit_damage=damage,
                                                                      damage_action=True)
-
-        # self.total_damage_dealt += damage
 
     def damage_spell_resisted(self, spell_id):
         if (spell_id, 1) in self.combat_actions.keys():
@@ -147,8 +144,6 @@ class SimResult:
                                                                      dot_damage=damage,
                                                                      damage_action=True)
 
-        # self.total_damage_dealt += damage
-
     def dot_spell_resisted(self, spell_id):
         if (spell_id, 1) in self.combat_actions.keys():
             action_result = self.combat_actions.get((spell_id, 1))
@@ -193,8 +188,6 @@ class SimResult:
                                                                     direct_hit_damage=damage,
                                                                     damage_action=True)
 
-        # self.total_damage_dealt += damage
-
     def wand_attack_crit(self, item_id, damage):
         if (item_id, 2) in self.combat_actions.keys():
             action_result = self.combat_actions.get((item_id, 2))
@@ -209,8 +202,6 @@ class SimResult:
                                                                     crits=1,
                                                                     direct_hit_damage=damage,
                                                                     damage_action=True)
-
-        # self.total_damage_dealt += damage
 
     def wand_attack_resisted(self, item_id):
         if (item_id, 2) in self.combat_actions.keys():
@@ -264,12 +255,13 @@ class SimResult:
         str_repr += "   ------------ Equipped Items ------------\n\n"
 
         for i in range(0, 20):
-            str_repr += "    {:9s}: ".format(enums.inventory_slot[i])
-            if i in self.equipped_items.keys():
-                str_repr += str(self.equipped_items.get(i)) + "\n"
-            else:
-                str_repr += "----\n"
-            str_repr += "   ---------------------------------------------------\n"
+            if i in enums.inventory_slot:
+                str_repr += "    {:9s}: ".format(enums.inventory_slot[i])
+                if i in self.equipped_items.keys():
+                    str_repr += str(self.equipped_items.get(i)) + "\n"
+                else:
+                    str_repr += "----\n"
+                str_repr += "   ---------------------------------------------------\n"
 
         str_repr += "\n"
         str_repr += "   ------------ Action Order ------------\n\n"
@@ -308,16 +300,16 @@ class SimResult:
         str_repr += "\n"
         str_repr += "\n    ------------ Offensive Combat Action Breakdown ------------\n\n"
         str_repr += off_combat_action_line_format.format("Combat Action Name",
-                                                         "Total Uses",
-                                                         "Total Hits",
-                                                         "Total Crits",
-                                                         "Total Resisted",
-                                                         "Total Damage",
+                                                         "Uses",
+                                                         "Hits",
+                                                         "Crits",
+                                                         "Resisted",
+                                                         "Damage",
                                                          "DPS",
-                                                         "Total Dot Hits",
-                                                         "Total Dot Crits",
-                                                         "Total Dot Res.",
-                                                         "Total Dot Damage",
+                                                         "Dot Hits",
+                                                         "Dot Crits",
+                                                         "Dot Res.",
+                                                         "Dot Damage",
                                                          "Dot DPS",
                                                          "Total DPS",
                                                          "Misc Effect")
@@ -413,7 +405,7 @@ class EquippedItem:
                     str_repr += "Socket Empty"
         if self.socket_bonus != 0:
             socket_bonus_name = DB.get_enchant(self.socket_bonus)[DB.enchant_column_info["m_name_lang_1"]]
-            str_repr += "\n\t\tSocket Bonus {}: \t".format("Active" if self.socket_bonus_met else "Inactive")\
+            str_repr += "\n\t\tSocket Bonus {}: \t".format("Active" if self.socket_bonus_met else "Inactive") \
                         + socket_bonus_name
         return str_repr
 

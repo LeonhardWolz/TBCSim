@@ -26,9 +26,7 @@ class SettingsView(QWidget):
         sim_settings_vbox_layout = QVBoxLayout()
 
         sim_settings_label = QLabel("Simulation Settings")
-        label_font = sim_settings_label.font()
-        label_font.setPointSize(15)
-        sim_settings_label.setFont(label_font)
+        sim_settings_label.setStyleSheet("""font-size: 15pt;""")
         sim_settings_label.setAlignment(Qt.AlignCenter)
 
         sim_settings_vbox_layout.addWidget(sim_settings_label)
@@ -38,19 +36,19 @@ class SettingsView(QWidget):
 
         self.sim_type_combo_box = QComboBox()
         self.sim_type_combo_box.addItem("dps")
-        sim_settings_form_layout.addRow("<b>Simulation Type:</b>", self.sim_type_combo_box)
+        sim_settings_form_layout.addRow("<b>Sim. Type:</b>", self.sim_type_combo_box)
 
         self.sim_duration_entry = QLineEdit()
         self.sim_duration_entry.setValidator(QIntValidator())
-        sim_settings_form_layout.addRow("<b>Simulation Duration:</b>", self.sim_duration_entry)
+        sim_settings_form_layout.addRow("<b>Sim. Duration:</b>", self.sim_duration_entry)
 
         self.sim_iterations_entry = QLineEdit()
         self.sim_iterations_entry.setValidator(QIntValidator())
-        sim_settings_form_layout.addRow("<b>Simulation Iterations:</b>", self.sim_iterations_entry)
+        sim_settings_form_layout.addRow("<b>Sim. Iterations:</b>", self.sim_iterations_entry)
 
         self.sim_rater_combo_box = QComboBox()
         self.sim_rater_combo_box.addItem("FireMageCAR")
-        sim_settings_form_layout.addRow("<b>Simulation Cobat Rater:</b>", self.sim_rater_combo_box)
+        sim_settings_form_layout.addRow("<b>Sim. Cobat Rater:</b>", self.sim_rater_combo_box)
 
         sim_settings_vbox_layout.addLayout(sim_settings_form_layout)
         sim_settings_vbox_layout.setAlignment(Qt.AlignTop)
@@ -58,9 +56,7 @@ class SettingsView(QWidget):
         enemy_settings_vbox_layout = QVBoxLayout()
 
         enemy_settings_label = QLabel("Enemy Settings")
-        label_font = enemy_settings_label.font()
-        label_font.setPointSize(15)
-        enemy_settings_label.setFont(label_font)
+        enemy_settings_label.setStyleSheet("""font-size: 15pt;""")
         enemy_settings_label.setAlignment(Qt.AlignCenter)
 
         enemy_settings_vbox_layout.addWidget(enemy_settings_label)
@@ -85,27 +81,27 @@ class SettingsView(QWidget):
 
         self.enemy_holy_resistance_entry = QLineEdit()
         self.enemy_holy_resistance_entry.setValidator(QIntValidator())
-        enemy_settings_form_layout.addRow("<b>Enemy Holy Resistance:</b>", self.enemy_holy_resistance_entry)
+        enemy_settings_form_layout.addRow("<b>Enemy Holy Res.:</b>", self.enemy_holy_resistance_entry)
 
         self.enemy_frost_resistance_entry = QLineEdit()
         self.enemy_frost_resistance_entry.setValidator(QIntValidator())
-        enemy_settings_form_layout.addRow("<b>Enemy Frost Resistance:</b>", self.enemy_frost_resistance_entry)
+        enemy_settings_form_layout.addRow("<b>Enemy Frost Res.:</b>", self.enemy_frost_resistance_entry)
 
         self.enemy_fire_resistance_entry = QLineEdit()
         self.enemy_fire_resistance_entry.setValidator(QIntValidator())
-        enemy_settings_form_layout.addRow("<b>Enemy Fire Resistance:</b>", self.enemy_fire_resistance_entry)
+        enemy_settings_form_layout.addRow("<b>Enemy Fire Res.:</b>", self.enemy_fire_resistance_entry)
 
         self.enemy_nature_resistance_entry = QLineEdit()
         self.enemy_nature_resistance_entry.setValidator(QIntValidator())
-        enemy_settings_form_layout.addRow("<b>Enemy Nature Resistance:</b>", self.enemy_nature_resistance_entry)
+        enemy_settings_form_layout.addRow("<b>Enemy Nature Res.:</b>", self.enemy_nature_resistance_entry)
 
         self.enemy_shadow_resistance_entry = QLineEdit()
         self.enemy_shadow_resistance_entry.setValidator(QIntValidator())
-        enemy_settings_form_layout.addRow("<b>Enemy Shadow Resistance:</b>", self.enemy_shadow_resistance_entry)
+        enemy_settings_form_layout.addRow("<b>Enemy Shadow Res.:</b>", self.enemy_shadow_resistance_entry)
 
         self.enemy_arcane_resistance_entry = QLineEdit()
         self.enemy_arcane_resistance_entry.setValidator(QIntValidator())
-        enemy_settings_form_layout.addRow("<b>Enemy Arcane Resistance:</b>", self.enemy_arcane_resistance_entry)
+        enemy_settings_form_layout.addRow("<b>Enemy Arcane Res.:</b>", self.enemy_arcane_resistance_entry)
 
         enemy_settings_vbox_layout.addLayout(enemy_settings_form_layout)
         enemy_settings_vbox_layout.setAlignment(Qt.AlignTop)
@@ -113,9 +109,7 @@ class SettingsView(QWidget):
         character_settings_vbox_layout = QVBoxLayout()
 
         character_settings_label = QLabel("Character Settings")
-        label_font = character_settings_label.font()
-        label_font.setPointSize(15)
-        character_settings_label.setFont(label_font)
+        character_settings_label.setStyleSheet("""font-size: 15pt;""")
         character_settings_label.setAlignment(Qt.AlignCenter)
 
         character_settings_vbox_layout.addWidget(character_settings_label)
@@ -156,11 +150,11 @@ class SettingsView(QWidget):
 
         ch_active_spells = QHBoxLayout()
 
-        active_spells_label = QLabel("<b>Active Spells:</b>")
+        active_spells_label = QLabel("<b>Active<br>Spells:</b>")
         active_spells_label.setToolTip("Damage spells that are considered for use during the Simulation.\n"
                                        "Power-up spells like Arcane Power don't belong here. "
                                        "Those get used automatically.")
-        active_spells_label.setFixedWidth(125)
+        active_spells_label.setFixedWidth(85)
         active_spells_label.setAlignment(Qt.AlignTop)
 
         self.active_spells_list = QListWidget()
@@ -187,10 +181,10 @@ class SettingsView(QWidget):
 
         ch_passive_spells = QHBoxLayout()
 
-        passive_spells_label = QLabel("<b>Passive Spells:</b>")
+        passive_spells_label = QLabel("<b>Passive<br>Spells:</b>")
         passive_spells_label.setToolTip("Spells that are applied automatically at the beginning of the simulation\n"
                                         "such as Power Word: Fortitude or Arcane Intellect.")
-        passive_spells_label.setFixedWidth(125)
+        passive_spells_label.setFixedWidth(85)
         passive_spells_label.setAlignment(Qt.AlignTop)
 
         self.passive_spells_list = QListWidget()
@@ -217,9 +211,9 @@ class SettingsView(QWidget):
 
         ch_active_consumables = QHBoxLayout()
 
-        active_consumables_label = QLabel("<b>Active Consumables:</b>")
+        active_consumables_label = QLabel("<b>Active<br>Consumables:</b>")
         active_consumables_label.setToolTip("Consumables that are to be used during the simulation.")
-        active_consumables_label.setFixedWidth(125)
+        active_consumables_label.setFixedWidth(85)
         active_consumables_label.setAlignment(Qt.AlignTop)
 
         self.active_consumables_list = QListWidget()
@@ -246,9 +240,9 @@ class SettingsView(QWidget):
 
         ch_passive_consumables = QHBoxLayout()
 
-        passive_consumables_label = QLabel("<b>Passive Consumables:</b>")
+        passive_consumables_label = QLabel("<b>Passive<br>Consumables:</b>")
         passive_consumables_label.setToolTip("Consumables that are already applied when the simulation begins.")
-        passive_consumables_label.setFixedWidth(125)
+        passive_consumables_label.setFixedWidth(85)
         passive_consumables_label.setAlignment(Qt.AlignTop)
 
         self.passive_consumables_list = QListWidget()

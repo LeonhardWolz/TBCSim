@@ -224,7 +224,10 @@ def get_enchant(enchantment_id):
 @lru_cache
 def get_enchant_name(enchantment_id):
     try:
-        tbcdb_cursor.execute("SELECT SpellName FROM simdata.spell_template WHERE id={}".format(enchantment_id))
+        query = "Select SpellName " \
+                "FROM simdata.spell_template " \
+                f"WHERE Effect1=53 and EffectMiscValue1={enchantment_id}"
+        tbcdb_cursor.execute(query)
         return str(tbcdb_cursor.fetchone()[0])
     except mysql.connector.Error as ex:
         logging.critical("DB Error during enchantment name retrieval: {}".format(ex))
@@ -336,20 +339,20 @@ def get_gui_gem_dict():
 
 @lru_cache
 def get_gui_enchantments_dict(item_class, item_subclass_mask=0, inventory_type_mask=0):
+    my_where_statement = ""
+
     if item_class == 4:
         my_where_statement = f" and EquippedItemInventoryTypeMask&{inventory_type_mask}"
     elif item_class == 2:
         my_where_statement = f" and EquippedItemClass=2 and EquippedItemSubClassMask&{item_subclass_mask}"
-    else:
-        my_where_statement = ""
 
-    myquery = "SELECT Id as Id, SpellName as Name, m_name_lang_1 as Description FROM " \
-              "(SELECT Id, m_ID, EffectMiscValue1, SpellName, m_name_lang_1 " \
-              "FROM simdata.spell_template, simdata.dbc_spellitemenchantment " \
-              f"WHERE Effect1=53 and Rank1!=\"QASpell\" and m_ID=EffectMiscValue1 {my_where_statement}) as Enchants"
+    query = "SELECT m_ID as Id, SpellName as Name, m_name_lang_1 as Description FROM " \
+            "(SELECT Id, m_ID, EffectMiscValue1, SpellName, m_name_lang_1 " \
+            "FROM simdata.spell_template, simdata.dbc_spellitemenchantment " \
+            f"WHERE Effect1=53 and Rank1!=\"QASpell\" and m_ID=EffectMiscValue1 {my_where_statement}) as Enchants"
 
     try:
-        tbcdb_cursor.execute(myquery)
+        tbcdb_cursor.execute(query)
         enchants_dict = {}
         for result in tbcdb_cursor.fetchall():
             enchants_dict[result[0]] = (result[1], result[2])
@@ -370,7 +373,8 @@ def get_gear_items_for_slot(inv_slot):
 
     # add filter for placeholder items in slots with durability
     if inv_slot not in (0, 2, 4, 11, 12, 13, 14, 15, 19):
-        query_str += ") and MaxDurability != 0"
+        query_str += ") and ItemLevel != 0"
+        # query_str += ") and MaxDurability != 0"
     else:
         query_str += ")"
 

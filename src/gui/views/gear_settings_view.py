@@ -24,9 +24,7 @@ class GearView(QWidget):
         self.setLayout(ch_settings_gear_layout)
 
         ch_gear_header_label = QLabel("Gear")
-        gear_header_font = ch_gear_header_label.font()
-        gear_header_font.setPointSize(15)
-        ch_gear_header_label.setFont(gear_header_font)
+        ch_gear_header_label.setStyleSheet("""font-size: 15pt;""")
         ch_gear_header_label.setAlignment(Qt.AlignCenter)
 
         gear_items_layout = QHBoxLayout()
@@ -53,10 +51,9 @@ class GearView(QWidget):
 
             gear_lvbox_layout = QVBoxLayout()
 
-            gear_slot_label = QLabel("<b>" + enums.inventory_slot[gear_slot_entry[0]] + ":</b>")
-            gear_slot_font = gear_slot_label.font()
-            gear_slot_font.setPointSize(9)
-            gear_slot_label.setFont(gear_slot_font)
+            gear_slot_label = QLabel(enums.inventory_slot[gear_slot_entry[0]])
+            gear_slot_label.setStyleSheet("""font-size: 11pt;""")
+            gear_slot_label.setContentsMargins(4, 0, 0, 0)
 
             gear_slot_label.setMinimumWidth(65)
             gear_slot_label.setMaximumWidth(65)
@@ -119,7 +116,6 @@ class GearView(QWidget):
 
 
 class GearItem(QWidget):
-    label_width = 65
 
     def __init__(self, model, inventory_slot):
         super().__init__()
@@ -129,10 +125,8 @@ class GearItem(QWidget):
         self.layout().setContentsMargins(0, 0, 0, 0)
 
         self.name_label = QLabel("--- Slot Empty ---")
-        self.name_label.setAlignment(Qt.AlignLeft)
-        name_label_font = self.name_label.font()
-        name_label_font.setPointSize(11)
-        self.name_label.setFont(name_label_font)
+        self.name_label.setAlignment(Qt.AlignCenter | Qt.AlignTop)
+        self.name_label.setStyleSheet("""font-size: 12pt;""")
         self.layout().addWidget(self.name_label)
 
         self.enchantments = None
@@ -174,13 +168,11 @@ class GearItem(QWidget):
         enchantment_layout = QHBoxLayout()
 
         enchantment_label = QLabel("Enchantment:")
-        enchantment_label.setMinimumWidth(self.label_width)
-        enchantment_label.setMaximumWidth(self.label_width)
 
         enchantment_name_label = QLabel(enchantment_name)
         enchantment_name_label.setAlignment(Qt.AlignCenter)
 
-        self.enchantment_set_button = QPushButton("Select")
+        self.enchantment_set_button = QPushButton("Edit")
         self.enchantment_set_button.setMaximumWidth(40)
 
         self.enchantment_set_button.clicked.connect(self.open_enchantments_dialog)
@@ -215,17 +207,14 @@ class GearItem(QWidget):
             socket_layout.setContentsMargins(0, 0, 0, 0)
 
             self.socket_label[index] = QLabel(color_name + ":")
-            self.socket_label[index].setMinimumWidth(35)
-            self.socket_label[index].setMaximumWidth(35)
 
             self.socket_content[index] = QLabel("--- No Gem ---")
             self.socket_content[index].setAlignment(Qt.AlignCenter)
 
-            self.socket_buttons[index] = QPushButton("Select")
+            self.socket_buttons[index] = QPushButton("Edit")
             self.socket_buttons[index].setMaximumWidth(40)
 
-            self.socket_buttons[index].clicked.connect(partial(self.open_socket_dialog,
-                                                               index))
+            self.socket_buttons[index].clicked.connect(partial(self.open_socket_dialog, index))
 
             socket_layout.addWidget(self.socket_label[index])
             socket_layout.addWidget(self.socket_content[index])
@@ -234,10 +223,9 @@ class GearItem(QWidget):
             sockets_vlayout.addLayout(socket_layout)
 
         sockets_label = QLabel("Sockets:")
+        sockets_label.setContentsMargins(0, 4, 0, 0)
         sockets_label.setAlignment(Qt.AlignTop)
-        sockets_label.setMinimumWidth(self.label_width)
-        sockets_label.setMaximumWidth(self.label_width)
-        sockets_label.setMinimumHeight(20)
+        sockets_label.setFixedWidth(50)
 
         sockets_hlayout.addWidget(sockets_label)
         sockets_hlayout.addLayout(sockets_vlayout)

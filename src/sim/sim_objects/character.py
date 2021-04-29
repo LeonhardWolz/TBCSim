@@ -1,3 +1,4 @@
+from src.sim.exceptions.exceptions import NotImplementedWarning
 from src.sim.sim_objects.spell_handler import SpellHandler
 import src.db.db_connector as DB
 
@@ -198,7 +199,7 @@ class Character:
         elif stat_type == 30:
             self.spell_haste_rating += value
         else:
-            raise NotImplementedError("Stat modification not implemented for stat_type: " + str(stat_type))
+            raise NotImplementedWarning("Stat modification not implemented for stat_type: " + str(stat_type))
 
     def school_power_from_auras(self, spell_school, proc_auras=True):
         school_power = 0

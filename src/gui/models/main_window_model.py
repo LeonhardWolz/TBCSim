@@ -71,7 +71,7 @@ class SimWorker(QObject):
         super().__init__()
         self.model = model
         self.settings_loader = settings_loader
-        self.sim_cum_results = None
+        self.sim_cum_results = settings_loader.get_sim_results()
         self.completed_sims = 0
 
         if not DB.good_startup():
@@ -101,10 +101,12 @@ class SimWorker(QObject):
                                                + "%")
 
         sim_end_time = time.perf_counter()
-        self.sim_cum_results = SimCumResult(sim_settings,
-                                            [res.result() for res in sim_results],
-                                            datetime.now(),
-                                            round(sim_end_time - sim_start_time, 2))
+
+        self.sim_cum_results.settings = sim_settings
+        self.sim_cum_results.results = [res.result() for res in sim_results]
+        self.sim_cum_results.start_time = datetime.now()
+        self.sim_cum_results.run_time = round(sim_end_time - sim_start_time, 2)
+
         self.model.progress_label.emit(str(self.completed_sims) + "/" + str(sim_settings.sim_iterations) + " "
                                        + "%0.2f" % ((self.completed_sims / sim_settings.sim_iterations) * 100)
                                        + "% - Simulation Complete")

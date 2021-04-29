@@ -5,6 +5,8 @@ import copy
 
 from src.db import db_connector as DB
 from src import enums
+from src.sim.exceptions.exceptions import NotImplementedWarning
+from src.sim.results.sim_cumulative_result import SimCumResult
 from src.sim.sim_objects.enemy import Enemy
 
 from src.sim.settings.sim_settings import SimSettings
@@ -13,6 +15,7 @@ from src.sim.results.sim_results import EquippedItem
 
 
 class SimulationSettingsLoader(object):
+
     mage_boost_spells = (11129, 12472)
 
     mage_mana_spells = (12051,)
@@ -21,8 +24,10 @@ class SimulationSettingsLoader(object):
         self.char = Character()
         self.enemy = Enemy()
         self.simSettings = SimSettings()
+        self.sim_results = SimCumResult()
 
         self.load_settings(settings_dict)
+
 
     def load_settings(self, settings_dict):
         # load sim settings
@@ -202,6 +207,8 @@ class SimulationSettingsLoader(object):
                     ValueError("Item " + str(item[1]["item_id"]) + " in Inventory Slot " + str(item[0]) + " not found")
 
                 if "enchant" in item[1]:
+                    # TODO vvvvv THis doesn't work item[1]["enchant"] refers to the spell id of the enchant
+                    #  but the function takes the enchant id
                     enchantment = DB.get_enchant(item[1]["enchant"])
                     self.char.gear[item[0]].enchantment = enchantment[DB.enchant_column_info["m_name_lang_1"]]
                     self.apply_enchantment(enchantment)
@@ -303,13 +310,19 @@ class SimulationSettingsLoader(object):
             stat_id = item_from_db[DB.item_column_info["stat_type" + str(i)]]
             stat_value = item_from_db[DB.item_column_info["stat_value" + str(i)]]
             if stat_value != 0:
-                self.char.modify_stat(stat_id, stat_value)
+                try:
+                    self.char.modify_stat(stat_id, stat_value)
+                except NotImplementedWarning as e:
+                    self.sim_results.errors.append(str(e))
 
         for i in range(1, 6):
             spell_id = item_from_db[DB.item_column_info["spellid_" + str(i)]]
             spell_trigger = item_from_db[DB.item_column_info["spelltrigger_" + str(i)]]
             if spell_id != 0 and spell_trigger == 1:
-                self.char.spell_handler.apply_spell_effect(spell_id)
+                try:
+                    self.char.spell_handler.apply_spell_effect(spell_id)
+                except NotImplementedWarning as e:
+                    self.sim_results.errors.append(str(e))
 
         for i in range(1, 4):
             socket_color = item_from_db[DB.item_column_info["socketColor_" + str(i)]]
@@ -317,6 +330,9 @@ class SimulationSettingsLoader(object):
                 self.char.gear[inventory_slot].sockets.append([socket_color, None, None, None, None])
 
         self.char.gear[inventory_slot].socket_bonus = item_from_db[DB.item_column_info["socketBonus"]]
+
+    def get_sim_results(self):
+        return self.sim_results
 
     def get_settings(self):
         return copy.deepcopy(self.simSettings), copy.deepcopy(self.char)

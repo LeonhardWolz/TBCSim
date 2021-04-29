@@ -12,10 +12,11 @@ from src.gui.views.settings_view import SettingsView
 class MainWindowView(QMainWindow):
     ABOUT = "DMG Simulation for World of Warcraft TBC<br>" \
             "Feel free to contribute at: " \
-            "<a href=https://github.com/LeonhardWolz/TBCSim>https://github.com/LeonhardWolz/TBCSim</a><br><br>" \
+            "<a href=https://github.com/LeonhardWolz/TBCSim style=\"color: #467fb3;\">" \
+            "https://github.com/LeonhardWolz/TBCSim</a><br><br>" \
             "Made using:" \
-            "<br>Linea Icons <a href=https://linea.io>linea.io</a> by Dario Ferrando under " \
-            "<a href=https://creativecommons.org/licenses/by/4.0>CC BY 4.0</a><br>" \
+            "<br>Linea Icons <a href=https://linea.io style=\"color: #467fb3;\">linea.io</a> by Dario Ferrando under " \
+            "<a href=https://creativecommons.org/licenses/by/4.0 style=\"color: #467fb3;\">CC BY 4.0</a><br>" \
             "<br>made by Leonhard Wolz, 2021"
 
     def __init__(self, mw_model):
@@ -23,9 +24,9 @@ class MainWindowView(QMainWindow):
         self.model = mw_model
 
         self.setWindowTitle('WoW TBC Combat Simulation')
-        self.setWindowIcon(QIcon("icons/arcane_intellect.jpg"))
+        self.setWindowIcon(QIcon("gui/icons/arcane_intellect.jpg"))
         self.resize(1750, 920)
-        self.center()
+        self._center()
 
         self._create_menu_bar()
         self._ui_components()
@@ -34,7 +35,7 @@ class MainWindowView(QMainWindow):
 
         self.model.set_default_values()
 
-    def center(self):
+    def _center(self):
         geometry = self.frameGeometry()
         center_point = QDesktopWidget().availableGeometry().center()
         geometry.moveCenter(center_point)
@@ -46,18 +47,18 @@ class MainWindowView(QMainWindow):
         file_menu = QMenu("&Actions", self)
 
         self.new_action = QAction("&New Sim Settings", self)
-        self.new_action.setIcon(QIcon("icons/basic_sheet_txt.svg"))
+        self.new_action.setIcon(QIcon("gui/icons/basic_sheet_txt.svg"))
 
         self.load_action = QAction("&Load Sim Settings", self)
-        self.load_action.setIcon(QIcon("icons/basic_folder_multiple.svg"))
+        self.load_action.setIcon(QIcon("gui/icons/basic_folder_multiple.svg"))
         self.load_action.setShortcut("Ctrl+O")
 
         self.save_action = QAction("&Save Sim Settings", self)
-        self.save_action.setIcon(QIcon("icons/basic_floppydisk.svg"))
+        self.save_action.setIcon(QIcon("gui/icons/save.svg"))
         self.save_action.setShortcut("Ctrl+S")
 
         self.exit_action = QAction("&Exit", self)
-        self.exit_action.setIcon(QIcon("icons/arrows_circle_remove.svg"))
+        self.exit_action.setIcon(QIcon("gui/icons/close.svg"))
 
         file_menu.addAction(self.new_action)
         file_menu.addAction(self.load_action)
@@ -68,10 +69,10 @@ class MainWindowView(QMainWindow):
         help_menu = QMenu("&Help", self)
 
         self.help_action = QAction("&Help", self)
-        self.help_action.setIcon(QIcon("icons/basic_question.svg"))
+        self.help_action.setIcon(QIcon("gui/icons/basic_question.svg"))
 
         self.about_action = QAction("&About", self)
-        self.about_action.setIcon(QIcon("icons/basic_info.svg"))
+        self.about_action.setIcon(QIcon("gui/icons/basic_info.svg"))
 
         help_menu.addAction(self.help_action)
         help_menu.addSeparator()
@@ -86,7 +87,7 @@ class MainWindowView(QMainWindow):
         central_widget = QWidget()
 
         main_layout = QVBoxLayout()
-        main_layout.setContentsMargins(0, 0, 0, 0)
+        main_layout.setContentsMargins(0, 4, 0, 0)
 
         tabs = QTabWidget()
         tabs.addTab(self._settings_tab(), "Settings")
@@ -97,6 +98,28 @@ class MainWindowView(QMainWindow):
         central_widget.setLayout(main_layout)
 
         self.setCentralWidget(central_widget)
+
+    def _settings_tab(self):
+        settings_scroll_area = QScrollArea()
+        settings_scroll_area.setWidgetResizable(True)
+        settings_scroll_area.setWidget(SettingsView(self.model.settings_model))
+
+        return settings_scroll_area
+
+    def _results_tab(self):
+        results_widget = QWidget()
+
+        results_vbox_layout = QVBoxLayout()
+        results_vbox_layout.setContentsMargins(4, 4, 4, 4)
+        results_widget.setLayout(results_vbox_layout)
+
+        self.results_text_browser = QTextBrowser()
+        self.results_text_browser.setLineWrapMode(QTextBrowser.NoWrap)
+
+        results_vbox_layout.addLayout(self._controls_layout())
+        results_vbox_layout.addWidget(self.results_text_browser)
+
+        return results_widget
 
     def _controls_layout(self):
         controls_hlayout = QHBoxLayout()
@@ -116,28 +139,6 @@ class MainWindowView(QMainWindow):
         controls_hlayout.addWidget(self.sim_progress_bar, 1)
 
         return controls_hlayout
-
-    def _settings_tab(self):
-        settings_scroll_area = QScrollArea()
-        settings_scroll_area.setWidgetResizable(True)
-        settings_scroll_area.setWidget(SettingsView(self.model.settings_model))
-
-        return settings_scroll_area
-
-    def _results_tab(self):
-        results_widget = QWidget()
-
-        results_vbox_layout = QVBoxLayout()
-        results_widget.setLayout(results_vbox_layout)
-
-        self.results_text_browser = QTextBrowser()
-        self.results_text_browser.setLineWrapMode(QTextBrowser.NoWrap)
-        self.results_text_browser.setFont(QFont("Courier"))
-
-        results_vbox_layout.addLayout(self._controls_layout())
-        results_vbox_layout.addWidget(self.results_text_browser)
-
-        return results_widget
 
     def _connect_signals(self):
         self.start_sim_button.clicked.connect(self.model.start_sim)
@@ -180,7 +181,7 @@ class MainWindowView(QMainWindow):
         about_window.setTextFormat(Qt.RichText)
         about_window.setWindowTitle("About")
         about_window.setText(self.ABOUT)
-        about_window.setIconPixmap(QPixmap("icons/basic_info.svg"))
+        about_window.setIconPixmap(QPixmap("gui/icons/basic_info.svg"))
         about_window.setStandardButtons(QMessageBox.Ok)
         about_window.exec_()
 
@@ -189,7 +190,7 @@ class MainWindowView(QMainWindow):
         close_window = QMessageBox()
         close_window.setWindowTitle("Quit?")
         close_window.setText(close_msg)
-        close_window.setIconPixmap(QPixmap("icons/basic_question.svg"))
+        close_window.setIconPixmap(QPixmap("gui/icons/basic_question.svg"))
         close_window.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
         close_window.setDefaultButton(QMessageBox.No)
         reply = close_window.exec_()
