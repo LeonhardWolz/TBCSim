@@ -28,7 +28,6 @@ class SimulationSettingsLoader(object):
 
         self.load_settings(settings_dict)
 
-
     def load_settings(self, settings_dict):
         # load sim settings
         self.load_sim_settings(settings_dict["simulation"])
@@ -133,10 +132,14 @@ class SimulationSettingsLoader(object):
                 if spell_id != 0:
                     # bufffood triggers spell
                     triggered_spell_id = self.char.spell_handler.spell_get_triggered_spell(spell_id)
-                    if triggered_spell_id != 0:
-                        self.char.spell_handler.apply_spell_effect(triggered_spell_id)
-                    else:
-                        self.char.spell_handler.apply_spell_effect(spell_id)
+                    try:
+                        if triggered_spell_id != 0:
+                            self.char.spell_handler.apply_spell_effect(triggered_spell_id)
+                        else:
+                            self.char.spell_handler.apply_spell_effect(spell_id)
+                    except NotImplementedWarning as e:
+                        self.sim_results.errors.append(str(e))
+
         if char_settings["active_consumables"]:
             for consumable_id in char_settings["active_consumables"]:
                 self.char.active_consumables[consumable_id] = 0
@@ -285,15 +288,21 @@ class SimulationSettingsLoader(object):
                 pass
             # 3: apply spell
             elif enchantment_info[DB.enchant_column_info["m_effect" + str(effect_slot)]] == 3:
-                self.char.spell_handler.apply_spell_effect(
-                    enchantment_info[DB.enchant_column_info["m_effectArg" + str(effect_slot)]])
+                try:
+                    self.char.spell_handler.apply_spell_effect(
+                        enchantment_info[DB.enchant_column_info["m_effectArg" + str(effect_slot)]])
+                except NotImplementedWarning as e:
+                    self.sim_results.errors.append(str(e))
             # 4: resistance mod
             elif enchantment_info[DB.enchant_column_info["m_effect" + str(effect_slot)]] == 4:
                 pass
             # 5: stat modification
             elif enchantment_info[DB.enchant_column_info["m_effect" + str(effect_slot)]] == 5:
-                self.char.modify_stat(enchantment_info[DB.enchant_column_info["m_effectArg" + str(effect_slot)]],
-                                      self.enchant_effect_strength(enchantment_info, effect_slot))
+                try:
+                    self.char.modify_stat(enchantment_info[DB.enchant_column_info["m_effectArg" + str(effect_slot)]],
+                                          self.enchant_effect_strength(enchantment_info, effect_slot))
+                except NotImplementedWarning as e:
+                    self.sim_results.errors.append(str(e))
             # 6: totem
             elif enchantment_info[DB.enchant_column_info["m_effect" + str(effect_slot)]] == 6:
                 pass

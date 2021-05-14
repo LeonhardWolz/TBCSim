@@ -7,7 +7,6 @@ from PyQt5.QtCore import QObject, pyqtSignal, pyqtSlot, QThread
 
 import src.db.db_connector as DB
 from src.sim.handlers import simulation as Sim
-from src.sim.results.sim_cumulative_result import SimCumResult
 from src.sim.settings.simulation_settings_loader import SimulationSettingsLoader
 
 
@@ -62,6 +61,10 @@ class MainWindowModel(QObject):
     def save_sim_settings(self, save_file_name):
         with open(fr"{save_file_name[0]}", "w") as file:
             yaml.dump(self.settings_model.settings_dict, file)
+
+    def save_sim_results(self, save_file_name):
+        with open(fr"{save_file_name[0]}", "w") as file:
+            file.write(str(self.last_results))
 
 
 class SimWorker(QObject):

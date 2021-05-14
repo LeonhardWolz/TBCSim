@@ -93,9 +93,9 @@ class SettingsModel(QObject):
             temp_gear_dict[inventory_slot[0]] = EquippedItem()
         self.equipped_gear = temp_gear_dict
 
-        self.spell_dict = DB.get_gui_spell_dict()
-        self.consumable_dict = DB.get_gui_consumable_dict()
-        self.gem_dict = DB.get_gui_gem_dict()
+        self.spell_dict = {}
+        self.consumable_dict = {}
+        self.gem_dict = {}
         self.enchantment_dict = {}
 
         self.edit_gear_dict = {}
@@ -486,6 +486,10 @@ class SettingsModel(QObject):
             item_from_db = DB.get_item(item_id)
             self._equipped_gear[inv_slot].item_id = item_id
             self._equipped_gear[inv_slot].name = item_from_db[DB.item_column_info["name"]]
+            self._equipped_gear[inv_slot].can_enchant = \
+                DB.get_item_can_be_enchanted(item_from_db[DB.item_column_info["class"]],
+                                             1 << item_from_db[DB.item_column_info["subclass"]],
+                                             1 << item_from_db[DB.item_column_info["InventoryType"]])
 
             self._equipped_gear[inv_slot].enchantment = None
             self._equipped_gear[inv_slot].sockets = {}
@@ -653,5 +657,6 @@ class SettingsModel(QObject):
 class EquippedItem:
     item_id: int = None
     name: str = None
+    can_enchant: bool = True
     enchantment: Tuple = field(default_factory=lambda: ())
     sockets: Dict = field(default_factory=lambda: {})

@@ -11,8 +11,7 @@ item_cache = {}
 tbcdb_cursor = None
 
 base_stat_query = "select 	* " \
-                  "from 	tbcmangos.player_classlevelstats, " \
-                  "tbcmangos.player_levelstats " \
+                  "from 	tbcmangos.player_classlevelstats, tbcmangos.player_levelstats " \
                   "where 	tbcmangos.player_classlevelstats.class=tbcmangos.player_levelstats.class and " \
                   "tbcmangos.player_levelstats.level = tbcmangos.player_classlevelstats.level and " \
                   "tbcmangos.player_classlevelstats.level = 70 and " \
@@ -260,14 +259,6 @@ def get_base_stats(player_class, race):
         logging.critical("DB Error during base stats retrieval: {}".format(ex))
 
 
-#
-# def get_class_talents(class_id, talent_index, talent_rank):
-#     try:
-#         tbcdb_cursor.execute(class_talent_query.format(talent_rank, class_id, talent_index))
-#         return tbcdb_cursor.fetchall()
-#     except mysql.connector.Error as ex:
-#         logging.critical("DB Error during class talent retrieval: {}".format(ex))
-
 @lru_cache
 def get_talent_tab_id(player_class_id, tab_pos):
     try:
@@ -359,6 +350,27 @@ def get_gui_enchantments_dict(item_class, item_subclass_mask=0, inventory_type_m
         return enchants_dict
     except mysql.connector.Error as ex:
         logging.critical("DB Error during gui enchantment list retrieval: {}".format(ex))
+
+
+# TODO: Include in DB hardcoded
+@lru_cache
+def get_item_can_be_enchanted(item_class, item_subclass_mask, inventory_type_mask):
+    my_where_statement = ""
+    if item_class == 4:
+        my_where_statement = f" and EquippedItemInventoryTypeMask&{inventory_type_mask}"
+    elif item_class == 2:
+        my_where_statement = f" and EquippedItemClass={item_class} and EquippedItemSubClassMask&{item_subclass_mask}"
+
+    query = f"SELECT COUNT(*) FROM simdata.spell_template WHERE Effect1=53 {my_where_statement}"
+    try:
+        tbcdb_cursor.execute(query)
+        for result in tbcdb_cursor.fetchall():
+            if result[0] == 0:
+                return False
+            else:
+                return True
+    except mysql.connector.Error as ex:
+        logging.critical("DB Error during item can be enchanted retrieval: {}".format(ex))
 
 
 @lru_cache

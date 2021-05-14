@@ -79,7 +79,7 @@ class SpellHandler:
 
                 self.energize(spell_info, j, item_id)
             elif spell_info[DB.spell_column_info["Effect" + str(j)]] != 0:
-                self.results.warning("Effect " + str(j) + " of Spell could not be handled: " + str(spell_info))
+                raise NotImplementedWarning("Effect " + str(j) + " of Spell could not be handled: " + str(spell_info))
 
     def apply_passive_auras(self, spell_info, effect_slot):
         if (spell_info[DB.spell_column_info["AttributesEx"]] & 4 or

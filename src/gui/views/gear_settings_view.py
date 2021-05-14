@@ -1,7 +1,8 @@
 from functools import partial
 
 from PyQt5.QtCore import pyqtSlot, Qt, QSize
-from PyQt5.QtWidgets import (QLabel, QWidget, QPushButton, QHBoxLayout, QVBoxLayout, QAbstractItemView)
+from PyQt5.QtWidgets import (QLabel, QWidget, QPushButton, QHBoxLayout, QVBoxLayout, QAbstractItemView, QSizePolicy,
+                             QLayout)
 
 from src import enums
 from src.gui.widgets.line_dividers import QVLine, QHLine
@@ -15,8 +16,6 @@ class GearView(QWidget):
         self.gear_slots = {}
         self.gear_slot_buttons = {}
         self.gear_slot_edit_dialog = {}
-
-        self.setMinimumWidth(600)
 
         ch_settings_gear_layout = QVBoxLayout()
         ch_settings_gear_layout.setAlignment(Qt.AlignTop)
@@ -102,7 +101,7 @@ class GearView(QWidget):
                     self.gear_slots[i].set_empty()
                 self.gear_slots[i].set_name(item.name)
 
-                self.gear_slots[i].set_enchantment(item.enchantment)
+                self.gear_slots[i].set_enchantment(item.can_enchant, item.enchantment)
 
                 self.gear_slots[i].set_sockets([socket["socket_color_name"] for socket in item.sockets.values()])
 
@@ -123,6 +122,7 @@ class GearItem(QWidget):
         self.inventory_slot = inventory_slot
         self.setLayout(QVBoxLayout())
         self.layout().setContentsMargins(0, 0, 0, 0)
+        self.layout().setSizeConstraint(QLayout.SetMinimumSize)
 
         self.name_label = QLabel("--- Slot Empty ---")
         self.name_label.setAlignment(Qt.AlignCenter | Qt.AlignTop)
@@ -153,36 +153,39 @@ class GearItem(QWidget):
     def set_name(self, item_name):
         self.name_label.setText(item_name)
 
-    def set_enchantment(self, enchantment):
+    def set_enchantment(self, can_enchant, enchantment):
         if self.enchantments:
             self.layout().removeWidget(self.enchantments)
-        self.enchantments = QWidget()
-        enchantments_layout = QVBoxLayout()
-        enchantments_layout.setContentsMargins(0, 0, 0, 0)
-        self.enchantments.setLayout(enchantments_layout)
-        if not enchantment:
-            enchantment_name = "--- No Enchantment ---"
-        else:
-            enchantment_name = enchantment[1]
 
-        enchantment_layout = QHBoxLayout()
+        if can_enchant:
+            self.enchantments = QWidget()
+            enchantments_layout = QVBoxLayout()
+            enchantments_layout.setContentsMargins(0, 0, 0, 0)
+            enchantments_layout.setSizeConstraint(QLayout.SetMinimumSize)
+            self.enchantments.setLayout(enchantments_layout)
+            if not enchantment:
+                enchantment_name = "--- No Enchantment ---"
+            else:
+                enchantment_name = enchantment[1]
 
-        enchantment_label = QLabel("Enchantment:")
+            enchantment_layout = QHBoxLayout()
 
-        enchantment_name_label = QLabel(enchantment_name)
-        enchantment_name_label.setAlignment(Qt.AlignCenter)
+            enchantment_label = QLabel("Enchantment:")
 
-        self.enchantment_set_button = QPushButton("Edit")
-        self.enchantment_set_button.setMaximumWidth(40)
+            enchantment_name_label = QLabel(enchantment_name)
+            enchantment_name_label.setAlignment(Qt.AlignRight | Qt.AlignCenter)
 
-        self.enchantment_set_button.clicked.connect(self.open_enchantments_dialog)
+            self.enchantment_set_button = QPushButton("Edit")
+            self.enchantment_set_button.setMaximumWidth(40)
 
-        enchantment_layout.addWidget(enchantment_label)
-        enchantment_layout.addWidget(enchantment_name_label)
-        enchantment_layout.addWidget(self.enchantment_set_button)
-        enchantments_layout.addLayout(enchantment_layout)
+            self.enchantment_set_button.clicked.connect(self.open_enchantments_dialog)
 
-        self.layout().addWidget(self.enchantments)
+            enchantment_layout.addWidget(enchantment_label)
+            enchantment_layout.addWidget(enchantment_name_label)
+            enchantment_layout.addWidget(self.enchantment_set_button)
+            enchantments_layout.addLayout(enchantment_layout)
+
+            self.layout().addWidget(self.enchantments)
 
     def set_sockets(self, sockets_colors):
         """
@@ -209,7 +212,7 @@ class GearItem(QWidget):
             self.socket_label[index] = QLabel(color_name + ":")
 
             self.socket_content[index] = QLabel("--- No Gem ---")
-            self.socket_content[index].setAlignment(Qt.AlignCenter)
+            self.socket_content[index].setAlignment(Qt.AlignRight | Qt.AlignCenter)
 
             self.socket_buttons[index] = QPushButton("Edit")
             self.socket_buttons[index].setMaximumWidth(40)

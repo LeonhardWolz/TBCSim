@@ -1,7 +1,7 @@
 from PyQt5.QtCore import pyqtSlot, Qt
 from PyQt5.QtGui import QIntValidator, QFontDatabase
 from PyQt5.QtWidgets import (QLabel, QWidget, QPushButton, QHBoxLayout, QVBoxLayout, QFormLayout, QComboBox, QLineEdit,
-                             QCheckBox, QListWidget, QAbstractItemView)
+                             QCheckBox, QListWidget, QAbstractItemView, QLayout)
 
 import src.gui.views.gear_settings_view
 from src.gui.widgets.line_dividers import QVLine, QHLine
@@ -17,11 +17,11 @@ class SettingsView(QWidget):
         self.setLayout(settings_hbox_layout)
 
         settings_left_widget = QWidget()
-        settings_left_widget.setMinimumWidth(400)
-        settings_left_widget.setMaximumWidth(500)
+        settings_left_widget.setMaximumWidth(530)
 
         settings_lvbox_layout = QVBoxLayout()
         settings_lvbox_layout.setContentsMargins(0, 0, 0, 0)
+        settings_lvbox_layout.setSizeConstraint(QLayout.SetMinimumSize)
 
         sim_settings_vbox_layout = QVBoxLayout()
 
@@ -48,7 +48,7 @@ class SettingsView(QWidget):
 
         self.sim_rater_combo_box = QComboBox()
         self.sim_rater_combo_box.addItem("FireMageCAR")
-        sim_settings_form_layout.addRow("<b>Sim. Cobat Rater:</b>", self.sim_rater_combo_box)
+        sim_settings_form_layout.addRow("<b>Sim. Combat Rater:</b>", self.sim_rater_combo_box)
 
         sim_settings_vbox_layout.addLayout(sim_settings_form_layout)
         sim_settings_vbox_layout.setAlignment(Qt.AlignTop)

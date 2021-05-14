@@ -75,7 +75,7 @@ QMenuBar
 {
 	background-color: #555;
 	color: #eee;
-	spacing: 2px;
+	spacing: 0px;
 	min-height: 16px;
 	padding: 0px;
 	margin-bottom: 0px;
@@ -153,7 +153,7 @@ QPushButton
 	min-width: 3em;
 	border: 1px solid #222;
 	border-radius: 2px;
-	padding: 2px;
+	padding: 2px 4px 2px 4px;
 	font-size: 11pt;
 }
 
