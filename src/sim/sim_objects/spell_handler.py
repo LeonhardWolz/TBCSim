@@ -444,7 +444,7 @@ class SpellHandler:
                                               (aura.value * aura.curr_stacks) / 100
 
     def handle_aura_proc(self, aura, spell_id):
-        # proc trigger spell #(11213, 12574, 12575, 12576, 12577)
+        # proc trigger spell (11213, 12574, 12575, 12576, 12577) Clearcast proc
         if aura.spell_id not in (11180, 28592, 28593, 28594, 28595) and aura.aura_id == 42:
             self.apply_spell_effect(aura.trigger_spell)
 

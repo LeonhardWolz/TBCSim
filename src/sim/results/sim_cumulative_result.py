@@ -13,6 +13,7 @@ class SimCumResult:
         self.start_time = None
         self.run_time = None
         self.errors = []
+        self.char = None
 
     @property
     def settings(self):
@@ -65,7 +66,26 @@ class SimCumResult:
         str_repr += "-----------------------------------------\n"
         str_repr += f"Simulation Type: {self.settings.sim_type}\n"
         str_repr += f"Length of Simulation: {str(self.settings.sim_duration / 1000)}s\n"
-        str_repr += f"Iterations: {self.settings.sim_iterations}\n"
+        str_repr += f"Iterations: {self.settings.sim_iterations}\n\n"
+        str_repr += "Char Info:\n"
+        str_repr += f"\tRace: {self.char.race}\n"
+        str_repr += f"\tClass: {self.char.player_class}\n"
+        str_repr += f"\tHealth: {self.char.total_health}\n"
+        str_repr += f"\tMana: {self.char.total_mana}\n"
+        str_repr += f"\tAgility: {self.char.total_agility}\n"
+        str_repr += f"\tStrength: {self.char.total_strength}\n"
+        str_repr += f"\tIntellect: {self.char.total_intellect}\n"
+        str_repr += f"\tSpirit: {self.char.total_spirit}\n"
+        str_repr += f"\tStamina: {self.char.total_stamina}\n"
+        str_repr += f"\tSpell Crit Rating: {self.char.total_spell_crit_rating}\n"
+        str_repr += f"\tSpell Hit Rating: {self.char.total_spell_hit_rating}\n"
+        str_repr += f"\tSpell Haste Rating: {self.char.spell_haste_rating}\n"
+        str_repr += f"\tFire Power: {self.char.total_fire_power}\n"
+        str_repr += f"\tArcane Power: {self.char.total_arcane_power}\n"
+        str_repr += f"\tFrost Power: {self.char.total_frost_power}\n"
+        str_repr += f"\tNature Power: {self.char.total_nature_power}\n"
+        str_repr += f"\tShadow Power: {self.char.total_shadow_power}\n"
+        str_repr += f"\tHoly Power: {self.char.total_holy_power}\n"
 
         str_repr += "\n"
         str_repr += "Best Single Simulation by DPS Results:\n"

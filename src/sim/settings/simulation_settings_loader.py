@@ -27,6 +27,7 @@ class SimulationSettingsLoader(object):
         self.sim_results = SimCumResult()
 
         self.load_settings(settings_dict)
+        self.sim_results.char = copy.deepcopy(self.char)
 
     def load_settings(self, settings_dict):
         # load sim settings

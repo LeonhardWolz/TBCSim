@@ -81,7 +81,7 @@ class CombatActionRater(object):
 
         if damage_spells_to_consider:
             spell_to_consider = damage_spells_to_consider.pop()
-            if spell_to_consider["spell_rating"] > 0:
+            if spell_to_consider["spell_rating"] > 1:
                 return [CombatAction.Cast_Spell, spell_to_consider["spell_id"]]
             else:
                 return None

@@ -94,27 +94,27 @@ class Character:
 
     @property
     def total_holy_power(self):
-        return self.spell_power + self.holy_power + self.school_power_from_auras(2)
+        return round(self.spell_power + self.holy_power + self.school_power_from_auras(2))
 
     @property
     def total_fire_power(self):
-        return self.spell_power + self.fire_power + self.school_power_from_auras(4)
+        return round(self.spell_power + self.fire_power + self.school_power_from_auras(4))
 
     @property
     def total_nature_power(self):
-        return self.spell_power + self.nature_power + self.school_power_from_auras(8)
+        return round(self.spell_power + self.nature_power + self.school_power_from_auras(8))
 
     @property
     def total_frost_power(self):
-        return self.spell_power + self.frost_power + self.school_power_from_auras(16)
+        return round(self.spell_power + self.frost_power + self.school_power_from_auras(16))
 
     @property
     def total_shadow_power(self):
-        return self.spell_power + self.shadow_power + self.school_power_from_auras(32)
+        return round(self.spell_power + self.shadow_power + self.school_power_from_auras(32))
 
     @property
     def total_arcane_power(self):
-        return self.spell_power + self.arcane_power + self.school_power_from_auras(64)
+        return round(self.spell_power + self.arcane_power + self.school_power_from_auras(64))
 
     @property
     def total_spell_hit_rating(self):
@@ -144,7 +144,7 @@ class Character:
 
     @property
     def spell_haste_pct(self):
-        return self.spell_haste_rating / 15.75
+        return self.spell_haste_rating / 15.8
 
     @property
     def mp5_from_spirit(self):
