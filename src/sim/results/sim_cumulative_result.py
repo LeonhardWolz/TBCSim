@@ -1,5 +1,6 @@
 import os
 from dataclasses import dataclass
+from math import sqrt
 
 row_divider = "---------------------------------------------------------------" \
               "---------------------------------------------------------------"
@@ -68,24 +69,24 @@ class SimCumResult:
         str_repr += f"Length of Simulation: {str(self.settings.sim_duration / 1000)}s\n"
         str_repr += f"Iterations: {self.settings.sim_iterations}\n\n"
         str_repr += "Char Info:\n"
-        str_repr += f"\tRace: {self.char.race}\n"
-        str_repr += f"\tClass: {self.char.player_class}\n"
-        str_repr += f"\tHealth: {self.char.total_health}\n"
-        str_repr += f"\tMana: {self.char.total_mana}\n"
-        str_repr += f"\tAgility: {self.char.total_agility}\n"
-        str_repr += f"\tStrength: {self.char.total_strength}\n"
-        str_repr += f"\tIntellect: {self.char.total_intellect}\n"
-        str_repr += f"\tSpirit: {self.char.total_spirit}\n"
-        str_repr += f"\tStamina: {self.char.total_stamina}\n"
-        str_repr += f"\tSpell Crit Rating: {self.char.total_spell_crit_rating}\n"
-        str_repr += f"\tSpell Hit Rating: {self.char.total_spell_hit_rating}\n"
-        str_repr += f"\tSpell Haste Rating: {self.char.spell_haste_rating}\n"
-        str_repr += f"\tFire Power: {self.char.total_fire_power}\n"
-        str_repr += f"\tArcane Power: {self.char.total_arcane_power}\n"
-        str_repr += f"\tFrost Power: {self.char.total_frost_power}\n"
-        str_repr += f"\tNature Power: {self.char.total_nature_power}\n"
-        str_repr += f"\tShadow Power: {self.char.total_shadow_power}\n"
-        str_repr += f"\tHoly Power: {self.char.total_holy_power}\n"
+        str_repr += f"{'Race:':20} {self.char.race}\n"
+        str_repr += f"{'Class:':20} {self.char.player_class}\n"
+        str_repr += f"{'Health:':20} {self.char.total_health}\n"
+        str_repr += f"{'Mana:':20} {self.char.total_mana}\n"
+        str_repr += f"{'Agility:':20} {self.char.total_agility}\n"
+        str_repr += f"{'Strength:':20} {self.char.total_strength}\n"
+        str_repr += f"{'Intellect:':20} {self.char.total_intellect}\n"
+        str_repr += f"{'Spirit:':20} {self.char.total_spirit}\n"
+        str_repr += f"{'Stamina:':20} {self.char.total_stamina}\n"
+        str_repr += f"{'Spell Crit Rating:':20} {self.char.total_spell_crit_rating}\n"
+        str_repr += f"{'Spell Hit Rating:':20} {self.char.total_spell_hit_rating}\n"
+        str_repr += f"{'Spell Haste Rating:':20} {self.char.spell_haste_rating}\n"
+        str_repr += f"{'Fire Power:':20} {self.char.total_fire_power}\n"
+        str_repr += f"{'Arcane Power:':20} {self.char.total_arcane_power}\n"
+        str_repr += f"{'Frost Power:':20} {self.char.total_frost_power}\n"
+        str_repr += f"{'Nature Power:':20} {self.char.total_nature_power}\n"
+        str_repr += f"{'Shadow Power:':20} {self.char.total_shadow_power}\n"
+        str_repr += f"{'Holy Power:':20} {self.char.total_holy_power}\n"
 
         str_repr += "\n"
         str_repr += "Best Single Simulation by DPS Results:\n"
@@ -94,8 +95,10 @@ class SimCumResult:
         str_repr += row_divider
 
         str_repr += "\n\n----------------------------- Cumulative Sim Results -----------------------------"
-        str_repr += f"\nCompleted {self.settings.sim_iterations} Iteration(s) in {self.run_time} seconds"
-        str_repr += f"\n\nAvg DPS: {self.avg_dps}"
+        str_repr += f"\nCompleted {self.settings.sim_iterations} Iteration(s) in {self.run_time} seconds\n\n"
+        str_repr += f"90% Confidence Margin of Error\n"
+        str_repr += f"Avg DPS: {self.avg_dps} +-{self.margin_of_error}\n"
+        str_repr += f"Standard deviation: {self.standard_deviation}"
 
         if self.errors:
             str_repr += "\n\nErrors during Simulation:\n"
@@ -108,7 +111,21 @@ class SimCumResult:
 
     @property
     def avg_dps(self):
-        return round(sum([res.dps for res in self.results]) / self.settings.sim_iterations, 2)
+        return round(sum([result.dps for result in self.results]) / self.settings.sim_iterations, 2)
+
+    @property
+    def standard_deviation(self):
+        avg_dps = self.avg_dps
+        sum_deviation = sum([(result.dps - avg_dps) ** 2 for result in self.results])
+
+        return round(sqrt(sum_deviation/len(self.results)), 2)
+
+    @property
+    def margin_of_error(self):
+        # Z value for different confidence intervals
+        z_value_95 = 1.960
+        z_value_90 = 1.645
+        return round(z_value_90 * (self.standard_deviation/sqrt(len(self.results))), 2)
 
     def write_result_files(self):
         file_path = self.settings.results_file_path

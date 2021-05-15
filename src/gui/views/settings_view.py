@@ -1,7 +1,7 @@
 from PyQt5.QtCore import pyqtSlot, Qt
 from PyQt5.QtGui import QIntValidator, QFontDatabase
 from PyQt5.QtWidgets import (QLabel, QWidget, QPushButton, QHBoxLayout, QVBoxLayout, QFormLayout, QComboBox, QLineEdit,
-                             QCheckBox, QListWidget, QAbstractItemView, QLayout)
+                             QCheckBox, QListWidget, QAbstractItemView, QLayout, QGridLayout)
 
 import src.gui.views.gear_settings_view
 from src.gui.widgets.line_dividers import QVLine, QHLine
@@ -32,25 +32,44 @@ class SettingsView(QWidget):
         sim_settings_vbox_layout.addWidget(sim_settings_label)
         sim_settings_vbox_layout.addWidget(QHLine())
 
-        sim_settings_form_layout = QFormLayout()
+        sim_settings_grid_layout = QGridLayout()
 
+        sim_type_label = QLabel("<b>Sim. Type:</b>")
+        sim_type_label.setMinimumWidth(120)
         self.sim_type_combo_box = QComboBox()
         self.sim_type_combo_box.addItem("dps")
-        sim_settings_form_layout.addRow("<b>Sim. Type:</b>", self.sim_type_combo_box)
 
+        sim_settings_grid_layout.addWidget(sim_type_label, 0, 0)
+        sim_settings_grid_layout.addWidget(self.sim_type_combo_box, 0, 1)
+
+        sim_duration_label = QLabel("<b>Sim. Duration:</b>")
+        sim_duration_label.setMinimumWidth(120)
         self.sim_duration_entry = QLineEdit()
         self.sim_duration_entry.setValidator(QIntValidator())
-        sim_settings_form_layout.addRow("<b>Sim. Duration:</b>", self.sim_duration_entry)
 
+        sim_settings_grid_layout.addWidget(sim_duration_label, 1, 0)
+        sim_settings_grid_layout.addWidget(self.sim_duration_entry, 1, 1)
+
+        sim_iterations_label = QLabel("<b>Sim. Iterations:</b>")
+        sim_iterations_label.setMinimumWidth(120)
+        sim_iterations_label.setToolTip("For best results use a value over at least 200.")
         self.sim_iterations_entry = QLineEdit()
         self.sim_iterations_entry.setValidator(QIntValidator())
-        sim_settings_form_layout.addRow("<b>Sim. Iterations:</b>", self.sim_iterations_entry)
 
+        sim_settings_grid_layout.addWidget(sim_iterations_label, 2, 0)
+        sim_settings_grid_layout.addWidget(self.sim_iterations_entry, 2, 1)
+
+        sim_rater_label = QLabel("<b>Sim. Combat Rater:</b>")
+        sim_rater_label.setMinimumWidth(120)
+        sim_rater_label.setToolTip("The combat rater evaluates possible combat actions.<br>"
+                                   "The rating system is different for different specs.")
         self.sim_rater_combo_box = QComboBox()
         self.sim_rater_combo_box.addItem("FireMageCAR")
-        sim_settings_form_layout.addRow("<b>Sim. Combat Rater:</b>", self.sim_rater_combo_box)
 
-        sim_settings_vbox_layout.addLayout(sim_settings_form_layout)
+        sim_settings_grid_layout.addWidget(sim_rater_label, 3, 0)
+        sim_settings_grid_layout.addWidget(self.sim_rater_combo_box, 3, 1)
+
+        sim_settings_vbox_layout.addLayout(sim_settings_grid_layout)
         sim_settings_vbox_layout.setAlignment(Qt.AlignTop)
 
         enemy_settings_vbox_layout = QVBoxLayout()
@@ -115,9 +134,11 @@ class SettingsView(QWidget):
         character_settings_vbox_layout.addWidget(character_settings_label)
         character_settings_vbox_layout.addWidget(QHLine())
 
-        ch_s_spells_vbox_layout = QVBoxLayout()
-        ch_settings_lform_layout = QFormLayout()
+        char_attributes_select_layout = QVBoxLayout()
+        char_two_column_layout = QGridLayout()
 
+        player_race_label = QLabel("<b>Race:</b>")
+        player_race_label.setMinimumWidth(50)
         self.player_race_combo_box = QComboBox()
         self.player_race_combo_box.addItem("Troll")
         self.player_race_combo_box.addItem("Human")
@@ -128,32 +149,33 @@ class SettingsView(QWidget):
         self.player_race_combo_box.addItem("Gnome")
         self.player_race_combo_box.addItem("Bloodelf")
         self.player_race_combo_box.addItem("Draenei")
-        ch_settings_lform_layout.addRow("<b>Race:</b>", self.player_race_combo_box)
 
+        char_two_column_layout.addWidget(player_race_label, 0, 0)
+        char_two_column_layout.addWidget(self.player_race_combo_box, 0, 1)
+
+        player_class_label = QLabel("<b>Class:</b>")
+        player_class_label.setMinimumWidth(50)
         self.player_class_combo_box = QComboBox()
         self.player_class_combo_box.addItem("Mage")
-        ch_settings_lform_layout.addRow("<b>Class:</b>", self.player_class_combo_box)
 
-        talent_input_widget = QWidget()
-        talent_input_widget.setLayout(QHBoxLayout())
-        talent_input_widget.layout().setContentsMargins(0, 0, 0, 0)
+        char_two_column_layout.addWidget(player_class_label, 1, 0)
+        char_two_column_layout.addWidget(self.player_class_combo_box, 1, 1)
 
         talent_input_label = QLabel("<b>Talents:</b>")
+        talent_input_label.setMinimumWidth(50)
         talent_input_label.setToolTip("Paste a link from the \"tbc.wowhead.com/talent-calc\" "
                                       "talent calculator into this field.")
         self.player_talents_line_edit = QLineEdit()
 
-        talent_input_widget.layout().addWidget(talent_input_label)
-        talent_input_widget.layout().addWidget(self.player_talents_line_edit)
-
-        ch_settings_lform_layout.addRow(talent_input_widget)
+        char_two_column_layout.addWidget(talent_input_label, 2, 0)
+        char_two_column_layout.addWidget(self.player_talents_line_edit, 2, 1)
 
         ch_active_spells = QHBoxLayout()
 
         active_spells_label = QLabel("<b>Active<br>Spells:</b>")
         active_spells_label.setToolTip("Damage spells that are considered for use during the Simulation.\n"
                                        "Power-up spells like Arcane Power don't belong here. "
-                                       "Those get used automatically.")
+                                       "Those will get used automatically.")
         active_spells_label.setFixedWidth(85)
         active_spells_label.setAlignment(Qt.AlignTop)
 
@@ -212,7 +234,8 @@ class SettingsView(QWidget):
         ch_active_consumables = QHBoxLayout()
 
         active_consumables_label = QLabel("<b>Active<br>Consumables:</b>")
-        active_consumables_label.setToolTip("Consumables that are to be used during the simulation.")
+        active_consumables_label.setToolTip("Consumables that are to be used during the simulation\n"
+                                            "such as Mana Potions or Combat Potions.")
         active_consumables_label.setFixedWidth(85)
         active_consumables_label.setAlignment(Qt.AlignTop)
 
@@ -241,7 +264,8 @@ class SettingsView(QWidget):
         ch_passive_consumables = QHBoxLayout()
 
         passive_consumables_label = QLabel("<b>Passive<br>Consumables:</b>")
-        passive_consumables_label.setToolTip("Consumables that are already applied when the simulation begins.")
+        passive_consumables_label.setToolTip("Consumables that are already applied when the simulation begins\n"
+                                             "such as Flasks or Bufffood.")
         passive_consumables_label.setFixedWidth(85)
         passive_consumables_label.setAlignment(Qt.AlignTop)
 
@@ -267,13 +291,13 @@ class SettingsView(QWidget):
         ch_passive_consumables.addWidget(self.passive_consumables_list)
         ch_passive_consumables.addLayout(passive_consumables_buttons)
 
-        ch_s_spells_vbox_layout.addLayout(ch_settings_lform_layout)
-        ch_s_spells_vbox_layout.addLayout(ch_active_spells)
-        ch_s_spells_vbox_layout.addLayout(ch_passive_spells)
-        ch_s_spells_vbox_layout.addLayout(ch_active_consumables)
-        ch_s_spells_vbox_layout.addLayout(ch_passive_consumables)
+        char_attributes_select_layout.addLayout(char_two_column_layout)
+        char_attributes_select_layout.addLayout(ch_active_spells)
+        char_attributes_select_layout.addLayout(ch_passive_spells)
+        char_attributes_select_layout.addLayout(ch_active_consumables)
+        char_attributes_select_layout.addLayout(ch_passive_consumables)
 
-        character_settings_vbox_layout.addLayout(ch_s_spells_vbox_layout)
+        character_settings_vbox_layout.addLayout(char_attributes_select_layout)
 
         settings_top_hbox_layout = QHBoxLayout()
         settings_top_hbox_layout.setContentsMargins(0, 0, 0, 0)

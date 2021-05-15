@@ -314,7 +314,9 @@ class SimResult:
                                                          "Total DPS",
                                                          "Misc Effect")
         str_repr += "\n"
-        for res in self.combat_actions.values():
+        combat_actions = list(self.combat_actions.values())
+        combat_actions.sort(key=lambda x: x.total_dps, reverse=True)
+        for res in combat_actions:
             if res.damage_action:
                 str_repr += off_combat_action_row_divider + "\n"
                 str_repr += str(res) + "\n"

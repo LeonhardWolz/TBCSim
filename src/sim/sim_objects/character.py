@@ -131,12 +131,12 @@ class Character:
     @property
     def spell_crit_chance(self):
         spell_crit_gain = {
-            "Warlock": 80.92,
-            "Druid": 80,
-            "Shaman": 80,
-            "Mage": 80,
+            "Warlock": 81.9,
+            "Druid": 79.4,
+            "Shaman": 78.1,
+            "Mage": 81,
             "Priest": 80,
-            "Paladin": 80.05
+            "Paladin": 79.4
         }
         return self.total_spell_crit_rating / 22.1 \
                + self.total_intellect / spell_crit_gain.get(self.player_class) \

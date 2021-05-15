@@ -205,37 +205,49 @@ class SpellHandler:
         return enums.cast_time[DB.get_spell(spell_id)[DB.spell_column_info["CastingTimeIndex"]]]
 
     def spell_power_coefficient(self, spell_id, effect_slot=4):
+        spell_from_db = DB.get_spell(spell_id)
+
         def spell_aoe_divisor():
             for x in [22, 24, 28 - 31, 33, 34]:
-                if x in [DB.get_spell(spell_id)[DB.spell_column_info["EffectImplicitTargetA" + str(1)]],
-                         DB.get_spell(spell_id)[DB.spell_column_info["EffectImplicitTargetA" + str(2)]],
-                         DB.get_spell(spell_id)[DB.spell_column_info["EffectImplicitTargetA" + str(3)]]]:
+                if x in [spell_from_db[DB.spell_column_info["EffectImplicitTargetA" + str(1)]],
+                         spell_from_db[DB.spell_column_info["EffectImplicitTargetA" + str(2)]],
+                         spell_from_db[DB.spell_column_info["EffectImplicitTargetA" + str(3)]]]:
                     return 2
             return 1
 
         def spell_slow_multiplier():
-            if 33 in [DB.get_spell(spell_id)[DB.spell_column_info["EffectApplyAuraName" + str(1)]],
-                      DB.get_spell(spell_id)[DB.spell_column_info["EffectApplyAuraName" + str(2)]],
-                      DB.get_spell(spell_id)[DB.spell_column_info["EffectApplyAuraName" + str(3)]]]:
+            if 33 in [spell_from_db[DB.spell_column_info["EffectApplyAuraName" + str(1)]],
+                      spell_from_db[DB.spell_column_info["EffectApplyAuraName" + str(2)]],
+                      spell_from_db[DB.spell_column_info["EffectApplyAuraName" + str(3)]]]:
                 return 0.95
             return 1
 
+        def spell_downrank_penalty():
+            spell_level = spell_from_db[DB.spell_column_info["SpellLevel"]]
+            if spell_level < 20:
+                return 1 - (20 - spell_level) * 0.0375
+            return 1
+
         # Pyroblast dot 70%
-        if DB.get_spell_school(spell_id) & 4194304 and \
-                DB.get_spell(spell_id)[DB.spell_column_info["Effect" + str(effect_slot)]] == 6:
+        if spell_from_db[DB.spell_column_info["SchoolMask"]] & 4194304 and \
+                spell_from_db[DB.spell_column_info["Effect" + str(effect_slot)]] == 6:
             return 0.7
 
         # channeled spell
-        if DB.get_spell(spell_id)[DB.spell_column_info["AttributesEx"]] & 4 or \
-                DB.get_spell(spell_id)[DB.spell_column_info["AttributesEx"]] & 64:
-            base_cast_time = enums.duration_index[DB.get_spell(spell_id)[DB.spell_column_info["DurationIndex"]]]
+        if spell_from_db[DB.spell_column_info["AttributesEx"]] & 4 or \
+                spell_from_db[DB.spell_column_info["AttributesEx"]] & 64:
+            base_cast_time = enums.duration_index[spell_from_db[DB.spell_column_info["DurationIndex"]]]
 
         # cast spell
         else:
-            base_cast_time = enums.cast_time[DB.get_spell(spell_id)[DB.spell_column_info["CastingTimeIndex"]]]
+            base_cast_time = enums.cast_time[spell_from_db[DB.spell_column_info["CastingTimeIndex"]]]
 
         # Instant Spells are counted as 1.5s casts. casts longer than 3.5s are considered 3.5s casts
-        return min(max(base_cast_time, 1500), 3500) / 3500 / spell_aoe_divisor() * spell_slow_multiplier()
+        return min(max(base_cast_time, 1500), 3500) \
+               / 3500 \
+               / spell_aoe_divisor() \
+               * spell_slow_multiplier() \
+               * spell_downrank_penalty()
 
     @lru_cache
     def spell_family_mask(self, spell_id):

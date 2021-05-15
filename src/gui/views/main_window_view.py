@@ -9,7 +9,7 @@ from src.gui.views.settings_view import SettingsView
 
 
 class MainWindowView(QMainWindow):
-    ABOUT = "DMG Simulation for World of Warcraft TBC<br>" \
+    ABOUT = "Raid damage simulator for World of Warcraft: The Burning Crusade<br>" \
             "Feel free to contribute at: " \
             "<a href=https://github.com/LeonhardWolz/TBCSim style=\"color: #467fb3;\">" \
             "https://github.com/LeonhardWolz/TBCSim</a><br><br>" \
@@ -17,6 +17,11 @@ class MainWindowView(QMainWindow):
             "<br>Linea Icons <a href=https://linea.io style=\"color: #467fb3;\">linea.io</a> by Dario Ferrando under " \
             "<a href=https://creativecommons.org/licenses/by/4.0 style=\"color: #467fb3;\">CC BY 4.0</a><br>" \
             "<br>made by Leonhard Wolz, 2021"
+
+    HELP = "This is a raid damage simulator for World of Warcraft: The Burning Crusade<br>" \
+           "You can set up your character in the settings tab. You can run the simulation in the simulation tab.<br>" \
+           "If you encounter any issues while using this simulator you can create an issue on the Github page " \
+           "<a href=https://github.com/LeonhardWolz/TBCSim style=\"color: #467fb3;\">here</a>."
 
     def __init__(self, mw_model):
         super(QMainWindow, self).__init__()
@@ -111,6 +116,7 @@ class MainWindowView(QMainWindow):
         self.save_action.triggered.connect(self._save_sim_settings)
 
         self.about_action.triggered.connect(self.open_about)
+        self.help_action.triggered.connect(self.open_help)
 
         self.exit_action.triggered.connect(self.close)
 
@@ -133,6 +139,15 @@ class MainWindowView(QMainWindow):
         dialog.exec_()
         if dialog.selectedFiles():
             self.model.save_sim_settings(dialog.selectedFiles())
+
+    def open_help(self):
+        about_window = QMessageBox()
+        about_window.setTextFormat(Qt.RichText)
+        about_window.setWindowTitle("Help")
+        about_window.setText(self.HELP)
+        about_window.setIconPixmap(QPixmap("gui/icons/basic_info.svg"))
+        about_window.setStandardButtons(QMessageBox.Ok)
+        about_window.exec_()
 
     def open_about(self):
         about_window = QMessageBox()
