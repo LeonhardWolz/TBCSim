@@ -52,7 +52,7 @@ class SettingsView(QWidget):
 
         sim_iterations_label = QLabel("<b>Sim. Iterations:</b>")
         sim_iterations_label.setMinimumWidth(120)
-        sim_iterations_label.setToolTip("For best results use a value over at least 200.")
+        sim_iterations_label.setToolTip("For best results use a value of at least 200 or above.")
         self.sim_iterations_entry = QLineEdit()
         self.sim_iterations_entry.setValidator(QIntValidator())
 

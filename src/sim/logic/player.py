@@ -1,5 +1,3 @@
-import random
-
 import src.db.db_connector as DB
 from src import enums
 from src.enums import CombatAction
