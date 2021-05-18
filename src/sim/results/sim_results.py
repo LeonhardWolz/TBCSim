@@ -2,8 +2,9 @@ import time
 from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Dict, List
-import src.db.db_connector as DB
 from src import enums
+
+import src.db.sqlite_db_connector as DB
 
 used_consumables_line_format = "    {:24s}|{:12s}|{:16s}"
 consumable_row_divider = "    ------------------------------------------------------"
@@ -29,18 +30,15 @@ class SimResult:
     full_combat_log: str = ""
     errors_short: str = ""
 
-    def spell_cast(self, spell_id, sim_time):
-        self.action_order.append((sim_time, DB.get_spell_name(spell_id) + " "
-                                  + DB.get_spell(spell_id)[DB.spell_column_info["Rank1"]]))
+    def spell_cast(self, spell_id, spell_name, sim_time):
+        self.action_order.append((sim_time, spell_name))
         if (spell_id, 1) in self.combat_actions.keys():
             action_result = self.combat_actions.get((spell_id, 1))
             action_result.uses += 1
         else:
             self.combat_actions[(spell_id, 1)] = CombatActionResults(attack_id=spell_id,
                                                                      attack_type=1,
-                                                                     name=DB.get_spell_name(spell_id) + " " +
-                                                                          DB.get_spell(spell_id)[
-                                                                              DB.spell_column_info["Rank1"]],
+                                                                     name=spell_name,
                                                                      sim_length=self.sim_length,
                                                                      uses=1)
 
@@ -50,7 +48,7 @@ class SimResult:
         elif (action_id, 2) in self.combat_actions.keys():
             self.combat_actions[(action_id, 2)].misc_effect += effect_strength
 
-    def damage_spell_hit(self, spell_id, damage):
+    def damage_spell_hit(self, spell_id, spell_name, damage):
         if (spell_id, 1) in self.combat_actions.keys():
             action_result = self.combat_actions.get((spell_id, 1))
             action_result.hits += 1
@@ -59,15 +57,13 @@ class SimResult:
         else:
             self.combat_actions[(spell_id, 1)] = CombatActionResults(attack_id=spell_id,
                                                                      attack_type=1,
-                                                                     name=DB.get_spell_name(spell_id) + " " +
-                                                                          DB.get_spell(spell_id)[
-                                                                              DB.spell_column_info["Rank1"]],
+                                                                     name=spell_name,
                                                                      sim_length=self.sim_length,
                                                                      hits=1,
                                                                      direct_hit_damage=damage,
                                                                      damage_action=True)
 
-    def damage_spell_crit(self, spell_id, damage):
+    def damage_spell_crit(self, spell_id, spell_name, damage):
         if (spell_id, 1) in self.combat_actions.keys():
             action_result = self.combat_actions.get((spell_id, 1))
             action_result.crits += 1
@@ -76,15 +72,13 @@ class SimResult:
         else:
             self.combat_actions[(spell_id, 1)] = CombatActionResults(attack_id=spell_id,
                                                                      attack_type=1,
-                                                                     name=DB.get_spell_name(spell_id) + " " +
-                                                                          DB.get_spell(spell_id)[
-                                                                              DB.spell_column_info["Rank1"]],
+                                                                     name=spell_name,
                                                                      sim_length=self.sim_length,
                                                                      crits=1,
                                                                      direct_hit_damage=damage,
                                                                      damage_action=True)
 
-    def damage_spell_resisted(self, spell_id):
+    def damage_spell_resisted(self, spell_id, spell_name):
         if (spell_id, 1) in self.combat_actions.keys():
             action_result = self.combat_actions.get((spell_id, 1))
             action_result.resisted += 1
@@ -92,14 +86,12 @@ class SimResult:
         else:
             self.combat_actions[(spell_id, 1)] = CombatActionResults(attack_id=spell_id,
                                                                      attack_type=1,
-                                                                     name=DB.get_spell_name(spell_id) + " " +
-                                                                          DB.get_spell(spell_id)[
-                                                                              DB.spell_column_info["Rank1"]],
+                                                                     name=spell_name,
                                                                      sim_length=self.sim_length,
                                                                      resisted=1,
                                                                      damage_action=True)
 
-    def dot_spell_hit(self, spell_id):
+    def dot_spell_hit(self, spell_id, spell_name):
         if (spell_id, 1) in self.combat_actions.keys():
             action_result = self.combat_actions.get((spell_id, 1))
             action_result.dot_hits += 1
@@ -107,14 +99,12 @@ class SimResult:
         else:
             self.combat_actions[(spell_id, 1)] = CombatActionResults(attack_id=spell_id,
                                                                      attack_type=1,
-                                                                     name=DB.get_spell_name(spell_id) + " " +
-                                                                          DB.get_spell(spell_id)[
-                                                                              DB.spell_column_info["Rank1"]],
+                                                                     name=spell_name,
                                                                      sim_length=self.sim_length,
                                                                      dot_hits=1,
                                                                      damage_action=True)
 
-    def dot_spell_crit(self, spell_id):
+    def dot_spell_crit(self, spell_id, spell_name):
         if (spell_id, 1) in self.combat_actions.keys():
             action_result = self.combat_actions.get((spell_id, 1))
             action_result.dot_crits += 1
@@ -122,14 +112,12 @@ class SimResult:
         else:
             self.combat_actions[(spell_id, 1)] = CombatActionResults(attack_id=spell_id,
                                                                      attack_type=1,
-                                                                     name=DB.get_spell_name(spell_id) + " " +
-                                                                          DB.get_spell(spell_id)[
-                                                                              DB.spell_column_info["Rank1"]],
+                                                                     name=spell_name,
                                                                      sim_length=self.sim_length,
                                                                      dot_crits=1,
                                                                      damage_action=True)
 
-    def dot_spell_damage(self, spell_id, damage):
+    def dot_spell_damage(self, spell_id, spell_name, damage):
         if (spell_id, 1) in self.combat_actions.keys():
             action_result = self.combat_actions.get((spell_id, 1))
             action_result.dot_damage += damage
@@ -137,14 +125,12 @@ class SimResult:
         else:
             self.combat_actions[(spell_id, 1)] = CombatActionResults(attack_id=spell_id,
                                                                      attack_type=1,
-                                                                     name=DB.get_spell_name(spell_id) + " " +
-                                                                          DB.get_spell(spell_id)[
-                                                                              DB.spell_column_info["Rank1"]],
+                                                                     name=spell_name,
                                                                      sim_length=self.sim_length,
                                                                      dot_damage=damage,
                                                                      damage_action=True)
 
-    def dot_spell_resisted(self, spell_id):
+    def dot_spell_resisted(self, spell_id, spell_name):
         if (spell_id, 1) in self.combat_actions.keys():
             action_result = self.combat_actions.get((spell_id, 1))
             action_result.dot_resisted += 1
@@ -152,15 +138,13 @@ class SimResult:
         else:
             self.combat_actions[(spell_id, 1)] = CombatActionResults(attack_id=spell_id,
                                                                      attack_type=1,
-                                                                     name=DB.get_spell_name(spell_id) + " " +
-                                                                          DB.get_spell(spell_id)[
-                                                                              DB.spell_column_info["Rank1"]],
+                                                                     name=spell_name,
                                                                      sim_length=self.sim_length,
                                                                      dot_resisted=1,
                                                                      damage_action=True)
 
-    def wand_attack_used(self, item_id, sim_time):
-        self.action_order.append((sim_time, DB.get_item_name(item_id) + " wand attack"))
+    def wand_attack_used(self, item_id, item_name, sim_time):
+        self.action_order.append((sim_time, item_name + " wand attack"))
         if (item_id, 2) in self.combat_actions.keys():
             action_result = self.combat_actions.get((item_id, 2))
             action_result.uses += 1
@@ -168,12 +152,12 @@ class SimResult:
         else:
             self.combat_actions[(item_id, 2)] = CombatActionResults(attack_id=item_id,
                                                                     attack_type=2,
-                                                                    name=DB.get_item_name(item_id),
+                                                                    name=item_name,
                                                                     sim_length=self.sim_length,
                                                                     uses=1,
                                                                     damage_action=True)
 
-    def wand_attack_hit(self, item_id, damage):
+    def wand_attack_hit(self, item_id, item_name, damage):
         if (item_id, 2) in self.combat_actions.keys():
             action_result = self.combat_actions.get((item_id, 2))
             action_result.hits += 1
@@ -182,13 +166,13 @@ class SimResult:
         else:
             self.combat_actions[(item_id, 2)] = CombatActionResults(attack_id=item_id,
                                                                     attack_type=2,
-                                                                    name=DB.get_item_name(item_id),
+                                                                    name=item_name,
                                                                     sim_length=self.sim_length,
                                                                     hits=1,
                                                                     direct_hit_damage=damage,
                                                                     damage_action=True)
 
-    def wand_attack_crit(self, item_id, damage):
+    def wand_attack_crit(self, item_id, item_name, damage):
         if (item_id, 2) in self.combat_actions.keys():
             action_result = self.combat_actions.get((item_id, 2))
             action_result.crits += 1
@@ -197,13 +181,13 @@ class SimResult:
         else:
             self.combat_actions[(item_id, 2)] = CombatActionResults(attack_id=item_id,
                                                                     attack_type=1,
-                                                                    name=DB.get_item_name(item_id),
+                                                                    name=item_name,
                                                                     sim_length=self.sim_length,
                                                                     crits=1,
                                                                     direct_hit_damage=damage,
                                                                     damage_action=True)
 
-    def wand_attack_resisted(self, item_id):
+    def wand_attack_resisted(self, item_id, item_name):
         if (item_id, 2) in self.combat_actions.keys():
             action_result = self.combat_actions.get((item_id, 2))
             action_result.resisted += 1
@@ -211,18 +195,18 @@ class SimResult:
         else:
             self.combat_actions[(item_id, 2)] = CombatActionResults(attack_id=item_id,
                                                                     attack_type=1,
-                                                                    name=DB.get_item_name(item_id),
+                                                                    name=item_name,
                                                                     sim_length=self.sim_length,
                                                                     resisted=1,
                                                                     damage_action=True)
 
-    def item_used(self, item_id, sim_time):
-        self.action_order.append((sim_time, "Used " + DB.get_item_name(item_id)))
+    def item_used(self, item_id, item_name, sim_time):
+        self.action_order.append((sim_time, "Used " + item_name))
         if item_id in self.used_consumables.keys():
             used_consumable = self.used_consumables.get(item_id)
             used_consumable.uses += 1
         else:
-            self.used_consumables[item_id] = UsedConsumable(name=DB.get_item_name(item_id),
+            self.used_consumables[item_id] = UsedConsumable(name=item_name,
                                                             item_id=item_id,
                                                             uses=1)
 
@@ -252,7 +236,7 @@ class SimResult:
 
     def __str__(self):
         str_repr = "\n    TBC Combat Simulation from: {}\n\n".format(self.start_time.strftime("%Y-%m-%d %H:%M:%S"))
-        str_repr += "   ------------ Equipped Items ------------\n\n"
+        str_repr += "    ------------ Equipped Items ------------\n\n"
 
         for i in range(0, 20):
             if i in enums.inventory_slot:
@@ -261,16 +245,15 @@ class SimResult:
                     str_repr += str(self.equipped_items.get(i)) + "\n"
                 else:
                     str_repr += "----\n"
-                str_repr += "   ---------------------------------------------------\n"
+                str_repr += "    ---------------------------------------------------\n"
 
         str_repr += "\n"
-        str_repr += "   ------------ Action Order ------------\n\n"
+        str_repr += "    ------------ Action Order ------------\n\n"
 
-        str_repr += "   Simtime   Combat Action\n"
-        str_repr += "   ---------------------------------"
+        str_repr += "    Simtime | Combat Action\n"
+        str_repr += "    ---------------------------------"
         for action in self.action_order:
-            str_repr += "\n    {:8s}| ".format(str(action[0] / 1000))
-            str_repr += str(action[1])
+            str_repr += f"\n    {action[0] / 1000:7.3f} | {action[1]}"
 
         str_repr += "\n"
         str_repr += "\n    ------------ Consumable Breakdown ------------\n\n"
@@ -323,7 +306,7 @@ class SimResult:
         str_repr += off_combat_action_row_divider + "\n"
         str_repr += "    Total Damage dealt: " + str(self.total_damage_dealt) + "\n"
         str_repr += "    DPS: " + str(self.dps) + "\n"
-        # TODO aura procs eg. Arcane Concentration
+        # TODO aura procs ie. Arcane Concentration
 
         return str_repr
 
@@ -385,7 +368,7 @@ class EquippedItem:
     item_data: List = field(default_factory=lambda: [])
     enchantment: str = ""
     sockets: List = field(default_factory=lambda: [])
-    socket_bonus: int = 0
+    socket_bonus: int = None
     socket_bonus_met: bool = False
 
     def __str__(self):

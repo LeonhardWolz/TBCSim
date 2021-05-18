@@ -4,8 +4,8 @@ from datetime import datetime
 
 import yaml
 from PyQt5.QtCore import QObject, pyqtSignal, pyqtSlot, QThread
+from profilehooks import profile
 
-import src.db.db_connector as DB
 from src.sim.handlers import simulation as Sim
 from src.sim.settings.simulation_settings_loader import SimulationSettingsLoader
 
@@ -76,9 +76,6 @@ class SimWorker(QObject):
         self.settings_loader = settings_loader
         self.sim_cum_results = settings_loader.get_sim_results()
         self.completed_sims = 0
-
-        if not DB.good_startup():
-            raise ConnectionError
 
     @pyqtSlot()
     def run_simulations(self):

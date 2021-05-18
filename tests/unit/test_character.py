@@ -165,7 +165,8 @@ class AuraSpellModTest(unittest.TestCase):
         self.assertEqual(3500, self.char.spell_cast_time(38692))
 
     def test_frostbolt_coefficient(self):
-        self.assertEqual(3000 / 3500 + self.spell_power_coeff_mod / 100, self.char.spell_power_coefficient(38697))
+        self.assertEqual(round(3000 / 3500 + self.spell_power_coeff_mod / 100, 3),
+                         self.char.spell_power_coefficient(38697))
 
     def test_fireball_coefficient(self):
         self.assertEqual(3500 / 3500, self.char.spell_power_coefficient(38692))

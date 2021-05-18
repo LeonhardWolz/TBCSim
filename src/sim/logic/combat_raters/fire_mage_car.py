@@ -1,7 +1,7 @@
 from src import enums
 from src.sim.logic.combat_raters.mage_car import MageCAR
 
-import src.db.db_connector as DB
+import src.db.sqlite_db_connector as DB
 
 
 class FireMageCAR(MageCAR):
@@ -22,8 +22,8 @@ class FireMageCAR(MageCAR):
                                                  / self.player.char.total_mana
                 elif item_id in (22839,):
                     if self.player.char.current_mana / self.player.char.total_mana > 0.35:
-                        consumable_rating += -0.8\
-                                             + self.player.char.current_mana / self.player.char.total_mana\
+                        consumable_rating += -0.8 \
+                                             + self.player.char.current_mana / self.player.char.total_mana \
                                              + self.scorch_modifier()
 
         return consumable_rating
@@ -70,9 +70,8 @@ class FireMageCAR(MageCAR):
             spell_time = self.player.char.spell_cast_time(spell_id, proc_auras=False)
 
         normalized_spell_time = max(spell_time, 1500)
-
-        spell_rating = -1 + (spell_effect_weight * 2.2 / normalized_spell_time) \
-                       - spell_mana_cost * 0.0002 \
+        spell_rating = -1 + (spell_effect_weight * 2 / normalized_spell_time) \
+                       - spell_mana_cost * 0.002 \
                        + spell_effect_weight / (spell_mana_cost * 20)
 
         # scorch rating modification

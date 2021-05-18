@@ -1,5 +1,4 @@
-import src.db.db_connector as DB
-
+import src.db.sqlite_db_connector as DB
 
 class ChannelledSpell(object):
     def __init__(self, channel_type, env, spell_handler, spell_id, interval, duration, results,
@@ -22,7 +21,8 @@ class ChannelledSpell(object):
             if self.channel_aura == 21:
                 mana_restore_amount = round(self.spell_handler.char.total_mana * (self.value / 100))
                 self.spell_handler.logg("Gained " + str(mana_restore_amount)
-                                        + " Mana from " + DB.get_spell_name(self.spell_id))
+                                        + " Mana from " + DB.get_spell_name(
+                                        self.spell_id))
                 self.results.misc_effect(self.spell_id, mana_restore_amount)
                 self.spell_handler.char.current_mana += mana_restore_amount
             elif self.channel_aura == 23:

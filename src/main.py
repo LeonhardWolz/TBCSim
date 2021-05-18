@@ -14,18 +14,18 @@ app_id = u"tbc-dmg-simulation"
 def main():
     ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(app_id)
     app = QApplication(sys.argv)
-    with open("gui/style/DarkMode.qss", 'r') as file:
+    with open("../data/style/DarkMode.qss", 'r') as file:
         qss = file.read()
         app.setStyleSheet(qss)
 
-    QFontDatabase.addApplicationFont("gui/fonts/RobotoMono-Medium.ttf")
+    QFontDatabase.addApplicationFont("../data/fonts/RobotoMono-Medium.ttf")
 
     settings_model = SettingsModel()
     m_window_model = MainWindowModel(settings_model)
     m_window_view = MainWindowView(m_window_model)
     m_window_view.show()
 
-    app.setWindowIcon(QIcon("gui/icons/arcane_intellect.jpg"))
+    app.setWindowIcon(QIcon("../data/icons/arcane_intellect.jpg"))
     sys.exit(app.exec_())
 
 

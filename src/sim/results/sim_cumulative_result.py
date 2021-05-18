@@ -15,6 +15,7 @@ class SimCumResult:
         self.run_time = None
         self.errors = []
         self.char = None
+        self.talents = ""
 
     @property
     def settings(self):
@@ -68,9 +69,13 @@ class SimCumResult:
         str_repr += f"Simulation Type: {self.settings.sim_type}\n"
         str_repr += f"Length of Simulation: {str(self.settings.sim_duration / 1000)}s\n"
         str_repr += f"Iterations: {self.settings.sim_iterations}\n\n"
-        str_repr += "Char Info:\n"
+        str_repr += "Character Info:\n"
+        str_repr += "-----------------------------------------\n"
         str_repr += f"{'Race:':20} {self.char.race}\n"
         str_repr += f"{'Class:':20} {self.char.player_class}\n"
+        str_repr += f"{'Talents:':20} {self.talents}\n"
+        str_repr += f"\nStats from Gear\n"
+        str_repr += "-----------------------------------------\n"
         str_repr += f"{'Health:':20} {self.char.total_health}\n"
         str_repr += f"{'Mana:':20} {self.char.total_mana}\n"
         str_repr += f"{'Agility:':20} {self.char.total_agility}\n"
@@ -81,6 +86,9 @@ class SimCumResult:
         str_repr += f"{'Spell Crit Rating:':20} {self.char.total_spell_crit_rating}\n"
         str_repr += f"{'Spell Hit Rating:':20} {self.char.total_spell_hit_rating}\n"
         str_repr += f"{'Spell Haste Rating:':20} {self.char.spell_haste_rating}\n"
+        str_repr += f"{'Spell Crit Chance:':20} {self.char.spell_crit_chance}\n"
+        str_repr += f"{'Spell Hit Chance:':20} {self.char.spell_hit_chance}\n"
+        str_repr += f"{'Spell Haste Percent:':20} {self.char.spell_haste_percent}\n"
         str_repr += f"{'Fire Power:':20} {self.char.total_fire_power}\n"
         str_repr += f"{'Arcane Power:':20} {self.char.total_arcane_power}\n"
         str_repr += f"{'Frost Power:':20} {self.char.total_frost_power}\n"
@@ -95,7 +103,8 @@ class SimCumResult:
         str_repr += row_divider
 
         str_repr += "\n\n----------------------------- Cumulative Sim Results -----------------------------"
-        str_repr += f"\nCompleted {self.settings.sim_iterations} Iteration(s) in {self.run_time} seconds\n\n"
+        str_repr += f"\nCompleted {self.settings.sim_iterations} iterations of " \
+                    f"{self.settings.sim_duration/1000} seconds in {self.run_time} seconds\n\n"
         str_repr += f"90% Confidence Margin of Error\n"
         str_repr += f"Avg DPS: {self.avg_dps} +-{self.margin_of_error}\n"
         str_repr += f"Standard deviation: {self.standard_deviation}"

@@ -1,4 +1,4 @@
-import src.db.db_connector as DB
+import src.db.sqlite_db_connector as DB
 
 
 class DotSpell(object):
@@ -13,11 +13,17 @@ class DotSpell(object):
         self.start = env.now
 
     def ticking(self):
+        spell_from_db = DB.get_spell(self.spell_id)
         # normal hit
-        self.results.dot_spell_hit(self.spell_id)
+        self.results.dot_spell_hit(self.spell_id,
+                                   spell_from_db[DB.spell_column_info["SpellName"]] + " " +
+                                   (spell_from_db[DB.spell_column_info["Rank1"]] or ""))
         while self.env.now <= self.duration + self.start:
-            self.spell_handler.logg(str(DB.get_spell_name(self.spell_id)) + " " +
-                                    DB.get_spell(self.spell_id)[DB.spell_column_info["Rank1"]] + " " +
+            self.spell_handler.logg(spell_from_db[DB.spell_column_info["SpellName"]] + " " +
+                                    (spell_from_db[DB.spell_column_info["Rank1"]] or "") + " " +
                                     str(self.start / 1000) + " Dot damage: " + str(self.dot_dmg))
-            self.results.dot_spell_damage(self.spell_id, self.dot_dmg)
+            self.results.dot_spell_damage(self.spell_id,
+                                          spell_from_db[DB.spell_column_info["SpellName"]] + " " +
+                                          (spell_from_db[DB.spell_column_info["Rank1"]] or ""),
+                                          self.dot_dmg)
             yield self.env.timeout(self.interval)

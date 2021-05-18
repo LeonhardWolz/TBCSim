@@ -2,11 +2,12 @@ from datetime import datetime
 import traceback
 
 import simpy
+from profilehooks import profile
 
 from src.sim.logic.player import Player
 from src.sim.results.sim_results import SimResult
 
-
+#@profile(immediate=True, entries=100, sort="tottime")
 def start_simulation(settings, char, sim_num):
     env = simpy.Environment()
     results = SimResult(start_time=datetime.now(), sim_length=settings.sim_duration)

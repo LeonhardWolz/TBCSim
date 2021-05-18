@@ -1,8 +1,6 @@
-from functools import lru_cache
-
-import src.db.db_connector as DB
 from src import enums
 from src.enums import CombatAction
+import src.db.sqlite_db_connector as DB
 
 
 class CombatActionRater(object):
@@ -41,8 +39,6 @@ class CombatActionRater(object):
 
         misc_combat_actions_to_consider.sort(key=lambda x: x["combat_rating"])
 
-        # print(self.player.char.current_mana, self.player.char.total_mana)
-        # print(misc_combat_actions_to_consider)
         if misc_combat_actions_to_consider:
             misc_combat_action = misc_combat_actions_to_consider.pop()
             if misc_combat_action["combat_rating"] > 0:
@@ -59,8 +55,6 @@ class CombatActionRater(object):
                                                  "spell_rating": self.get_boost_spell_rating(spell_id)})
 
         boost_spells_to_consider.sort(key=lambda x: x["spell_rating"])
-        # print(self.char.current_mana, self.char.total_mana)
-        # print(boost_spells_to_consider)
 
         if boost_spells_to_consider:
             spell_to_consider = boost_spells_to_consider.pop()
@@ -79,9 +73,12 @@ class CombatActionRater(object):
 
         damage_spells_to_consider.sort(key=lambda x: x["spell_rating"])
 
+        # print([(x["spell_id"], x["spell_rating"]) for x in damage_spells_to_consider])
+
         if damage_spells_to_consider:
             spell_to_consider = damage_spells_to_consider.pop()
-            if spell_to_consider["spell_rating"] > 1:
+
+            if spell_to_consider["spell_rating"] > 0:
                 return [CombatAction.Cast_Spell, spell_to_consider["spell_id"]]
             else:
                 return None
@@ -111,11 +108,12 @@ class CombatActionRater(object):
 
     def get_direct_spell_damage(self, effect_slot, spell_id, spell_info):
         """Calculates avg direct spell damage, including critical hits and any triggered effects"""
-        spell_base_damage = self.get_avg_effect_strength(spell_info, effect_slot)
+        mindamage, maxdamage = self.player.char.spell_handler.get_effect_strength(spell_info, effect_slot)
+        spell_base_damage = round(mindamage + maxdamage / 2)
         spell_spell_power = self.player.char.spell_spell_power(spell_id)
         spell_power_coefficient = self.player.char.spell_power_coefficient(spell_id, proc_auras=False)
         spell_damage_multiplier = self.player.char.spell_dmg_multiplier(spell_id, proc_auras=False) \
-                                  * self.player.char.spell_handler.enemy_damage_taken_mod(spell_info[0])
+                                  * self.player.char.spell_handler.enemy_damage_taken_mod(spell_id)
         spell_crit_damage_multiplier = self.player.char.spell_crit_dmg_multiplier(spell_id, proc_auras=False)
         spell_crit_chance_spell = self.player.char.spell_crit_chance_spell(spell_id, proc_auras=False)
 
@@ -125,8 +123,6 @@ class CombatActionRater(object):
         # non crit damage + per spell avg crit damage
         spell_crit_damage = spell_damage * spell_crit_damage_multiplier * spell_crit_chance_spell / 100
 
-        # self.logg(str(spell_id) + " " + str(spell_damage) + ", " + str(spell_crit_damage))
-
         # add avg ignite dmg
         if DB.get_spell_school(spell_id) & 4:
             for aura in [aura for aura in self.player.char.spell_handler.active_auras if
@@ -135,7 +131,8 @@ class CombatActionRater(object):
         return spell_damage + spell_crit_damage
 
     def get_dot_spell_damage(self, effect_slot, spell_id, spell_info):
-        spell_base_damage = self.get_avg_effect_strength(spell_info, effect_slot)
+        mindamage, maxdamage = self.player.char.spell_handler.get_effect_strength(spell_info, effect_slot)
+        spell_base_damage = round(mindamage + maxdamage / 2)
         spell_base_damage = spell_base_damage * \
                             enums.duration_index[spell_info[DB.spell_column_info["DurationIndex"]]] / \
                             spell_info[DB.spell_column_info["EffectAmplitude" + str(effect_slot)]]
@@ -150,8 +147,8 @@ class CombatActionRater(object):
         triggered_spell_total_damage = 0
         for triggered_spell_slot in range(1, 4):
             if triggered_spell_info[DB.spell_column_info["Effect" + str(triggered_spell_slot)]] == 2 and \
-                    triggered_spell_info[
-                        DB.spell_column_info["EffectImplicitTargetA" + str(triggered_spell_slot)]] in [6, 77]:
+                    triggered_spell_info[DB.spell_column_info["EffectImplicitTargetA" + str(triggered_spell_slot)]] \
+                    in [6, 77]:
                 triggered_spell_total_damage += self.get_direct_spell_damage(triggered_spell_slot,
                                                                              triggered_spell_id,
                                                                              triggered_spell_info)
@@ -160,11 +157,11 @@ class CombatActionRater(object):
 
         return triggered_spell_total_damage * channel_duration / channel_interval + 1
 
-    @lru_cache
-    def get_avg_effect_strength(self, spell_info, effect_slot):
-        min_value = spell_info[DB.spell_column_info["EffectBasePoints" + str(effect_slot)]] + \
-                    spell_info[DB.spell_column_info["EffectBaseDice" + str(effect_slot)]] * 1
-        max_value = spell_info[DB.spell_column_info["EffectBasePoints" + str(effect_slot)]] + \
-                    spell_info[DB.spell_column_info["EffectBaseDice" + str(effect_slot)]] * \
-                    spell_info[DB.spell_column_info["EffectDieSides" + str(effect_slot)]]
-        return round((min_value + max_value) / 2)
+    # @lru_cache
+    # def get_avg_effect_strength(self, spell_info, effect_slot):
+    #     min_value = spell_info[DB.spell_column_info["EffectBasePoints" + str(effect_slot)]] + \
+    #                 spell_info[DB.spell_column_info["EffectBaseDice" + str(effect_slot)]] * 1
+    #     max_value = spell_info[DB.spell_column_info["EffectBasePoints" + str(effect_slot)]] + \
+    #                 spell_info[DB.spell_column_info["EffectBaseDice" + str(effect_slot)]] * \
+    #                 spell_info[DB.spell_column_info["EffectDieSides" + str(effect_slot)]]
+    #     return round((min_value + max_value) / 2)

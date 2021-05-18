@@ -2,8 +2,8 @@ import random
 import re
 
 import copy
+import src.db.sqlite_db_connector as DB
 
-from src.db import db_connector as DB
 from src import enums
 from src.sim.exceptions.exceptions import NotImplementedWarning
 from src.sim.results.sim_cumulative_result import SimCumResult
@@ -15,7 +15,6 @@ from src.sim.results.sim_results import EquippedItem
 
 
 class SimulationSettingsLoader(object):
-
     mage_boost_spells = (11129, 12472)
 
     mage_mana_spells = (12051,)
@@ -158,6 +157,7 @@ class SimulationSettingsLoader(object):
 
     def load_talents(self, settings):
         if "talent_calc_link" in settings:
+            self.sim_results.talents = settings["talent_calc_link"]
             talent_string = re.findall("([0-9]+)", settings["talent_calc_link"])
             for x, group in enumerate(talent_string):
                 talent_tab_id = DB.get_talent_tab_id(enums.PlayerClass[self.char.player_class].value, x)
@@ -211,10 +211,9 @@ class SimulationSettingsLoader(object):
                     ValueError("Item " + str(item[1]["item_id"]) + " in Inventory Slot " + str(item[0]) + " not found")
 
                 if "enchant" in item[1]:
-                    # TODO vvvvv THis doesn't work item[1]["enchant"] refers to the spell id of the enchant
-                    #  but the function takes the enchant id
                     enchantment = DB.get_enchant(item[1]["enchant"])
-                    self.char.gear[item[0]].enchantment = enchantment[DB.enchant_column_info["m_name_lang_1"]]
+                    self.char.gear[item[0]].enchantment = enchantment[
+                        DB.enchant_column_info["m_name_lang_1"]]
                     self.apply_enchantment(enchantment)
 
                 if "gems" in item[1]:
@@ -300,8 +299,9 @@ class SimulationSettingsLoader(object):
             # 5: stat modification
             elif enchantment_info[DB.enchant_column_info["m_effect" + str(effect_slot)]] == 5:
                 try:
-                    self.char.modify_stat(enchantment_info[DB.enchant_column_info["m_effectArg" + str(effect_slot)]],
-                                          self.enchant_effect_strength(enchantment_info, effect_slot))
+                    self.char.modify_stat(
+                        enchantment_info[DB.enchant_column_info["m_effectArg" + str(effect_slot)]],
+                        self.enchant_effect_strength(enchantment_info, effect_slot))
                 except NotImplementedWarning as e:
                     self.sim_results.errors.append(str(e))
             # 6: totem

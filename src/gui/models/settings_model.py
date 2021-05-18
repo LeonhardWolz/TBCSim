@@ -4,7 +4,7 @@ from typing import Dict, Tuple
 from PyQt5.QtCore import QObject, pyqtSignal
 
 from src import enums
-import src.db.db_connector as DB
+import src.db.sqlite_db_connector as DB
 
 
 class SettingsModel(QObject):
@@ -489,7 +489,8 @@ class SettingsModel(QObject):
             self._equipped_gear[inv_slot].can_enchant = \
                 DB.get_item_can_be_enchanted(item_from_db[DB.item_column_info["class"]],
                                              1 << item_from_db[DB.item_column_info["subclass"]],
-                                             1 << item_from_db[DB.item_column_info["InventoryType"]])
+                                             1 << item_from_db[
+                                                 DB.item_column_info["InventoryType"]])
 
             self._equipped_gear[inv_slot].enchantment = None
             self._equipped_gear[inv_slot].sockets = {}
@@ -513,7 +514,7 @@ class SettingsModel(QObject):
                         if gem_slot["socket_content_id"] is not None:
                             if "gems" not in inv_slot:
                                 inv_slot["gems"] = {}
-                            inv_slot["gems"][x+1] = gem_slot["socket_content_id"]
+                            inv_slot["gems"][x + 1] = gem_slot["socket_content_id"]
 
                 dict_for_yaml[equipped_item[0]] = inv_slot
 
@@ -533,11 +534,13 @@ class SettingsModel(QObject):
                                                               "socket_color_name":
                                                                   enums.socket_color_name[socket_color],
                                                               "socket_content_id": socket_content,
-                                                              "socket_content_name": DB.get_item_name(socket_content)
-                                                              if socket_content else None}
+                                                              "socket_content_name":
+                                                                  DB.get_item_name(socket_content)
+                                                                  if socket_content else None}
 
     def set_socket_gem(self, inv_slot, socket_slot, socket_content):
-        self._equipped_gear[inv_slot].sockets[socket_slot]["socket_content_id"] = socket_content if socket_content else None
+        self._equipped_gear[inv_slot].sockets[socket_slot]["socket_content_id"] = socket_content \
+            if socket_content else None
         self._equipped_gear[inv_slot].sockets[socket_slot]["socket_content_name"] = \
             DB.get_item_name(socket_content) if socket_content else None
 
@@ -605,7 +608,7 @@ class SettingsModel(QObject):
 
                         if "gems" in item[1]:
                             for socket in item[1]["gems"].items():
-                                self.set_socket_gem(item[0], socket[0]-1, socket[1])
+                                self.set_socket_gem(item[0], socket[0] - 1, socket[1])
 
             if "talent_calc_link" in settings_dict["character"]:
                 self.player_talents_string = settings_dict["character"]["talent_calc_link"]

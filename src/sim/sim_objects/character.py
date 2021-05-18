@@ -1,6 +1,8 @@
+from math import sqrt
+
 from src.sim.exceptions.exceptions import NotImplementedWarning
 from src.sim.sim_objects.spell_handler import SpellHandler
-import src.db.db_connector as DB
+import src.db.sqlite_db_connector as DB
 
 
 class Character:
@@ -8,6 +10,7 @@ class Character:
         self.race = 'default'
         self.player_class = 'default'
         self.spell_handler = SpellHandler(self)
+        self.level = 70
         self.damage_spells = []
         self.boost_spells = []
         self.defensive_spells = []
@@ -132,32 +135,25 @@ class Character:
     def spell_crit_chance(self):
         spell_crit_gain = {
             "Warlock": 81.9,
-            "Druid": 79.4,
-            "Shaman": 78.1,
-            "Mage": 81,
+            "Druid": 80,
+            "Shaman": 80,
+            "Mage": 80,
             "Priest": 80,
-            "Paladin": 79.4
+            "Paladin": 80.05
         }
         return self.total_spell_crit_rating / 22.1 \
                + self.total_intellect / spell_crit_gain.get(self.player_class) \
                + 0.91
 
     @property
-    def spell_haste_pct(self):
+    def spell_haste_percent(self):
         return self.spell_haste_rating / 15.8
 
     @property
-    def mp5_from_spirit(self):
-        mp5_spirit_gain = {
-            "Druid": self.spirit / 4.5 + 15,
-            "Hunter": self.spirit / 5 + 15,
-            "Paladin": self.spirit / 5 + 15,
-            "Warlock": self.spirit / 5 + 15,
-            "Mage": self.spirit / 4 + 12.5,
-            "Priest": self.spirit / 4 + 12.5,
-            "Shaman": self.spirit / 5 + 17
-        }
-        return mp5_spirit_gain.get(self.player_class)
+    def mana_per_tick_from_spirit(self):
+        # TODO only accurate for lvl 70
+        base_regen_70 = 0.009327
+        return (self.total_spirit * base_regen_70 * sqrt(self.total_intellect)) * 5 * 0.4
 
     def get_pct_stat_mod(self, stat_index, proc_auras=True):
         stat_pct_mod = 100
@@ -237,10 +233,8 @@ class Character:
         if spell_id != 0:
             # for aura in self.spell_handler.get_character_mod_auras(spell_id):
             for aura in self.spell_handler.active_auras:
-                if self.spell_handler.aura_applies_to_spell(aura, spell_id) and \
-                        (aura.aura_id == 107 and aura.misc_value == 16 and aura.spell_id not in [29438, 29439, 29440] or
-                         aura.aura_id == 107 and aura.misc_value == 16 and
-                         aura.affected_spell_family_mask & DB.get_spell_family(spell_id)):
+                if aura.aura_id == 107 and aura.misc_value == 16 and \
+                        aura.affected_spell_family_mask & DB.get_spell_family(spell_id):
                     hit_chance_mod += aura.value * aura.curr_stacks
 
                     if proc_auras:
@@ -252,24 +246,11 @@ class Character:
         if spell_id != 0:
 
             for aura in self.spell_handler.active_auras:
-                if self.spell_handler.aura_applies_to_spell(aura, spell_id) and \
-                        (aura.aura_id == 107 and aura.misc_value == 7 and
-                         (aura.spell_id not in [31682, 31683, 31684, 31685, 31686] or
-                          aura.affected_spell_school & DB.get_spell_school(spell_id) or
-                          aura.affected_spell_family_mask & DB.get_spell_family(spell_id)) and
-                         (aura.spell_id not in [11108, 12349, 12350] or DB.get_spell_family(spell_id) & 4) or
-                         aura.aura_id == 71 and aura.misc_value == 126 or
-                         aura.aura_id == 71 and aura.misc_value == DB.get_spell_school(spell_id) or
-                         aura.aura_id == 57):
+                if self.aura_modifies_spell_crit_chance(aura, spell_id):
+                    crit_chance_mod += aura.value * aura.curr_stacks
 
-                    # Apply spell crit modifier from mage incineration talent only if spell scorch or fire blast
-                    if aura.spell_id not in (18459, 18460) or \
-                            self.spell_handler.spell_family_mask(spell_id) & 2 or \
-                            self.spell_handler.spell_family_mask(spell_id) & 16:
-                        crit_chance_mod += aura.value * aura.curr_stacks
-
-                        if proc_auras:
-                            self.spell_handler.proc_aura_charge(aura)
+                    if proc_auras:
+                        self.spell_handler.proc_aura_charge(aura)
                 elif aura.spell_id in [11170, 12982, 12983, 12984, 12985] and \
                         any(aura.spell_id == 12494 for aura in self.spell_handler.enemy.active_auras):
                     shatter_crit_chance = {
@@ -287,12 +268,49 @@ class Character:
 
         return round(self.spell_crit_chance + crit_chance_mod, 3)
 
+    @staticmethod
+    def aura_modifies_spell_crit_chance(aura, spell_id):
+        def empowered_frostbolt():
+            if aura.spell_id in (31682, 31683, 31684, 31685, 31686) and \
+                    aura.affected_spell_family_mask & DB.get_spell_family(spell_id):
+                return True
+            return False
+
+        def improved_flamestrike():
+            if aura.spell_id in (11108, 12349, 12350) and DB.get_spell_family(spell_id) & 4:
+                return True
+            return False
+
+        def incineration():
+            if aura.spell_id in (18459, 18460) and DB.get_spell_family(spell_id) & (2 + 16):
+                return True
+            return False
+
+        def arcane_impact():
+            if aura.spell_id in (11242, 12467, 12469) and \
+                    aura.affected_spell_family_mask & DB.get_spell_family(spell_id):
+                return True
+            return False
+
+        def combustion():
+            if aura.spell_id == 28682 and aura.affected_spell_family_mask & DB.get_spell_family(spell_id):
+                return True
+            return False
+
+        if (aura.aura_id == 107 and aura.misc_value == 7) and \
+                (empowered_frostbolt() or improved_flamestrike() or incineration() or arcane_impact() or combustion()):
+            return True
+        elif aura.aura_id == 71 and aura.misc_value & DB.get_spell_school(spell_id) or aura.aura_id == 57:
+            return True
+        else:
+            return False
+
     def spell_crit_dmg_multiplier(self, spell_id, proc_auras=True):
         crit_damage_mod = 0
 
         for aura in self.spell_handler.active_auras:
-            if self.spell_handler.aura_applies_to_spell(aura, spell_id) and \
-                    aura.aura_id == 108 and aura.misc_value == 15 or \
+            if (aura.affected_spell_family_mask & DB.get_spell_family(spell_id) and
+                aura.aura_id == 108 and aura.misc_value == 15) or \
                     aura.aura_id == 163 and aura.misc_value == 895:
                 crit_damage_mod += aura.value * aura.curr_stacks
 
@@ -332,24 +350,40 @@ class Character:
         return wand_damage_multiplier
 
     def spell_cast_time(self, spell_id, proc_auras=True):
+        def improved_fireball():
+            if aura.spell_id in (11069, 12338, 12339, 12340, 12341) and \
+                    aura.affected_spell_family_mask & DB.get_spell_family(spell_id):
+                return True
+            return False
+
+        def improved_frostbolt():
+            if aura.spell_id in (11070, 12473, 16763, 16765, 16766) and \
+                    aura.affected_spell_family_mask & DB.get_spell_family(spell_id):
+                return True
+            return False
+
+        def arcane_blast():
+            if aura.spell_id == 36032 and \
+                    aura.affected_spell_family_mask & DB.get_spell_family(spell_id):
+                return True
+            return False
+
         cast_time_mod_pct = 1
         cast_time_mod_flat = 0
-        # for aura in self.spell_handler.get_character_mod_auras(spell_id):
         for aura in self.spell_handler.active_auras:
-            if self.spell_handler.aura_applies_to_spell(aura, spell_id):
-                if aura.aura_id == 107 and aura.misc_value == 10 and\
-                        (aura.spell_id not in [11069, 12338, 12339, 12340, 12341] or DB.get_spell_family(spell_id) & 1):
-                    cast_time_mod_flat += aura.value * aura.curr_stacks
-                    if proc_auras:
-                        self.spell_handler.proc_aura_charge(aura)
-                elif aura.aura_id == 65:
-                    cast_time_mod_pct *= 1 - (aura.value * aura.curr_stacks / 100)
-                    if proc_auras:
-                        self.spell_handler.proc_aura_charge(aura)
-                elif aura.aura_id == 108 and aura.misc_value == 10:
-                    cast_time_mod_pct *= (aura.value * aura.curr_stacks / 100)
-                    if proc_auras:
-                        self.spell_handler.proc_aura_charge(aura)
+            if aura.aura_id == 107 and aura.misc_value == 10 and \
+                    (improved_fireball() or improved_frostbolt() or arcane_blast()):
+                cast_time_mod_flat += aura.value * aura.curr_stacks
+                if proc_auras:
+                    self.spell_handler.proc_aura_charge(aura)
+            elif aura.aura_id == 65:
+                cast_time_mod_pct *= 1 - (aura.value * aura.curr_stacks / 100)
+                if proc_auras:
+                    self.spell_handler.proc_aura_charge(aura)
+            elif aura.aura_id == 108 and aura.misc_value == 10:
+                cast_time_mod_pct *= (aura.value * aura.curr_stacks / 100)
+                if proc_auras:
+                    self.spell_handler.proc_aura_charge(aura)
 
         cast_time = self.cast_time_with_haste(self.spell_handler.spell_cast_time(spell_id) + cast_time_mod_flat) \
                     * cast_time_mod_pct
@@ -358,19 +392,59 @@ class Character:
         return 0
 
     def spell_resource_cost(self, spell_id, proc_auras=True):
+        def empowered_arcane_missiles():
+            if aura.spell_id in (31579, 31582, 31583) and DB.get_spell_family(spell_id) & 2048:
+                return True
+            return False
+
+        def frost_channeling():
+            if aura.spell_id in (11160, 12518, 12519) and \
+                    aura.affected_spell_family_mask & DB.get_spell_family(spell_id):
+                return True
+            return False
+
+        def clearcasting():
+            if aura.spell_id == 12536 and aura.affected_spell_family_mask & DB.get_spell_family(spell_id):
+                return True
+            return False
+
+        def arcane_power():
+            if aura.spell_id == 12042 and aura.affected_spell_family_mask & DB.get_spell_family(spell_id):
+                return True
+            return False
+
+        def pyromaniac():
+            if aura.spell_id in (34293, 34295, 34296) and \
+                    aura.misc_value & DB.get_spell_school(spell_id):
+                return True
+            return False
+
+        def elemental_precision():
+            if aura.spell_id in (29438, 29439, 29440) and \
+                    aura.misc_value & DB.get_spell_school(spell_id):
+                return True
+            return False
+
+        def arcane_blast():
+            if aura.spell_id == 36032 and \
+                    aura.affected_spell_family_mask & DB.get_spell_family(spell_id):
+                return True
+            return False
+
         resource_cost = self.spell_handler.spell_flat_mana_cost(spell_id) \
                         + (self.spell_handler.spell_pct_mana_cost(spell_id) / 100) * self.total_mana
 
-        # for aura in self.spell_handler.get_character_mod_auras(spell_id):
         for aura in self.spell_handler.active_auras:
-            if self.spell_handler.aura_applies_to_spell(aura, spell_id) and \
-                    ((aura.aura_id == 108 and aura.misc_value == 14) and
-                     (aura.spell_id not in [31579, 31582, 31583] or DB.get_spell_family(spell_id) & 2048) or
-                     (aura.aura_id == 72 and (aura.misc_value & DB.get_spell_school(spell_id)))):
+            if ((aura.aura_id == 108 and aura.misc_value == 14) and
+                (empowered_arcane_missiles() or frost_channeling() or clearcasting() or arcane_power()
+                 or arcane_blast())) \
+                    or (aura.aura_id == 72 and (pyromaniac() or elemental_precision())):
+
                 resource_cost *= 1 + (aura.value * aura.curr_stacks / 100)
 
                 if proc_auras:
                     self.spell_handler.proc_aura_charge(aura)
+
         return max(round(resource_cost), 0)
 
     def get_spell_gcd(self, spell_id):
@@ -383,18 +457,36 @@ class Character:
         return False
 
     def cast_time_with_haste(self, base_cast_time):
-        return round(base_cast_time / (1 + (self.spell_haste_pct / 100)))
+        return round(base_cast_time / (1 + (self.spell_haste_percent / 100)))
 
     def spell_power_coefficient(self, spell_id, proc_auras=True):
+        def empowered_arcane_missiles():
+            if aura.spell_id in (31579, 31582, 31583) and \
+                    aura.affected_spell_family_mask & DB.get_spell_family(spell_id):
+                return True
+            return False
+
+        def empowered_fireball():
+            if aura.spell_id in (31656, 31657, 31658, 31659, 31660) and \
+                    aura.affected_spell_family_mask & DB.get_spell_family(spell_id):
+                return True
+            return False
+
+        def empowered_frostbolt():
+            if aura.spell_id in (31682, 31683, 31684, 31685, 31686) and \
+                    aura.affected_spell_family_mask & DB.get_spell_family(spell_id):
+                return True
+            return False
+
         coefficient_mod = 0
-        # for aura in self.spell_handler.get_character_mod_auras(spell_id):
         for aura in self.spell_handler.active_auras:
-            if self.spell_handler.aura_applies_to_spell(aura, spell_id) and \
-                    (aura.aura_id == 107 and aura.misc_value == 24):
+            if (aura.aura_id == 107 and aura.misc_value == 24) and \
+                    (empowered_arcane_missiles() or empowered_fireball() or empowered_frostbolt()):
                 coefficient_mod += aura.value * aura.curr_stacks
                 if proc_auras:
                     self.spell_handler.proc_aura_charge(aura)
-        return self.spell_handler.spell_power_coefficient(spell_id) + coefficient_mod / 100
+
+        return round(self.spell_handler.spell_power_coefficient(spell_id) + coefficient_mod / 100, 3)
 
     def spell_spell_power(self, spell_id):
         spell_school = DB.get_spell_school(spell_id)
@@ -419,15 +511,15 @@ class Character:
     def cast_mana_spell(self, spell_id):
         self.current_mana -= self.spell_resource_cost(spell_id, True)
 
-    def mp5_while_casting(self):
-        spirit_mp5_casting = 0
+    def mana_per_tick_while_casting(self):
+        spirit_mana_regen_while_casting = 0
         for aura in self.spell_handler.active_auras:
             if aura.aura_id == 134:
-                spirit_mp5_casting += aura.value * aura.curr_stacks
-        return self.mp5 + self.mp5_from_spirit * (spirit_mp5_casting / 100)
+                spirit_mana_regen_while_casting += aura.value * aura.curr_stacks
+        return round(self.mp5 + self.mana_per_tick_from_spirit * (spirit_mana_regen_while_casting / 100))
 
-    def mp5_not_casting(self):
-        return self.mp5_from_spirit + self.mp5
+    def mana_per_tick_not_casting(self):
+        return round(self.mana_per_tick_from_spirit + self.mp5 * 0.4)
 
     def has_wand_range_attack(self):
         return 18 in self.gear and \

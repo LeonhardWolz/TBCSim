@@ -1,5 +1,6 @@
-import src.db.db_connector as DB
+
 from src import enums
+import src.db.sqlite_db_connector as DB
 from src.enums import CombatAction
 from src.sim.logic.combat_raters.fire_mage_car import FireMageCAR
 from src.sim.logic.combat_raters.mage_car import MageCAR
@@ -48,9 +49,9 @@ class Player(object):
     def mana_regeneration(self):
         while True:
             if self.char.is_casting:
-                self.char.current_mana += int(self.char.mp5_while_casting() * 0.4)
+                self.char.current_mana += self.char.mana_per_tick_while_casting()
             else:
-                self.char.current_mana += int(self.char.mp5_not_casting() * 0.4)
+                self.char.current_mana += self.char.mana_per_tick_not_casting()
             yield self.env.timeout(2000)
 
     def five_second_rule(self):
@@ -65,46 +66,53 @@ class Player(object):
         self.results.logg("{:8s} {}".format(self.curr_sim_time_str(), info))
 
     def cast_spell(self, spell_id):
-        spell_duration_index = DB.get_spell(spell_id)[DB.spell_column_info["DurationIndex"]]
+        spell_from_db = DB.get_spell(spell_id)
+        spell_duration_index = spell_from_db[DB.spell_column_info["DurationIndex"]]
         spell_duration = enums.duration_index[spell_duration_index if spell_duration_index != 0 else 1]
         spell_cast_time = self.char.spell_cast_time(spell_id)
 
         if spell_cast_time != 0:
-            self.logg("Begin Cast " + DB.get_spell_name(spell_id) + " " +
-                      DB.get_spell(spell_id)[DB.spell_column_info["Rank1"]])
-        elif DB.get_spell(spell_id)[DB.spell_column_info["AttributesEx"]] & 4 or \
-                DB.get_spell(spell_id)[DB.spell_column_info["AttributesEx"]] & 64:
-            self.logg("Begin Channel " + DB.get_spell_name(spell_id) + " " +
-                      DB.get_spell(spell_id)[DB.spell_column_info["Rank1"]])
+            self.logg("Begin Cast " + spell_from_db[DB.spell_column_info["SpellName"]] + " " +
+                      (spell_from_db[DB.spell_column_info["Rank1"]] or ""))
+        elif spell_from_db[DB.spell_column_info["AttributesEx"]] & 4 or \
+                spell_from_db[DB.spell_column_info["AttributesEx"]] & 64:
+            self.logg("Begin Channel " + spell_from_db[DB.spell_column_info["SpellName"]] + " " +
+                      (spell_from_db[DB.spell_column_info["Rank1"]] or ""))
         else:
-            self.logg("Cast " + DB.get_spell_name(spell_id) + " " +
-                      DB.get_spell(spell_id)[DB.spell_column_info["Rank1"]])
+            self.logg("Cast " + spell_from_db[DB.spell_column_info["SpellName"]] + " " +
+                      (spell_from_db[DB.spell_column_info["Rank1"]] or ""))
 
         self.start_gcd(spell_id)
         yield self.env.timeout(spell_cast_time)
 
-        if spell_cast_time != 0 and (not DB.get_spell(spell_id)[DB.spell_column_info["AttributesEx"]] & 4 and
-                                     not DB.get_spell(spell_id)[DB.spell_column_info["AttributesEx"]] & 64):
-            self.logg("Cast Completed " + DB.get_spell_name(spell_id) + " " +
-                      DB.get_spell(spell_id)[DB.spell_column_info["Rank1"]])
+        if spell_cast_time != 0 and \
+                (not spell_from_db[DB.spell_column_info["AttributesEx"]] & 4 and
+                 not spell_from_db[DB.spell_column_info["AttributesEx"]] & 64):
+            self.logg("Cast Completed " + spell_from_db[DB.spell_column_info["SpellName"]] + " " +
+                      (spell_from_db[DB.spell_column_info["Rank1"]] or ""))
 
         self.env.process(self.five_second_rule())
-        if not DB.get_spell(spell_id)[DB.spell_column_info["AttributesEx"]] & 4 and \
-                not DB.get_spell(spell_id)[DB.spell_column_info["AttributesEx"]] & 64:
-            self.results.spell_cast(spell_id, self.env.now)
+        if not spell_from_db[DB.spell_column_info["AttributesEx"]] & 4 and \
+                not spell_from_db[DB.spell_column_info["AttributesEx"]] & 64:
+            self.results.spell_cast(spell_id,
+                                    spell_from_db[DB.spell_column_info["SpellName"]] + " " +
+                                    (spell_from_db[DB.spell_column_info["Rank1"]] or ""),
+                                    self.env.now)
 
         self.char.cast_mana_spell(spell_id)
         self.char.spell_handler.spell_start_cooldown(spell_id)
         self.env.process(self.char.spell_handler.apply_spell_effect_delay(spell_id))
 
-        if DB.get_spell(spell_id)[DB.spell_column_info["AttributesEx"]] & 4 or \
-                DB.get_spell(spell_id)[DB.spell_column_info["AttributesEx"]] & 64:
+        if spell_from_db[DB.spell_column_info["AttributesEx"]] & 4 or \
+                spell_from_db[DB.spell_column_info["AttributesEx"]] & 64:
             yield self.env.timeout(spell_duration if spell_duration >= 0 else 0)
 
     def wand_attack(self):
         self.logg("Start Wand attack with " + self.char.gear[18].name)
         yield self.env.timeout(self.char.weapon_attack_delay_time(18))
-        self.results.wand_attack_used(self.char.gear[18].item_data[0], self.env.now)
+        self.results.wand_attack_used(self.char.gear[18].item_data[0],
+                                      self.char.gear[18].item_data[DB.item_column_info["name"]],
+                                      self.env.now)
         self.char.spell_handler.process_wand_attack()
 
     def start_gcd(self, spell_id):
@@ -112,7 +120,9 @@ class Player(object):
 
     def consume_item(self, item_id):
         item_info = DB.get_item(item_id)
-        self.results.item_used(item_id, self.env.now)
+        self.results.item_used(item_id,
+                               item_info[DB.item_column_info["name"]],
+                               self.env.now)
         self.logg("Used " + item_info[DB.item_column_info["name"]])
         for i in range(1, 6):
             item_spell_id = item_info[DB.item_column_info["spellid_" + str(i)]]

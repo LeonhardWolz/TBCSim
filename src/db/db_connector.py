@@ -11,12 +11,12 @@ item_cache = {}
 tbcdb_cursor = None
 
 base_stat_query = "select 	* " \
-                  "from 	tbcmangos.player_classlevelstats, tbcmangos.player_levelstats " \
-                  "where 	tbcmangos.player_classlevelstats.class=tbcmangos.player_levelstats.class and " \
-                  "tbcmangos.player_levelstats.level = tbcmangos.player_classlevelstats.level and " \
-                  "tbcmangos.player_classlevelstats.level = 70 and " \
-                  "tbcmangos.player_levelstats.class = {} and " \
-                  "tbcmangos.player_levelstats.race = {}"
+                  "from 	simdata.player_classlevelstats, simdata.player_levelstats " \
+                  "where 	simdata.player_classlevelstats.class=simdata.player_levelstats.class and " \
+                  "simdata.player_levelstats.level = simdata.player_classlevelstats.level and " \
+                  "simdata.player_classlevelstats.level = 70 and " \
+                  "simdata.player_levelstats.class = {} and " \
+                  "simdata.player_levelstats.race = {}"
 
 class_talent_query = "SELECT talent_id_rank{}" \
                      " FROM simdata.class_talent_trees where class_id={} and talent_index={}"

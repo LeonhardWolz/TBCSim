@@ -1,7 +1,7 @@
 from src import enums
 from src.sim.logic.combat_raters.combat_action_rater import CombatActionRater
 
-import src.db.db_connector as DB
+import src.db.sqlite_db_connector as DB
 
 
 class MageCAR(CombatActionRater):
@@ -21,13 +21,17 @@ class MageCAR(CombatActionRater):
         consumable_rating = 0
         item_info = DB.get_item(item_id)
         for i in range(1, 6):
-            item_spell = DB.get_spell(item_info[DB.item_column_info["spellid_" + str(i)]])
+            item_spell = DB.get_spell(
+                item_info[DB.item_column_info["spellid_" + str(i)]])
             if item_spell:
                 if item_id in (5513, 5514, 8007, 8008, 22044, 22832):
                     for effect_slot in range(1, 4):
-                        max_value = item_spell[DB.spell_column_info["EffectBasePoints" + str(effect_slot)]] + \
-                                    (item_spell[DB.spell_column_info["EffectBaseDice" + str(effect_slot)]] *
-                                     item_spell[DB.spell_column_info["EffectDieSides" + str(effect_slot)]])
+                        max_value = item_spell[
+                                        DB.spell_column_info["EffectBasePoints" + str(effect_slot)]] + \
+                                    (item_spell[
+                                         DB.spell_column_info["EffectBaseDice" + str(effect_slot)]] *
+                                     item_spell[
+                                         DB.spell_column_info["EffectDieSides" + str(effect_slot)]])
                         if max_value != 0:
                             consumable_rating += -0.8 + max_value / self.player.char.total_mana + \
                                                  (self.player.char.total_mana - self.player.char.current_mana) \
@@ -80,6 +84,6 @@ class MageCAR(CombatActionRater):
 
         spell_rating = spell_effect_weight / (normalized_spell_time * 1.2) / (spell_mana_cost * 0.7) - 1
 
-        #self.player.logg(str(DB.get_spell_name(spell_id)) + str(spell_id) + ": " + str(spell_rating))
+        # self.player.logg(str(DB.get_spell_name(spell_id)) + str(spell_id) + ": " + str(spell_rating))
 
         return spell_rating

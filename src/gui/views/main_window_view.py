@@ -28,7 +28,7 @@ class MainWindowView(QMainWindow):
         self.model = mw_model
 
         self.setWindowTitle('WoW TBC Combat Simulation')
-        self.setWindowIcon(QIcon("gui/icons/arcane_intellect.jpg"))
+        self.setWindowIcon(QIcon("../data/icons/arcane_intellect.jpg"))
         self.resize(1750, 920)
         self._center()
 
@@ -51,18 +51,18 @@ class MainWindowView(QMainWindow):
         file_menu = QMenu("&Actions", self)
 
         self.new_action = QAction("&New Sim Settings", self)
-        self.new_action.setIcon(QIcon("gui/icons/basic_sheet_txt.svg"))
+        self.new_action.setIcon(QIcon("../data/icons/basic_sheet_txt.svg"))
 
         self.load_action = QAction("&Load Sim Settings", self)
-        self.load_action.setIcon(QIcon("gui/icons/basic_folder_multiple.svg"))
+        self.load_action.setIcon(QIcon("../data/icons/basic_folder_multiple.svg"))
         self.load_action.setShortcut("Ctrl+O")
 
         self.save_action = QAction("&Save Sim Settings", self)
-        self.save_action.setIcon(QIcon("gui/icons/save.svg"))
+        self.save_action.setIcon(QIcon("../data/icons/save.svg"))
         self.save_action.setShortcut("Ctrl+S")
 
         self.exit_action = QAction("&Exit", self)
-        self.exit_action.setIcon(QIcon("gui/icons/close.svg"))
+        self.exit_action.setIcon(QIcon("../data/icons/close.svg"))
 
         file_menu.addAction(self.new_action)
         file_menu.addAction(self.load_action)
@@ -73,10 +73,10 @@ class MainWindowView(QMainWindow):
         help_menu = QMenu("&Help", self)
 
         self.help_action = QAction("&Help", self)
-        self.help_action.setIcon(QIcon("gui/icons/basic_question.svg"))
+        self.help_action.setIcon(QIcon("../data/icons/basic_question.svg"))
 
         self.about_action = QAction("&About", self)
-        self.about_action.setIcon(QIcon("gui/icons/basic_info.svg"))
+        self.about_action.setIcon(QIcon("../data/icons/basic_info.svg"))
 
         help_menu.addAction(self.help_action)
         help_menu.addSeparator()
@@ -145,7 +145,7 @@ class MainWindowView(QMainWindow):
         about_window.setTextFormat(Qt.RichText)
         about_window.setWindowTitle("Help")
         about_window.setText(self.HELP)
-        about_window.setIconPixmap(QPixmap("gui/icons/basic_info.svg"))
+        about_window.setIconPixmap(QPixmap("../data/icons/basic_info.svg"))
         about_window.setStandardButtons(QMessageBox.Ok)
         about_window.exec_()
 
@@ -154,7 +154,7 @@ class MainWindowView(QMainWindow):
         about_window.setTextFormat(Qt.RichText)
         about_window.setWindowTitle("About")
         about_window.setText(self.ABOUT)
-        about_window.setIconPixmap(QPixmap("gui/icons/basic_info.svg"))
+        about_window.setIconPixmap(QPixmap("../data/icons/basic_info.svg"))
         about_window.setStandardButtons(QMessageBox.Ok)
         about_window.exec_()
 
@@ -163,7 +163,7 @@ class MainWindowView(QMainWindow):
         close_window = QMessageBox()
         close_window.setWindowTitle("Quit?")
         close_window.setText(close_msg)
-        close_window.setIconPixmap(QPixmap("gui/icons/basic_question.svg"))
+        close_window.setIconPixmap(QPixmap("../data/icons/basic_question.svg"))
         close_window.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
         close_window.setDefaultButton(QMessageBox.No)
         reply = close_window.exec_()
