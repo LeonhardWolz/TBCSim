@@ -1,7 +1,7 @@
 from math import sqrt
 
 from src.sim.exceptions.exceptions import NotImplementedWarning
-from src.sim.sim_objects.spell_handler import SpellHandler
+from src.sim.sim_objects.combat_handler import CombatHandler
 import src.db.sqlite_db_connector as DB
 
 
@@ -9,13 +9,15 @@ class Character:
     def __init__(self):
         self.race = 'default'
         self.player_class = 'default'
-        self.spell_handler = SpellHandler(self)
+        self.combat_handler = CombatHandler(self)
         self.level = 70
         self.damage_spells = []
+        self.passive_spells = []
         self.boost_spells = []
         self.defensive_spells = []
         self.mana_spells = []
         self.active_consumables = {}
+        self.passive_consumables = []
         self.gear = {}
 
         self.agility = 0
@@ -70,6 +72,10 @@ class Character:
         self.__current_mana = round(value)
         if self.__current_mana > self.total_mana:
             self.__current_mana = self.total_mana
+
+    @property
+    def total_mp5(self):
+        return round(self.mp5 + self._mp5_from_auras())
 
     @property
     def is_casting(self):
@@ -151,26 +157,36 @@ class Character:
 
     @property
     def mana_per_tick_from_spirit(self):
-        # TODO only accurate for lvl 70
+        # TODO only accurate for lvl 70;
+        #  see https://wowpedia.fandom.com/wiki/Talk:Spirit_(statistic)#2.4_PTR_spirit_regen_formula
         base_regen_70 = 0.009327
         return (self.total_spirit * base_regen_70 * sqrt(self.total_intellect)) * 5 * 0.4
 
+    def _mp5_from_auras(self):
+        mana_reg = 0
+        for aura in self.combat_handler.active_auras:
+            if aura.aura_id == 85:
+                mana_reg += aura.value * aura.curr_stacks
+                self.combat_handler.proc_aura_charge(aura)
+
+        return mana_reg
+
     def get_pct_stat_mod(self, stat_index, proc_auras=True):
         stat_pct_mod = 100
-        for aura in self.spell_handler.active_auras:
-            if aura.aura_id == 137 and aura.misc_value == stat_index:
+        for aura in self.combat_handler.active_auras:
+            if aura.aura_id == 137 and (aura.misc_value == stat_index or aura.misc_value == -1):
                 stat_pct_mod += aura.value * aura.curr_stacks
                 if proc_auras:
-                    self.spell_handler.proc_aura_charge(aura)
+                    self.combat_handler.proc_aura_charge(aura)
         return stat_pct_mod / 100
 
     def get_stat_mod(self, stat_index, proc_auras=True):
         stat_mod = 0
-        for aura in self.spell_handler.active_auras:
-            if aura.aura_id == 29 and aura.misc_value == stat_index:
+        for aura in self.combat_handler.active_auras:
+            if aura.aura_id == 29 and (aura.misc_value == stat_index or aura.misc_value == -1):
                 stat_mod += aura.value * aura.curr_stacks
                 if proc_auras:
-                    self.spell_handler.proc_aura_charge(aura)
+                    self.combat_handler.proc_aura_charge(aura)
         return stat_mod
 
     def modify_stat(self, stat_type, value):
@@ -199,60 +215,60 @@ class Character:
 
     def school_power_from_auras(self, spell_school, proc_auras=True):
         school_power = 0
-        for aura in self.spell_handler.active_auras:
+        for aura in self.combat_handler.active_auras:
             if aura.aura_id == 13 and aura.misc_value & spell_school:
                 school_power += aura.value * aura.curr_stacks
                 if proc_auras:
-                    self.spell_handler.proc_aura_charge(aura)
+                    self.combat_handler.proc_aura_charge(aura)
             elif aura.aura_id == 174 and aura.misc_value & spell_school:
                 school_power += self.total_intellect * (aura.value * aura.curr_stacks / 100)
                 if proc_auras:
-                    self.spell_handler.proc_aura_charge(aura)
+                    self.combat_handler.proc_aura_charge(aura)
         return school_power
 
     def spell_hit_rating_from_auras(self, proc_auras=True):
         hit_rating = 0
-        for aura in self.spell_handler.active_auras:
+        for aura in self.combat_handler.active_auras:
             if aura.aura_id == 189 and aura.misc_value == 128:
                 hit_rating += aura.value * aura.curr_stacks
                 if proc_auras:
-                    self.spell_handler.proc_aura_charge(aura)
+                    self.combat_handler.proc_aura_charge(aura)
         return hit_rating
 
     def spell_crit_rating_from_auras(self, proc_auras=True):
         crit_rating = 0
-        for aura in self.spell_handler.active_auras:
+        for aura in self.combat_handler.active_auras:
             if aura.aura_id == 189 and aura.misc_value == 1024:
                 crit_rating += aura.value * aura.curr_stacks
                 if proc_auras:
-                    self.spell_handler.proc_aura_charge(aura)
+                    self.combat_handler.proc_aura_charge(aura)
         return crit_rating
 
     def spell_hit_chance_spell(self, spell_id=0, proc_auras=True):
         hit_chance_mod = 0
         if spell_id != 0:
             # for aura in self.spell_handler.get_character_mod_auras(spell_id):
-            for aura in self.spell_handler.active_auras:
+            for aura in self.combat_handler.active_auras:
                 if aura.aura_id == 107 and aura.misc_value == 16 and \
                         aura.affected_spell_family_mask & DB.get_spell_family(spell_id):
                     hit_chance_mod += aura.value * aura.curr_stacks
 
                     if proc_auras:
-                        self.spell_handler.proc_aura_charge(aura)
+                        self.combat_handler.proc_aura_charge(aura)
         return max(min(self.spell_hit_chance + hit_chance_mod, 16), 0)
 
     def spell_crit_chance_spell(self, spell_id=0, proc_auras=True):
         crit_chance_mod = 0
         if spell_id != 0:
 
-            for aura in self.spell_handler.active_auras:
+            for aura in self.combat_handler.active_auras:
                 if self.aura_modifies_spell_crit_chance(aura, spell_id):
                     crit_chance_mod += aura.value * aura.curr_stacks
 
                     if proc_auras:
-                        self.spell_handler.proc_aura_charge(aura)
+                        self.combat_handler.proc_aura_charge(aura)
                 elif aura.spell_id in [11170, 12982, 12983, 12984, 12985] and \
-                        any(aura.spell_id == 12494 for aura in self.spell_handler.enemy.active_auras):
+                        any(aura.spell_id == 12494 for aura in self.combat_handler.enemy.active_auras):
                     shatter_crit_chance = {
                         11170: 10,
                         12982: 20,
@@ -262,7 +278,7 @@ class Character:
                     }
                     crit_chance_mod += shatter_crit_chance.get(aura.spell_id) * aura.curr_stacks
 
-            for aura in self.spell_handler.enemy.active_auras:
+            for aura in self.combat_handler.enemy.active_auras:
                 if DB.get_spell_school(spell_id) == 16 and aura.spell_id == 12579:
                     crit_chance_mod += aura.value * aura.curr_stacks
 
@@ -308,44 +324,68 @@ class Character:
     def spell_crit_dmg_multiplier(self, spell_id, proc_auras=True):
         crit_damage_mod = 0
 
-        for aura in self.spell_handler.active_auras:
+        for aura in self.combat_handler.active_auras:
             if (aura.affected_spell_family_mask & DB.get_spell_family(spell_id) and
                 aura.aura_id == 108 and aura.misc_value == 15) or \
                     aura.aura_id == 163 and aura.misc_value == 895:
                 crit_damage_mod += aura.value * aura.curr_stacks
 
                 if proc_auras:
-                    self.spell_handler.proc_aura_charge(aura)
-        return 1.5 * (1 + crit_damage_mod / 100)
+                    self.combat_handler.proc_aura_charge(aura)
+        return (150 + crit_damage_mod) / 100
 
     def spell_dmg_multiplier(self, spell_id, proc_auras=True):
-        spell_damage_multiplier = 1
+        def arcane_power():
+            if aura.aura_id == 108 and aura.misc_value == 0 and aura.spell_id == 12042:
+                return True
+            return False
 
-        for aura in self.spell_handler.active_auras:
-            if aura.aura_id == 108 and aura.misc_value == 22 or \
-                    aura.aura_id == 108 and aura.misc_value == 0 and \
+        # arcane instability, playing with fire, fire power, piercing ice, arctic winds etc...
+        def school_damage_mod():
+            if aura.aura_id == 108 and aura.misc_value == 0 and \
                     aura.affected_spell_school & DB.get_spell_school(spell_id) or \
                     aura.aura_id == 79 and aura.misc_value & DB.get_spell_school(spell_id) and \
-                    aura.affected_item_class <= 0 or \
-                    aura.spell_id in [11190, 12489, 12490] and DB.get_spell_family(spell_id) & 512 or \
-                    aura.spell_id in [31679, 31680] and self.spell_handler.enemy.in_execute_range or \
-                    aura.aura_id == 79 and aura.spell_id in (15058, 15059, 15060, 31638, 31639, 31640):
+                    aura.spell_id in (15058, 15059, 15060, 31638, 31639, 31640, 31674, 31675, 31676, 31677, 31678):
+                return True
+            return False
+
+        def molten_fury():
+            if aura.spell_id in (31679, 31680) and self.combat_handler.enemy.in_execute_range:
+                return True
+            return False
+
+        def improved_cone_of_cold():
+            if aura.spell_id in (11190, 12489, 12490) and DB.get_spell_family(spell_id) & 512:
+                return True
+            return False
+
+        def improved_arcane_blast():
+            if aura.aura_id == 108 and aura.misc_value == 0 and aura.spell_id == 37441 and \
+                    aura.affected_spell_family_mask & DB.get_spell_family(spell_id):
+                return True
+            return False
+
+        spell_damage_multiplier = 1
+
+        for aura in self.combat_handler.active_auras:
+            if arcane_power() or school_damage_mod() or molten_fury() or improved_cone_of_cold() or \
+                    improved_arcane_blast():
                 spell_damage_multiplier *= 1 + (aura.value * aura.curr_stacks / 100)
 
                 if proc_auras:
-                    self.spell_handler.proc_aura_charge(aura)
+                    self.combat_handler.proc_aura_charge(aura)
 
         return spell_damage_multiplier
 
     def wand_dmg_multiplier(self, proc_auras=True):
         wand_damage_multiplier = 1
 
-        for aura in self.spell_handler.active_auras:
+        for aura in self.combat_handler.active_auras:
             if aura.affected_item_class == 2 and aura.affected_item_subclass_mask & (1 << 19) and \
                     (aura.aura_id == 79 and aura.misc_value == 126):
                 wand_damage_multiplier *= 1 + (aura.value * aura.curr_stacks / 100)
                 if proc_auras:
-                    self.spell_handler.proc_aura_charge(aura)
+                    self.combat_handler.proc_aura_charge(aura)
 
         return wand_damage_multiplier
 
@@ -370,22 +410,22 @@ class Character:
 
         cast_time_mod_pct = 1
         cast_time_mod_flat = 0
-        for aura in self.spell_handler.active_auras:
+        for aura in self.combat_handler.active_auras:
             if aura.aura_id == 107 and aura.misc_value == 10 and \
                     (improved_fireball() or improved_frostbolt() or arcane_blast()):
                 cast_time_mod_flat += aura.value * aura.curr_stacks
                 if proc_auras:
-                    self.spell_handler.proc_aura_charge(aura)
+                    self.combat_handler.proc_aura_charge(aura)
             elif aura.aura_id == 65:
                 cast_time_mod_pct *= 1 - (aura.value * aura.curr_stacks / 100)
                 if proc_auras:
-                    self.spell_handler.proc_aura_charge(aura)
+                    self.combat_handler.proc_aura_charge(aura)
             elif aura.aura_id == 108 and aura.misc_value == 10:
                 cast_time_mod_pct *= (aura.value * aura.curr_stacks / 100)
                 if proc_auras:
-                    self.spell_handler.proc_aura_charge(aura)
+                    self.combat_handler.proc_aura_charge(aura)
 
-        cast_time = self.cast_time_with_haste(self.spell_handler.spell_cast_time(spell_id) + cast_time_mod_flat) \
+        cast_time = self.cast_time_with_haste(self.combat_handler.spell_cast_time(spell_id) + cast_time_mod_flat) \
                     * cast_time_mod_pct
         if cast_time >= 0:
             return round(cast_time)
@@ -431,24 +471,29 @@ class Character:
                 return True
             return False
 
-        resource_cost = self.spell_handler.spell_flat_mana_cost(spell_id) \
-                        + (self.spell_handler.spell_pct_mana_cost(spell_id) / 100) * self.total_mana
+        def improved_arcane_blast():
+            if aura.spell_id == 37441 and aura.affected_spell_family_mask & DB.get_spell_family(spell_id):
+                return True
+            return False
 
-        for aura in self.spell_handler.active_auras:
+        resource_cost = self.combat_handler.spell_flat_mana_cost(spell_id) \
+                        + (self.combat_handler.spell_pct_mana_cost(spell_id) / 100) * self.total_mana
+
+        for aura in self.combat_handler.active_auras:
             if ((aura.aura_id == 108 and aura.misc_value == 14) and
                 (empowered_arcane_missiles() or frost_channeling() or clearcasting() or arcane_power()
-                 or arcane_blast())) \
+                 or arcane_blast() or improved_arcane_blast())) \
                     or (aura.aura_id == 72 and (pyromaniac() or elemental_precision())):
 
                 resource_cost *= 1 + (aura.value * aura.curr_stacks / 100)
 
                 if proc_auras:
-                    self.spell_handler.proc_aura_charge(aura)
+                    self.combat_handler.proc_aura_charge(aura)
 
         return max(round(resource_cost), 0)
 
     def get_spell_gcd(self, spell_id):
-        gcd = self.spell_handler.get_spell_gcd(spell_id)
+        gcd = self.combat_handler.get_spell_gcd(spell_id)
         return max(self.cast_time_with_haste(gcd), 1000) if gcd != 0 else 0
 
     def has_mana_to_cast_spell(self, spell_id):
@@ -479,14 +524,14 @@ class Character:
             return False
 
         coefficient_mod = 0
-        for aura in self.spell_handler.active_auras:
+        for aura in self.combat_handler.active_auras:
             if (aura.aura_id == 107 and aura.misc_value == 24) and \
                     (empowered_arcane_missiles() or empowered_fireball() or empowered_frostbolt()):
                 coefficient_mod += aura.value * aura.curr_stacks
                 if proc_auras:
-                    self.spell_handler.proc_aura_charge(aura)
+                    self.combat_handler.proc_aura_charge(aura)
 
-        return round(self.spell_handler.spell_power_coefficient(spell_id) + coefficient_mod / 100, 3)
+        return round(self.combat_handler.spell_power_coefficient(spell_id) + coefficient_mod / 100, 3)
 
     def spell_spell_power(self, spell_id):
         spell_school = DB.get_spell_school(spell_id)
@@ -513,13 +558,13 @@ class Character:
 
     def mana_per_tick_while_casting(self):
         spirit_mana_regen_while_casting = 0
-        for aura in self.spell_handler.active_auras:
+        for aura in self.combat_handler.active_auras:
             if aura.aura_id == 134:
                 spirit_mana_regen_while_casting += aura.value * aura.curr_stacks
-        return round(self.mp5 + self.mana_per_tick_from_spirit * (spirit_mana_regen_while_casting / 100))
+        return round(self.total_mp5 + self.mana_per_tick_from_spirit * (spirit_mana_regen_while_casting / 100))
 
     def mana_per_tick_not_casting(self):
-        return round(self.mana_per_tick_from_spirit + self.mp5 * 0.4)
+        return round(self.mana_per_tick_from_spirit + self.total_mp5 * 0.4)
 
     def has_wand_range_attack(self):
         return 18 in self.gear and \

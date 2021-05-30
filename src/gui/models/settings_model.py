@@ -176,7 +176,13 @@ class SettingsModel(QObject):
         self.sim_duration_signal.emit(self._sim_duration)
 
     def set_sim_duration(self, value):
-        self._sim_duration = int(value)
+        int_value = 0
+        try:
+            int_value = int(value)
+        except ValueError:
+            int_value = 0
+        finally:
+            self._sim_duration = int_value
 
     @property
     def sim_iterations(self):
@@ -188,7 +194,13 @@ class SettingsModel(QObject):
         self.sim_iterations_signal.emit(self._sim_iterations)
 
     def set_sim_iterations(self, value):
-        self._sim_iterations = int(value)
+        int_value = 0
+        try:
+            int_value = int(value)
+        except ValueError:
+            int_value = 0
+        finally:
+            self._sim_iterations = int_value
 
     @property
     def sim_combat_rater(self):

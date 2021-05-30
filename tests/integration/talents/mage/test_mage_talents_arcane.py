@@ -32,35 +32,35 @@ class TestArcaneFocus(unittest.TestCase):
         self.char.player_class = "Mage"
 
     def test_arcane_focus_rank1(self):
-        self.char.spell_handler.apply_spell_effect(self.rank1)
+        self.char.combat_handler.apply_spell_effect(self.rank1)
 
         self.assertEqual(self.char.spell_hit_chance + 2, self.char.spell_hit_chance_spell(30451))
         self.assertEqual(self.char.spell_hit_chance, self.char.spell_hit_chance_spell(133))
         self.assertEqual(self.char.spell_hit_chance, self.char.spell_hit_chance_spell(116))
 
     def test_arcane_focus_rank2(self):
-        self.char.spell_handler.apply_spell_effect(self.rank2)
+        self.char.combat_handler.apply_spell_effect(self.rank2)
 
         self.assertEqual(self.char.spell_hit_chance + 4, self.char.spell_hit_chance_spell(30451))
         self.assertEqual(self.char.spell_hit_chance, self.char.spell_hit_chance_spell(133))
         self.assertEqual(self.char.spell_hit_chance, self.char.spell_hit_chance_spell(116))
 
     def test_arcane_focus_rank3(self):
-        self.char.spell_handler.apply_spell_effect(self.rank3)
+        self.char.combat_handler.apply_spell_effect(self.rank3)
 
         self.assertEqual(self.char.spell_hit_chance + 6, self.char.spell_hit_chance_spell(30451))
         self.assertEqual(self.char.spell_hit_chance, self.char.spell_hit_chance_spell(133))
         self.assertEqual(self.char.spell_hit_chance, self.char.spell_hit_chance_spell(116))
 
     def test_arcane_focus_rank4(self):
-        self.char.spell_handler.apply_spell_effect(self.rank4)
+        self.char.combat_handler.apply_spell_effect(self.rank4)
 
         self.assertEqual(self.char.spell_hit_chance + 8, self.char.spell_hit_chance_spell(30451))
         self.assertEqual(self.char.spell_hit_chance, self.char.spell_hit_chance_spell(133))
         self.assertEqual(self.char.spell_hit_chance, self.char.spell_hit_chance_spell(116))
 
     def test_arcane_focus_rank5(self):
-        self.char.spell_handler.apply_spell_effect(self.rank5)
+        self.char.combat_handler.apply_spell_effect(self.rank5)
 
         self.assertEqual(self.char.spell_hit_chance + 10, self.char.spell_hit_chance_spell(30451))
         self.assertEqual(self.char.spell_hit_chance, self.char.spell_hit_chance_spell(133))
@@ -96,11 +96,11 @@ class TestWandSpecialization(unittest.TestCase):
         self.char.player_class = "Mage"
 
     def test_wand_specialization_rank1(self):
-        self.char.spell_handler.apply_spell_effect(self.wand_specialization_rank1)
+        self.char.combat_handler.apply_spell_effect(self.wand_specialization_rank1)
         self.assertEqual(1.13, self.char.wand_dmg_multiplier())
 
     def test_wand_specialization_rank2(self):
-        self.char.spell_handler.apply_spell_effect(self.wand_specialization_rank2)
+        self.char.combat_handler.apply_spell_effect(self.wand_specialization_rank2)
         self.assertEqual(1.25, self.char.wand_dmg_multiplier())
 
 
@@ -110,13 +110,13 @@ class TestArcaneConcentration(unittest.TestCase):
     def setUp(self) -> None:
         self.char = Char()
         self.char.player_class = "Mage"
-        self.char.spell_handler.apply_spell_effect(self.arcane_concentration_rank1)
-        for aura in self.char.spell_handler.active_auras:
-            aura.proc[1] = 100
+        self.char.combat_handler.apply_spell_effect(self.arcane_concentration_rank1)
+        for aura in self.char.combat_handler.active_auras:
+            aura.proc[2] = 100
 
     def test_arcane_concentration(self):
         self.assertEqual(30, self.char.spell_resource_cost(133, True))
-        self.char.spell_handler.on_spell_hit(133)
+        self.char.combat_handler.on_spell_impact(133)
         self.assertEqual(0, self.char.spell_resource_cost(133, True))
         self.assertEqual(30, self.char.spell_resource_cost(133, True))
 
@@ -146,22 +146,22 @@ class TestArcaneImpact(unittest.TestCase):
     def setUp(self) -> None:
         self.char = Char()
         self.char.player_class = "Mage"
-        self.char.spell_handler.enemy = Enemy()
+        self.char.combat_handler.enemy = Enemy()
 
     def test_arcane_impact_rank1(self):
-        self.char.spell_handler.apply_spell_effect(self.arcane_impact_rank1)
+        self.char.combat_handler.apply_spell_effect(self.arcane_impact_rank1)
         self.assertEqual(2.91, self.char.spell_crit_chance_spell(self.arcane_blast))
         self.assertEqual(0.91, self.char.spell_crit_chance_spell(self.arcane_missiles_rank11_missile))
         self.assertEqual(0.91, self.char.spell_crit_chance_spell(self.fireball_rank1))
 
     def test_arcane_impact_rank2(self):
-        self.char.spell_handler.apply_spell_effect(self.arcane_impact_rank2)
+        self.char.combat_handler.apply_spell_effect(self.arcane_impact_rank2)
         self.assertEqual(4.91, self.char.spell_crit_chance_spell(self.arcane_blast))
         self.assertEqual(0.91, self.char.spell_crit_chance_spell(self.arcane_missiles_rank11_missile))
         self.assertEqual(0.91, self.char.spell_crit_chance_spell(self.fireball_rank1))
 
     def test_arcane_impact_rank3(self):
-        self.char.spell_handler.apply_spell_effect(self.arcane_impact_rank3)
+        self.char.combat_handler.apply_spell_effect(self.arcane_impact_rank3)
         self.assertEqual(6.91, self.char.spell_crit_chance_spell(self.arcane_blast))
         self.assertEqual(0.91, self.char.spell_crit_chance_spell(self.arcane_missiles_rank11_missile))
         self.assertEqual(0.91, self.char.spell_crit_chance_spell(self.fireball_rank1))
@@ -217,15 +217,15 @@ class TestArcaneMeditation(unittest.TestCase):
         self.char.intellect = 100
 
     def test_arcane_meditation_rank1(self):
-        self.char.spell_handler.apply_spell_effect(self.arcane_meditation_rank1)
+        self.char.combat_handler.apply_spell_effect(self.arcane_meditation_rank1)
         self.assertEqual(round(18.654 * 0.1), self.char.mana_per_tick_while_casting())
 
     def test_arcane_meditation_rank2(self):
-        self.char.spell_handler.apply_spell_effect(self.arcane_meditation_rank2)
+        self.char.combat_handler.apply_spell_effect(self.arcane_meditation_rank2)
         self.assertEqual(round(18.654 * 0.2), self.char.mana_per_tick_while_casting())
 
     def test_arcane_meditation_rank3(self):
-        self.char.spell_handler.apply_spell_effect(self.arcane_meditation_rank3)
+        self.char.combat_handler.apply_spell_effect(self.arcane_meditation_rank3)
         self.assertEqual(round(18.654 * 0.3), self.char.mana_per_tick_while_casting())
 
 
@@ -254,7 +254,7 @@ class TestPresenceofMind(unittest.TestCase):
         self.char.player_class = "Mage"
 
     def test_presence_of_mind(self):
-        self.char.spell_handler.apply_spell_effect(self.presence_of_mind)
+        self.char.combat_handler.apply_spell_effect(self.presence_of_mind)
         self.assertEqual(0, self.char.spell_cast_time(self.pyroblast_rank1, proc_auras=False))
         self.assertEqual(0, self.char.spell_cast_time(self.frostbolt_rank1, proc_auras=False))
         self.assertEqual(0, self.char.spell_cast_time(self.fireball_rank1, proc_auras=True))
@@ -274,23 +274,23 @@ class TestArcaneMind(unittest.TestCase):
         self.char.intellect = 100
 
     def test_arcane_mind_rank1(self):
-        self.char.spell_handler.apply_spell_effect(self.arcane_mind_rank1)
+        self.char.combat_handler.apply_spell_effect(self.arcane_mind_rank1)
         self.assertEqual(103, self.char.total_intellect)
 
     def test_arcane_mind_rank2(self):
-        self.char.spell_handler.apply_spell_effect(self.arcane_mind_rank2)
+        self.char.combat_handler.apply_spell_effect(self.arcane_mind_rank2)
         self.assertEqual(106, self.char.total_intellect)
 
     def test_arcane_mind_rank3(self):
-        self.char.spell_handler.apply_spell_effect(self.arcane_mind_rank3)
+        self.char.combat_handler.apply_spell_effect(self.arcane_mind_rank3)
         self.assertEqual(109, self.char.total_intellect)
 
     def test_arcane_mind_rank4(self):
-        self.char.spell_handler.apply_spell_effect(self.arcane_mind_rank4)
+        self.char.combat_handler.apply_spell_effect(self.arcane_mind_rank4)
         self.assertEqual(112, self.char.total_intellect)
 
     def test_arcane_mind_rank5(self):
-        self.char.spell_handler.apply_spell_effect(self.arcane_mind_rank5)
+        self.char.combat_handler.apply_spell_effect(self.arcane_mind_rank5)
         self.assertEqual(115, self.char.total_intellect)
 
 
@@ -318,10 +318,10 @@ class TestArcaneInstability(unittest.TestCase):
     def setUp(self) -> None:
         self.char = Char()
         self.char.player_class = "Mage"
-        self.char.spell_handler.enemy = Enemy()
+        self.char.combat_handler.enemy = Enemy()
 
     def test_arcane_instability_rank1(self):
-        self.char.spell_handler.apply_spell_effect(self.arcane_instability_rank1)
+        self.char.combat_handler.apply_spell_effect(self.arcane_instability_rank1)
         self.assertEqual(1.01, self.char.spell_dmg_multiplier(self.fireball_rank1))
         self.assertEqual(1.91, self.char.spell_crit_chance_spell(self.fireball_rank1))
 
@@ -329,7 +329,7 @@ class TestArcaneInstability(unittest.TestCase):
         self.assertEqual(1.91, self.char.spell_crit_chance_spell(self.frostbolt_rank1))
 
     def test_arcane_instability_rank2(self):
-        self.char.spell_handler.apply_spell_effect(self.arcane_instability_rank2)
+        self.char.combat_handler.apply_spell_effect(self.arcane_instability_rank2)
         self.assertEqual(1.02, self.char.spell_dmg_multiplier(self.fireball_rank1))
         self.assertEqual(2.91, self.char.spell_crit_chance_spell(self.fireball_rank1))
 
@@ -337,7 +337,7 @@ class TestArcaneInstability(unittest.TestCase):
         self.assertEqual(2.91, self.char.spell_crit_chance_spell(self.frostbolt_rank1))
 
     def test_arcane_instability_rank3(self):
-        self.char.spell_handler.apply_spell_effect(self.arcane_instability_rank3)
+        self.char.combat_handler.apply_spell_effect(self.arcane_instability_rank3)
         self.assertEqual(1.03, self.char.spell_dmg_multiplier(self.fireball_rank1))
         self.assertEqual(3.91, self.char.spell_crit_chance_spell(self.fireball_rank1))
 
@@ -355,23 +355,23 @@ class TestArcanePotency(unittest.TestCase):
     def setUp(self) -> None:
         self.char = Char()
         self.char.player_class = "Mage"
-        self.char.spell_handler.enemy = Enemy()
+        self.char.combat_handler.enemy = Enemy()
 
     def test_arcane_potency_rank1(self):
-        self.char.spell_handler.apply_spell_effect(self.arcane_potency_rank1)
-        self.char.spell_handler.apply_spell_effect(12536)
+        self.char.combat_handler.apply_spell_effect(self.arcane_potency_rank1)
+        self.char.combat_handler.apply_spell_effect(12536)
         self.assertEqual(10.91, self.char.spell_crit_chance_spell(self.fireball_rank1))
         self.assertEqual(0.91, self.char.spell_crit_chance_spell(self.fireball_rank1))
 
     def test_arcane_potency_rank2(self):
-        self.char.spell_handler.apply_spell_effect(self.arcane_potency_rank2)
-        self.char.spell_handler.apply_spell_effect(12536)
+        self.char.combat_handler.apply_spell_effect(self.arcane_potency_rank2)
+        self.char.combat_handler.apply_spell_effect(12536)
         self.assertEqual(20.91, self.char.spell_crit_chance_spell(self.fireball_rank1))
         self.assertEqual(0.91, self.char.spell_crit_chance_spell(self.fireball_rank1))
 
     def test_arcane_potency_rank3(self):
-        self.char.spell_handler.apply_spell_effect(self.arcane_potency_rank3)
-        self.char.spell_handler.apply_spell_effect(12536)
+        self.char.combat_handler.apply_spell_effect(self.arcane_potency_rank3)
+        self.char.combat_handler.apply_spell_effect(12536)
         self.assertEqual(30.91, self.char.spell_crit_chance_spell(self.fireball_rank1))
         self.assertEqual(0.91, self.char.spell_crit_chance_spell(self.fireball_rank1))
 
@@ -393,11 +393,12 @@ class TestEmpoweredArcaneMissiles(unittest.TestCase):
         self.char.player_class = "Mage"
 
     def test_empowered_arcane_missiles_rank1(self):
-        self.char.spell_handler.apply_spell_effect(self.empowered_arcane_missiles_rank1)
+        self.char.combat_handler.apply_spell_effect(self.empowered_arcane_missiles_rank1)
 
-        self.assertEqual(self.char.spell_handler.spell_power_coefficient(self.arcane_missiles_rank1_missile) + 0.03,
+        self.assertEqual(round(self.char.combat_handler.spell_power_coefficient(self.arcane_missiles_rank1_missile)
+                               + 0.03, 3),
                          self.char.spell_power_coefficient(self.arcane_missiles_rank1_missile))
-        self.assertEqual(self.char.spell_handler.spell_power_coefficient(self.fireball_rank1),
+        self.assertEqual(self.char.combat_handler.spell_power_coefficient(self.fireball_rank1),
                          self.char.spell_power_coefficient(self.fireball_rank1))
 
         self.assertEqual(round(self.mana_cost_arcane_missiles_rank1 * 1.02),
@@ -406,11 +407,12 @@ class TestEmpoweredArcaneMissiles(unittest.TestCase):
                          self.char.spell_resource_cost(self.fireball_rank1))
 
     def test_empowered_arcane_missiles_rank2(self):
-        self.char.spell_handler.apply_spell_effect(self.empowered_arcane_missiles_rank2)
+        self.char.combat_handler.apply_spell_effect(self.empowered_arcane_missiles_rank2)
 
-        self.assertEqual(round(self.char.spell_handler.spell_power_coefficient(self.arcane_missiles_rank1_missile) + 0.06, 3),
+        self.assertEqual(round(self.char.combat_handler.spell_power_coefficient(self.arcane_missiles_rank1_missile)
+                               + 0.06, 3),
                          self.char.spell_power_coefficient(self.arcane_missiles_rank1_missile))
-        self.assertEqual(self.char.spell_handler.spell_power_coefficient(self.fireball_rank1),
+        self.assertEqual(self.char.combat_handler.spell_power_coefficient(self.fireball_rank1),
                          self.char.spell_power_coefficient(self.fireball_rank1))
 
         self.assertEqual(round(self.mana_cost_arcane_missiles_rank1 * 1.04),
@@ -419,11 +421,12 @@ class TestEmpoweredArcaneMissiles(unittest.TestCase):
                          self.char.spell_resource_cost(self.fireball_rank1))
 
     def test_empowered_arcane_missiles_rank3(self):
-        self.char.spell_handler.apply_spell_effect(self.empowered_arcane_missiles_rank3)
+        self.char.combat_handler.apply_spell_effect(self.empowered_arcane_missiles_rank3)
 
-        self.assertEqual(self.char.spell_handler.spell_power_coefficient(self.arcane_missiles_rank1_missile) + 0.09,
+        self.assertEqual(round(self.char.combat_handler.spell_power_coefficient(self.arcane_missiles_rank1_missile)
+                               + 0.09, 3),
                          self.char.spell_power_coefficient(self.arcane_missiles_rank1_missile))
-        self.assertEqual(self.char.spell_handler.spell_power_coefficient(self.fireball_rank1),
+        self.assertEqual(self.char.combat_handler.spell_power_coefficient(self.fireball_rank1),
                          self.char.spell_power_coefficient(self.fireball_rank1))
 
         self.assertEqual(round(self.mana_cost_arcane_missiles_rank1 * 1.06),
@@ -441,7 +444,7 @@ class TestArcanePower(unittest.TestCase):
     def setUp(self) -> None:
         self.char = Char()
         self.char.player_class = "Mage"
-        self.char.spell_handler.apply_spell_effect(self.arcane_power)
+        self.char.combat_handler.apply_spell_effect(self.arcane_power)
 
     def test_arcane_power(self):
         self.assertEqual(1.3, self.char.spell_dmg_multiplier(self.fireball_rank1))
@@ -460,16 +463,16 @@ class TestSpellPower(unittest.TestCase):
         self.char.player_class = "Mage"
 
     def test_spell_power_rank1(self):
-        self.char.spell_handler.apply_spell_effect(self.spell_power_rank1)
+        self.char.combat_handler.apply_spell_effect(self.spell_power_rank1)
 
-        self.assertEqual(1.5 * 1.25, self.char.spell_crit_dmg_multiplier(self.fireball_rank1))
-        self.assertEqual(1.5 * 1.25, self.char.spell_crit_dmg_multiplier(self.frostbolt_rank1))
+        self.assertEqual(1.75, self.char.spell_crit_dmg_multiplier(self.fireball_rank1))
+        self.assertEqual(1.75, self.char.spell_crit_dmg_multiplier(self.frostbolt_rank1))
 
     def test_spell_power_rank2(self):
-        self.char.spell_handler.apply_spell_effect(self.spell_power_rank2)
+        self.char.combat_handler.apply_spell_effect(self.spell_power_rank2)
 
-        self.assertEqual(1.5 * 1.5, self.char.spell_crit_dmg_multiplier(self.fireball_rank1))
-        self.assertEqual(1.5 * 1.5, self.char.spell_crit_dmg_multiplier(self.frostbolt_rank1))
+        self.assertEqual(2, self.char.spell_crit_dmg_multiplier(self.fireball_rank1))
+        self.assertEqual(2, self.char.spell_crit_dmg_multiplier(self.frostbolt_rank1))
 
 
 class TestMindMastery(unittest.TestCase):
@@ -485,7 +488,7 @@ class TestMindMastery(unittest.TestCase):
         self.char.intellect = 100
 
     def test_mind_mastery_rank1(self):
-        self.char.spell_handler.apply_spell_effect(self.mind_mastery_rank1)
+        self.char.combat_handler.apply_spell_effect(self.mind_mastery_rank1)
 
         self.assertEqual(5, self.char.total_fire_power)
         self.assertEqual(5, self.char.total_nature_power)
@@ -494,7 +497,7 @@ class TestMindMastery(unittest.TestCase):
         self.assertEqual(5, self.char.total_arcane_power)
 
     def test_mind_mastery_rank2(self):
-        self.char.spell_handler.apply_spell_effect(self.mind_mastery_rank2)
+        self.char.combat_handler.apply_spell_effect(self.mind_mastery_rank2)
 
         self.assertEqual(10, self.char.total_fire_power)
         self.assertEqual(10, self.char.total_nature_power)
@@ -503,7 +506,7 @@ class TestMindMastery(unittest.TestCase):
         self.assertEqual(10, self.char.total_arcane_power)
 
     def test_mind_mastery_rank3(self):
-        self.char.spell_handler.apply_spell_effect(self.mind_mastery_rank3)
+        self.char.combat_handler.apply_spell_effect(self.mind_mastery_rank3)
 
         self.assertEqual(15, self.char.total_fire_power)
         self.assertEqual(15, self.char.total_nature_power)
@@ -512,7 +515,7 @@ class TestMindMastery(unittest.TestCase):
         self.assertEqual(15, self.char.total_arcane_power)
 
     def test_mind_mastery_rank4(self):
-        self.char.spell_handler.apply_spell_effect(self.mind_mastery_rank4)
+        self.char.combat_handler.apply_spell_effect(self.mind_mastery_rank4)
 
         self.assertEqual(20, self.char.total_fire_power)
         self.assertEqual(20, self.char.total_nature_power)
@@ -521,7 +524,7 @@ class TestMindMastery(unittest.TestCase):
         self.assertEqual(20, self.char.total_arcane_power)
 
     def test_mind_mastery_rank5(self):
-        self.char.spell_handler.apply_spell_effect(self.mind_mastery_rank5)
+        self.char.combat_handler.apply_spell_effect(self.mind_mastery_rank5)
 
         self.assertEqual(25, self.char.total_fire_power)
         self.assertEqual(25, self.char.total_nature_power)

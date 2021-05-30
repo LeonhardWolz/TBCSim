@@ -32,27 +32,27 @@ class TestImprovedFrostbolt(unittest.TestCase):
         self.char.player_class = "Mage"
 
     def test_improved_frostbolt_rank1(self):
-        self.char.spell_handler.apply_spell_effect(self.improved_frostbolt_rank1)
+        self.char.combat_handler.apply_spell_effect(self.improved_frostbolt_rank1)
         self.assertEqual(2900, self.char.spell_cast_time(self.frostbolt_rank14))
         self.assertEqual(3500, self.char.spell_cast_time(self.fireball_rank14))
 
     def test_improved_frostbolt_rank2(self):
-        self.char.spell_handler.apply_spell_effect(self.improved_frostbolt_rank2)
+        self.char.combat_handler.apply_spell_effect(self.improved_frostbolt_rank2)
         self.assertEqual(2800, self.char.spell_cast_time(self.frostbolt_rank14))
         self.assertEqual(3500, self.char.spell_cast_time(self.fireball_rank14))
 
     def test_improved_frostbolt_rank3(self):
-        self.char.spell_handler.apply_spell_effect(self.improved_frostbolt_rank3)
+        self.char.combat_handler.apply_spell_effect(self.improved_frostbolt_rank3)
         self.assertEqual(2700, self.char.spell_cast_time(self.frostbolt_rank14))
         self.assertEqual(3500, self.char.spell_cast_time(self.fireball_rank14))
 
     def test_improved_frostbolt_rank4(self):
-        self.char.spell_handler.apply_spell_effect(self.improved_frostbolt_rank4)
+        self.char.combat_handler.apply_spell_effect(self.improved_frostbolt_rank4)
         self.assertEqual(2600, self.char.spell_cast_time(self.frostbolt_rank14))
         self.assertEqual(3500, self.char.spell_cast_time(self.fireball_rank14))
 
     def test_improved_frostbolt_rank5(self):
-        self.char.spell_handler.apply_spell_effect(self.improved_frostbolt_rank5)
+        self.char.combat_handler.apply_spell_effect(self.improved_frostbolt_rank5)
         self.assertEqual(2500, self.char.spell_cast_time(self.frostbolt_rank14))
         self.assertEqual(3500, self.char.spell_cast_time(self.fireball_rank14))
 
@@ -75,7 +75,7 @@ class TestElementalPrecision(unittest.TestCase):
         self.char.player_class = "Mage"
 
     def test_elemental_precision_rank1(self):
-        self.char.spell_handler.apply_spell_effect(self.elemental_precision_rank1)
+        self.char.combat_handler.apply_spell_effect(self.elemental_precision_rank1)
         self.assertEqual(1, self.char.spell_hit_chance_spell(self.fireball_rank14))
         self.assertEqual(1, self.char.spell_hit_chance_spell(self.frostbolt_rank14))
         self.assertEqual(0, self.char.spell_hit_chance_spell(self.arcane_blast_rank1))
@@ -88,7 +88,7 @@ class TestElementalPrecision(unittest.TestCase):
                          self.char.spell_resource_cost(self.arcane_blast_rank1))
 
     def test_elemental_precision_rank2(self):
-        self.char.spell_handler.apply_spell_effect(self.elemental_precision_rank2)
+        self.char.combat_handler.apply_spell_effect(self.elemental_precision_rank2)
         self.assertEqual(2, self.char.spell_hit_chance_spell(self.fireball_rank14))
         self.assertEqual(2, self.char.spell_hit_chance_spell(self.frostbolt_rank14))
         self.assertEqual(0, self.char.spell_hit_chance_spell(self.arcane_blast_rank1))
@@ -101,7 +101,7 @@ class TestElementalPrecision(unittest.TestCase):
                          self.char.spell_resource_cost(self.arcane_blast_rank1))
 
     def test_elemental_precision_rank3(self):
-        self.char.spell_handler.apply_spell_effect(self.elemental_precision_rank3)
+        self.char.combat_handler.apply_spell_effect(self.elemental_precision_rank3)
         self.assertEqual(3, self.char.spell_hit_chance_spell(self.fireball_rank14))
         self.assertEqual(3, self.char.spell_hit_chance_spell(self.frostbolt_rank14))
         self.assertEqual(0, self.char.spell_hit_chance_spell(self.arcane_blast_rank1))
@@ -129,28 +129,28 @@ class TestIceShards(unittest.TestCase):
         self.char.player_class = "Mage"
 
     def test_ice_shards_rank1(self):
-        self.char.spell_handler.apply_spell_effect(self.ice_shards_rank1)
-        self.assertEqual(1.50 * 1.2, self.char.spell_crit_dmg_multiplier(self.frostbolt_rank14))
+        self.char.combat_handler.apply_spell_effect(self.ice_shards_rank1)
+        self.assertEqual(1.7, self.char.spell_crit_dmg_multiplier(self.frostbolt_rank14))
         self.assertEqual(1.50, self.char.spell_crit_dmg_multiplier(self.fireball_rank14))
 
     def test_ice_shards_rank2(self):
-        self.char.spell_handler.apply_spell_effect(self.ice_shards_rank2)
-        self.assertEqual(1.50 * 1.4, self.char.spell_crit_dmg_multiplier(self.frostbolt_rank14))
+        self.char.combat_handler.apply_spell_effect(self.ice_shards_rank2)
+        self.assertEqual(1.9, self.char.spell_crit_dmg_multiplier(self.frostbolt_rank14))
         self.assertEqual(1.50, self.char.spell_crit_dmg_multiplier(self.fireball_rank14))
 
     def test_ice_shards_rank3(self):
-        self.char.spell_handler.apply_spell_effect(self.ice_shards_rank3)
-        self.assertEqual(1.50 * 1.6, self.char.spell_crit_dmg_multiplier(self.frostbolt_rank14))
+        self.char.combat_handler.apply_spell_effect(self.ice_shards_rank3)
+        self.assertEqual(2.1, self.char.spell_crit_dmg_multiplier(self.frostbolt_rank14))
         self.assertEqual(1.50, self.char.spell_crit_dmg_multiplier(self.fireball_rank14))
 
     def test_ice_shards_rank4(self):
-        self.char.spell_handler.apply_spell_effect(self.ice_shards_rank4)
-        self.assertEqual(1.50 * 1.8, self.char.spell_crit_dmg_multiplier(self.frostbolt_rank14))
+        self.char.combat_handler.apply_spell_effect(self.ice_shards_rank4)
+        self.assertEqual(2.3, self.char.spell_crit_dmg_multiplier(self.frostbolt_rank14))
         self.assertEqual(1.50, self.char.spell_crit_dmg_multiplier(self.fireball_rank14))
 
     def test_ice_shards_rank5(self):
-        self.char.spell_handler.apply_spell_effect(self.ice_shards_rank5)
-        self.assertEqual(1.50 * 2, self.char.spell_crit_dmg_multiplier(self.frostbolt_rank14))
+        self.char.combat_handler.apply_spell_effect(self.ice_shards_rank5)
+        self.assertEqual(2.5, self.char.spell_crit_dmg_multiplier(self.frostbolt_rank14))
         self.assertEqual(1.50, self.char.spell_crit_dmg_multiplier(self.fireball_rank14))
 
 
@@ -164,35 +164,35 @@ class TestFrostbite(unittest.TestCase):
     def setUp(self) -> None:
         self.char = Char()
         self.char.player_class = "Mage"
-        self.char.spell_handler.enemy = Enemy()
-        self.char.spell_handler.env = Mock()
-        self.char.spell_handler.env.now = 0
-        self.char.spell_handler.results = Mock()
-        self.char.spell_handler.results.damage_spell_hit = MagicMock()
+        self.char.combat_handler.enemy = Enemy()
+        self.char.combat_handler.env = Mock()
+        self.char.combat_handler.env.now = 0
+        self.char.combat_handler.results = Mock()
+        self.char.combat_handler.results.damage_spell_hit = MagicMock()
 
     def test_frostbite_rank1(self):
-        self.char.spell_handler.apply_spell_effect(self.frostbite_rank1)
+        self.char.combat_handler.apply_spell_effect(self.frostbite_rank1)
         self.assertTrue(any(aura.spell_id == 11071 and aura.value == 5
-                            for aura in self.char.spell_handler.active_auras))
+                            for aura in self.char.combat_handler.active_auras))
 
     def test_frostbite_rank2(self):
-        self.char.spell_handler.apply_spell_effect(self.frostbite_rank2)
+        self.char.combat_handler.apply_spell_effect(self.frostbite_rank2)
         self.assertTrue(any(aura.spell_id == 12496 and aura.value == 10
-                            for aura in self.char.spell_handler.active_auras))
+                            for aura in self.char.combat_handler.active_auras))
 
     def test_frostbite_rank3(self):
-        self.char.spell_handler.apply_spell_effect(self.frostbite_rank3)
+        self.char.combat_handler.apply_spell_effect(self.frostbite_rank3)
         self.assertTrue(any(aura.spell_id == 12497 and aura.value == 15
-                            for aura in self.char.spell_handler.active_auras))
+                            for aura in self.char.combat_handler.active_auras))
 
     def test_frostbite_application(self):
-        self.char.spell_handler.apply_spell_effect(self.frostbite_rank3)
-        for aura in self.char.spell_handler.active_auras:
+        self.char.combat_handler.apply_spell_effect(self.frostbite_rank3)
+        for aura in self.char.combat_handler.active_auras:
             if aura.spell_id == 12497:
                 aura.value = 100
-        self.char.spell_handler.apply_spell_effect(self.frostbolt_rank14)
+        self.char.combat_handler.apply_spell_effect(self.frostbolt_rank14)
 
-        self.assertTrue(any(aura.spell_id == 12494 for aura in self.char.spell_handler.enemy.active_auras))
+        self.assertTrue(any(aura.spell_id == 12494 for aura in self.char.combat_handler.enemy.active_auras))
 
 
 class TestImprovedFrostNova(unittest.TestCase):
@@ -205,24 +205,24 @@ class TestImprovedFrostNova(unittest.TestCase):
     def setUp(self) -> None:
         self.char = Char()
         self.char.player_class = "Mage"
-        self.char.spell_handler.env = Mock()
-        self.char.spell_handler.env.now = 0
+        self.char.combat_handler.env = Mock()
+        self.char.combat_handler.env.now = 0
 
     def test_improved_frost_nova_rank1(self):
-        self.char.spell_handler.apply_spell_effect(self.improved_frost_nova_rank1)
-        self.char.spell_handler.spell_start_cooldown(self.frost_nova_rank5)
-        self.char.spell_handler.spell_start_cooldown(self.ice_barrier_rank6)
+        self.char.combat_handler.apply_spell_effect(self.improved_frost_nova_rank1)
+        self.char.combat_handler.spell_start_cooldown(self.frost_nova_rank5)
+        self.char.combat_handler.spell_start_cooldown(self.ice_barrier_rank6)
 
-        self.assertEqual(23000, self.char.spell_handler.cooldown_spell_family_mask[524352][0])
-        self.assertEqual(30000, self.char.spell_handler.cooldown_spell_family_mask[4294967296][0])
+        self.assertEqual(23000, self.char.combat_handler.cooldown_spell_family_mask[524352][0])
+        self.assertEqual(30000, self.char.combat_handler.cooldown_spell_family_mask[4294967296][0])
 
     def test_improved_frost_nova_rank2(self):
-        self.char.spell_handler.apply_spell_effect(self.improved_frost_nova_rank2)
-        self.char.spell_handler.spell_start_cooldown(self.frost_nova_rank5)
-        self.char.spell_handler.spell_start_cooldown(self.ice_barrier_rank6)
+        self.char.combat_handler.apply_spell_effect(self.improved_frost_nova_rank2)
+        self.char.combat_handler.spell_start_cooldown(self.frost_nova_rank5)
+        self.char.combat_handler.spell_start_cooldown(self.ice_barrier_rank6)
 
-        self.assertEqual(21000, self.char.spell_handler.cooldown_spell_family_mask[524352][0])
-        self.assertEqual(30000, self.char.spell_handler.cooldown_spell_family_mask[4294967296][0])
+        self.assertEqual(21000, self.char.combat_handler.cooldown_spell_family_mask[524352][0])
+        self.assertEqual(30000, self.char.combat_handler.cooldown_spell_family_mask[4294967296][0])
 
 
 @unittest.skip("Not yet implemented")
@@ -251,27 +251,27 @@ class TestPiercingIce(unittest.TestCase):
         self.char.player_class = "Mage"
 
     def test_piercing_ice_rank1(self):
-        self.char.spell_handler.apply_spell_effect(self.piercing_ice_rank1)
+        self.char.combat_handler.apply_spell_effect(self.piercing_ice_rank1)
         self.assertEqual(1.02, self.char.spell_dmg_multiplier(self.frostbolt_rank14))
         self.assertEqual(1, self.char.spell_dmg_multiplier(self.fireball_rank14))
 
     def test_piercing_ice_rank2(self):
-        self.char.spell_handler.apply_spell_effect(self.piercing_ice_rank2)
+        self.char.combat_handler.apply_spell_effect(self.piercing_ice_rank2)
         self.assertEqual(1.04, self.char.spell_dmg_multiplier(self.frostbolt_rank14))
         self.assertEqual(1, self.char.spell_dmg_multiplier(self.fireball_rank14))
 
     def test_piercing_ice_rank3(self):
-        self.char.spell_handler.apply_spell_effect(self.piercing_ice_rank3)
+        self.char.combat_handler.apply_spell_effect(self.piercing_ice_rank3)
         self.assertEqual(1.06, self.char.spell_dmg_multiplier(self.frostbolt_rank14))
         self.assertEqual(1, self.char.spell_dmg_multiplier(self.fireball_rank14))
 
     def test_piercing_ice_rank4(self):
-        self.char.spell_handler.apply_spell_effect(self.piercing_ice_rank4)
+        self.char.combat_handler.apply_spell_effect(self.piercing_ice_rank4)
         self.assertEqual(1.08, self.char.spell_dmg_multiplier(self.frostbolt_rank14))
         self.assertEqual(1, self.char.spell_dmg_multiplier(self.fireball_rank14))
 
     def test_piercing_ice_rank5(self):
-        self.char.spell_handler.apply_spell_effect(self.piercing_ice_rank5)
+        self.char.combat_handler.apply_spell_effect(self.piercing_ice_rank5)
         self.assertEqual(1.1, self.char.spell_dmg_multiplier(self.frostbolt_rank14))
         self.assertEqual(1, self.char.spell_dmg_multiplier(self.fireball_rank14))
 
@@ -286,8 +286,8 @@ class TestIcyVeins(unittest.TestCase):
         self.char.player_class = "Mage"
 
     def test_icy_veins(self):
-        self.char.spell_handler.apply_spell_effect(self.icy_veins)
-        self.assertEqual(self.char.spell_handler.spell_cast_time(self.fireball_rank14) * 0.8,
+        self.char.combat_handler.apply_spell_effect(self.icy_veins)
+        self.assertEqual(self.char.combat_handler.spell_cast_time(self.fireball_rank14) * 0.8,
                          self.char.spell_cast_time(self.fireball_rank14))
 
 
@@ -328,21 +328,21 @@ class TestFrostChanneling(unittest.TestCase):
         self.char.player_class = "Mage"
 
     def test_frost_channeling_rank1(self):
-        self.char.spell_handler.apply_spell_effect(self.frost_channeling_rank1)
+        self.char.combat_handler.apply_spell_effect(self.frost_channeling_rank1)
         self.assertEqual(round(self.frostbolt_rank14_mana_cost * 0.95),
                          self.char.spell_resource_cost(self.frostbolt_rank14))
         self.assertEqual(self.fireball_rank14_mana_cost,
                          self.char.spell_resource_cost(self.fireball_rank14))
 
     def test_frost_channeling_rank2(self):
-        self.char.spell_handler.apply_spell_effect(self.frost_channeling_rank2)
+        self.char.combat_handler.apply_spell_effect(self.frost_channeling_rank2)
         self.assertEqual(round(self.frostbolt_rank14_mana_cost * 0.90),
                          self.char.spell_resource_cost(self.frostbolt_rank14))
         self.assertEqual(self.fireball_rank14_mana_cost,
                          self.char.spell_resource_cost(self.fireball_rank14))
 
     def test_frost_channeling_rank3(self):
-        self.char.spell_handler.apply_spell_effect(self.frost_channeling_rank3)
+        self.char.combat_handler.apply_spell_effect(self.frost_channeling_rank3)
         self.assertEqual(round(self.frostbolt_rank14_mana_cost * 0.85),
                          self.char.spell_resource_cost(self.frostbolt_rank14))
         self.assertEqual(self.fireball_rank14_mana_cost,
@@ -362,53 +362,53 @@ class TestShatter(unittest.TestCase):
     def setUp(self) -> None:
         self.char = Char()
         self.char.player_class = "Mage"
-        self.char.spell_handler.enemy = Enemy()
-        self.char.spell_handler.env = Mock()
-        self.char.spell_handler.env.now = 0
-        self.char.spell_handler.results = SimResult(start_time=datetime.now(), sim_length=6000)
+        self.char.combat_handler.enemy = Enemy()
+        self.char.combat_handler.env = Mock()
+        self.char.combat_handler.env.now = 0
+        self.char.combat_handler.results = SimResult(start_time=datetime.now(), sim_length=6000)
 
     def test_shatter_rank1(self):
-        self.char.spell_handler.apply_spell_effect(self.shatter_rank1)
+        self.char.combat_handler.apply_spell_effect(self.shatter_rank1)
         self.assertEqual(0.91, self.char.spell_crit_chance_spell(self.frostbolt_rank14, proc_auras=False))
         self.assertEqual(0.91, self.char.spell_crit_chance_spell(self.fireball_rank14, proc_auras=False))
 
-        self.char.spell_handler.apply_spell_effect(12494)
+        self.char.combat_handler.apply_spell_effect(12494)
         self.assertEqual(10.91, self.char.spell_crit_chance_spell(self.frostbolt_rank14, proc_auras=False))
         self.assertEqual(10.91, self.char.spell_crit_chance_spell(self.fireball_rank14, proc_auras=False))
 
     def test_shatter_rank2(self):
-        self.char.spell_handler.apply_spell_effect(self.shatter_rank2)
+        self.char.combat_handler.apply_spell_effect(self.shatter_rank2)
         self.assertEqual(0.91, self.char.spell_crit_chance_spell(self.frostbolt_rank14, proc_auras=False))
         self.assertEqual(0.91, self.char.spell_crit_chance_spell(self.fireball_rank14, proc_auras=False))
 
-        self.char.spell_handler.apply_spell_effect(12494)
+        self.char.combat_handler.apply_spell_effect(12494)
         self.assertEqual(20.91, self.char.spell_crit_chance_spell(self.frostbolt_rank14, proc_auras=False))
         self.assertEqual(20.91, self.char.spell_crit_chance_spell(self.fireball_rank14, proc_auras=False))
 
     def test_shatter_rank3(self):
-        self.char.spell_handler.apply_spell_effect(self.shatter_rank3)
+        self.char.combat_handler.apply_spell_effect(self.shatter_rank3)
         self.assertEqual(0.91, self.char.spell_crit_chance_spell(self.frostbolt_rank14, proc_auras=False))
         self.assertEqual(0.91, self.char.spell_crit_chance_spell(self.fireball_rank14, proc_auras=False))
 
-        self.char.spell_handler.apply_spell_effect(12494)
+        self.char.combat_handler.apply_spell_effect(12494)
         self.assertEqual(30.91, self.char.spell_crit_chance_spell(self.frostbolt_rank14, proc_auras=False))
         self.assertEqual(30.91, self.char.spell_crit_chance_spell(self.fireball_rank14, proc_auras=False))
 
     def test_shatter_rank4(self):
-        self.char.spell_handler.apply_spell_effect(self.shatter_rank4)
+        self.char.combat_handler.apply_spell_effect(self.shatter_rank4)
         self.assertEqual(0.91, self.char.spell_crit_chance_spell(self.frostbolt_rank14, proc_auras=False))
         self.assertEqual(0.91, self.char.spell_crit_chance_spell(self.fireball_rank14, proc_auras=False))
 
-        self.char.spell_handler.apply_spell_effect(12494)
+        self.char.combat_handler.apply_spell_effect(12494)
         self.assertEqual(40.91, self.char.spell_crit_chance_spell(self.frostbolt_rank14, proc_auras=False))
         self.assertEqual(40.91, self.char.spell_crit_chance_spell(self.fireball_rank14, proc_auras=False))
 
     def test_shatter_rank5(self):
-        self.char.spell_handler.apply_spell_effect(self.shatter_rank5)
+        self.char.combat_handler.apply_spell_effect(self.shatter_rank5)
         self.assertEqual(0.91, self.char.spell_crit_chance_spell(self.frostbolt_rank14, proc_auras=False))
         self.assertEqual(0.91, self.char.spell_crit_chance_spell(self.fireball_rank14, proc_auras=False))
 
-        self.char.spell_handler.apply_spell_effect(12494)
+        self.char.combat_handler.apply_spell_effect(12494)
         self.assertEqual(50.91, self.char.spell_crit_chance_spell(self.frostbolt_rank14, proc_auras=False))
         self.assertEqual(50.91, self.char.spell_crit_chance_spell(self.fireball_rank14, proc_auras=False))
 
@@ -438,30 +438,30 @@ class TestColdSnap(unittest.TestCase):
         self.char = Char()
         self.char.player_class = "Mage"
 
-        self.char.spell_handler.env = Mock()
-        self.char.spell_handler.env.now = 0
+        self.char.combat_handler.env = Mock()
+        self.char.combat_handler.env.now = 0
 
     def test_cold_snap(self):
-        self.char.spell_handler.spell_start_cooldown(self.cone_of_cold_rank1)
-        self.char.spell_handler.spell_start_cooldown(self.ice_barrier_rank1)
-        self.char.spell_handler.spell_start_cooldown(self.ice_block)
-        self.char.spell_handler.spell_start_cooldown(self.frost_nova_rank5)
-        self.char.spell_handler.spell_start_cooldown(self.fire_blast_rank9)
+        self.char.combat_handler.spell_start_cooldown(self.cone_of_cold_rank1)
+        self.char.combat_handler.spell_start_cooldown(self.ice_barrier_rank1)
+        self.char.combat_handler.spell_start_cooldown(self.ice_block)
+        self.char.combat_handler.spell_start_cooldown(self.frost_nova_rank5)
+        self.char.combat_handler.spell_start_cooldown(self.fire_blast_rank9)
 
-        self.assertTrue(self.char.spell_handler.spell_on_cooldown(self.cone_of_cold_rank1))
-        self.assertTrue(self.char.spell_handler.spell_on_cooldown(self.ice_barrier_rank1))
-        self.assertTrue(self.char.spell_handler.spell_on_cooldown(self.ice_block))
-        self.assertTrue(self.char.spell_handler.spell_on_cooldown(self.frost_nova_rank5))
-        self.assertTrue(self.char.spell_handler.spell_on_cooldown(self.fire_blast_rank9))
+        self.assertTrue(self.char.combat_handler.spell_on_cooldown(self.cone_of_cold_rank1))
+        self.assertTrue(self.char.combat_handler.spell_on_cooldown(self.ice_barrier_rank1))
+        self.assertTrue(self.char.combat_handler.spell_on_cooldown(self.ice_block))
+        self.assertTrue(self.char.combat_handler.spell_on_cooldown(self.frost_nova_rank5))
+        self.assertTrue(self.char.combat_handler.spell_on_cooldown(self.fire_blast_rank9))
 
-        self.char.spell_handler.apply_spell_effect(self.cold_snap)
+        self.char.combat_handler.apply_spell_effect(self.cold_snap)
 
-        self.assertFalse(self.char.spell_handler.spell_on_cooldown(self.cone_of_cold_rank1))
-        self.assertFalse(self.char.spell_handler.spell_on_cooldown(self.ice_barrier_rank1))
-        self.assertFalse(self.char.spell_handler.spell_on_cooldown(self.ice_block))
-        self.assertFalse(self.char.spell_handler.spell_on_cooldown(self.frost_nova_rank5))
-        self.assertTrue(self.char.spell_handler.spell_on_cooldown(self.fire_blast_rank9))
-        self.assertTrue(self.char.spell_handler.spell_on_cooldown(self.cold_snap))
+        self.assertFalse(self.char.combat_handler.spell_on_cooldown(self.cone_of_cold_rank1))
+        self.assertFalse(self.char.combat_handler.spell_on_cooldown(self.ice_barrier_rank1))
+        self.assertFalse(self.char.combat_handler.spell_on_cooldown(self.ice_block))
+        self.assertFalse(self.char.combat_handler.spell_on_cooldown(self.frost_nova_rank5))
+        self.assertTrue(self.char.combat_handler.spell_on_cooldown(self.fire_blast_rank9))
+        self.assertTrue(self.char.combat_handler.spell_on_cooldown(self.cold_snap))
 
 
 class TestImprovedConeOfCold(unittest.TestCase):
@@ -478,19 +478,19 @@ class TestImprovedConeOfCold(unittest.TestCase):
         self.char.player_class = "Mage"
 
     def test_improved_cone_of_cold_rank1(self):
-        self.char.spell_handler.apply_spell_effect(self.improved_cone_of_cold_rank1)
+        self.char.combat_handler.apply_spell_effect(self.improved_cone_of_cold_rank1)
         self.assertEqual(1.15, self.char.spell_dmg_multiplier(self.cone_of_cold_rank1))
         self.assertEqual(1, self.char.spell_dmg_multiplier(self.frostbolt_rank14))
         self.assertEqual(1, self.char.spell_dmg_multiplier(self.fireball_rank14))
 
     def test_improved_cone_of_cold_rank2(self):
-        self.char.spell_handler.apply_spell_effect(self.improved_cone_of_cold_rank2)
+        self.char.combat_handler.apply_spell_effect(self.improved_cone_of_cold_rank2)
         self.assertEqual(1.25, self.char.spell_dmg_multiplier(self.cone_of_cold_rank1))
         self.assertEqual(1, self.char.spell_dmg_multiplier(self.frostbolt_rank14))
         self.assertEqual(1, self.char.spell_dmg_multiplier(self.fireball_rank14))
 
     def test_improved_cone_of_cold_rank3(self):
-        self.char.spell_handler.apply_spell_effect(self.improved_cone_of_cold_rank3)
+        self.char.combat_handler.apply_spell_effect(self.improved_cone_of_cold_rank3)
         self.assertEqual(1.35, self.char.spell_dmg_multiplier(self.cone_of_cold_rank1))
         self.assertEqual(1, self.char.spell_dmg_multiplier(self.frostbolt_rank14))
         self.assertEqual(1, self.char.spell_dmg_multiplier(self.fireball_rank14))
@@ -510,38 +510,38 @@ class TestIceFloes(unittest.TestCase):
         self.char = Char()
         self.char.player_class = "Mage"
 
-        self.char.spell_handler.env = Mock()
-        self.char.spell_handler.env.now = 0
+        self.char.combat_handler.env = Mock()
+        self.char.combat_handler.env.now = 0
 
     def test_ice_floes_rank1(self):
-        self.char.spell_handler.apply_spell_effect(self.ice_floes_rank1)
+        self.char.combat_handler.apply_spell_effect(self.ice_floes_rank1)
 
-        self.char.spell_handler.spell_start_cooldown(self.cold_snap)
-        self.char.spell_handler.spell_start_cooldown(self.cone_of_cold_rank1)
-        self.char.spell_handler.spell_start_cooldown(self.ice_barrier_rank1)
-        self.char.spell_handler.spell_start_cooldown(self.ice_block)
-        self.char.spell_handler.spell_start_cooldown(self.frost_nova_rank5)
+        self.char.combat_handler.spell_start_cooldown(self.cold_snap)
+        self.char.combat_handler.spell_start_cooldown(self.cone_of_cold_rank1)
+        self.char.combat_handler.spell_start_cooldown(self.ice_barrier_rank1)
+        self.char.combat_handler.spell_start_cooldown(self.ice_block)
+        self.char.combat_handler.spell_start_cooldown(self.frost_nova_rank5)
 
-        self.assertEqual(480000 * 0.9, self.char.spell_handler.cooldown_spell_id[self.cold_snap][0])
-        self.assertEqual(10000 * 0.9, self.char.spell_handler.cooldown_spell_family_mask[1573376][0])
-        self.assertEqual(30000 * 0.9, self.char.spell_handler.cooldown_spell_family_mask[4294967296][0])
-        self.assertEqual(300000 * 0.9, self.char.spell_handler.cooldown_spell_family_mask[554050781184][0])
-        self.assertEqual(25000, self.char.spell_handler.cooldown_spell_family_mask[524352][0])
+        self.assertEqual(480000 * 0.9, self.char.combat_handler.cooldown_spell_id[self.cold_snap][0])
+        self.assertEqual(10000 * 0.9, self.char.combat_handler.cooldown_spell_family_mask[1573376][0])
+        self.assertEqual(30000 * 0.9, self.char.combat_handler.cooldown_spell_family_mask[4294967296][0])
+        self.assertEqual(300000 * 0.9, self.char.combat_handler.cooldown_spell_family_mask[554050781184][0])
+        self.assertEqual(25000, self.char.combat_handler.cooldown_spell_family_mask[524352][0])
 
     def test_ice_floes_rank2(self):
-        self.char.spell_handler.apply_spell_effect(self.ice_floes_rank2)
+        self.char.combat_handler.apply_spell_effect(self.ice_floes_rank2)
 
-        self.char.spell_handler.spell_start_cooldown(self.cold_snap)
-        self.char.spell_handler.spell_start_cooldown(self.cone_of_cold_rank1)
-        self.char.spell_handler.spell_start_cooldown(self.ice_barrier_rank1)
-        self.char.spell_handler.spell_start_cooldown(self.ice_block)
-        self.char.spell_handler.spell_start_cooldown(self.frost_nova_rank5)
+        self.char.combat_handler.spell_start_cooldown(self.cold_snap)
+        self.char.combat_handler.spell_start_cooldown(self.cone_of_cold_rank1)
+        self.char.combat_handler.spell_start_cooldown(self.ice_barrier_rank1)
+        self.char.combat_handler.spell_start_cooldown(self.ice_block)
+        self.char.combat_handler.spell_start_cooldown(self.frost_nova_rank5)
 
-        self.assertEqual(480000 * 0.8, self.char.spell_handler.cooldown_spell_id[self.cold_snap][0])
-        self.assertEqual(10000 * 0.8, self.char.spell_handler.cooldown_spell_family_mask[1573376][0])
-        self.assertEqual(30000 * 0.8, self.char.spell_handler.cooldown_spell_family_mask[4294967296][0])
-        self.assertEqual(300000 * 0.8, self.char.spell_handler.cooldown_spell_family_mask[554050781184][0])
-        self.assertEqual(25000, self.char.spell_handler.cooldown_spell_family_mask[524352][0])
+        self.assertEqual(480000 * 0.8, self.char.combat_handler.cooldown_spell_id[self.cold_snap][0])
+        self.assertEqual(10000 * 0.8, self.char.combat_handler.cooldown_spell_family_mask[1573376][0])
+        self.assertEqual(30000 * 0.8, self.char.combat_handler.cooldown_spell_family_mask[4294967296][0])
+        self.assertEqual(300000 * 0.8, self.char.combat_handler.cooldown_spell_family_mask[554050781184][0])
+        self.assertEqual(25000, self.char.combat_handler.cooldown_spell_family_mask[524352][0])
 
 
 def spell_does_hit(spell_id):
@@ -563,49 +563,49 @@ class TestWintersChill(unittest.TestCase):
         self.char = Char()
         self.char.player_class = "Mage"
         self.char.spell_hit_rating = 2000
-        self.char.spell_handler.enemy = Enemy()
-        self.char.spell_handler.env = Mock()
-        self.char.spell_handler.env.now = 0
-        self.char.spell_handler.results = Mock()
-        self.char.spell_handler.results.damage_spell_hit = MagicMock()
-        self.char.spell_handler.spell_does_hit = Mock(side_effect=spell_does_hit)
+        self.char.combat_handler.enemy = Enemy()
+        self.char.combat_handler.env = Mock()
+        self.char.combat_handler.env.now = 0
+        self.char.combat_handler.results = Mock()
+        self.char.combat_handler.results.damage_spell_hit = MagicMock()
+        self.char.combat_handler.spell_does_hit = Mock(side_effect=spell_does_hit)
 
     def test_winters_chill_rank1(self):
-        self.char.spell_handler.apply_spell_effect(self.winters_chill_rank1)
-        self.assertTrue(any(aura.spell_id == self.winters_chill_rank1 and aura.proc[1] == 20
-                            for aura in self.char.spell_handler.active_auras))
+        self.char.combat_handler.apply_spell_effect(self.winters_chill_rank1)
+        self.assertTrue(any(aura.spell_id == self.winters_chill_rank1 and aura.proc[2] == 20
+                            for aura in self.char.combat_handler.active_auras))
 
     def test_winters_chill_rank2(self):
-        self.char.spell_handler.apply_spell_effect(self.winters_chill_rank2)
-        self.assertTrue(any(aura.spell_id == self.winters_chill_rank2 and aura.proc[1] == 40
-                            for aura in self.char.spell_handler.active_auras))
+        self.char.combat_handler.apply_spell_effect(self.winters_chill_rank2)
+        self.assertTrue(any(aura.spell_id == self.winters_chill_rank2 and aura.proc[2] == 40
+                            for aura in self.char.combat_handler.active_auras))
 
     def test_winters_chill_rank3(self):
-        self.char.spell_handler.apply_spell_effect(self.winters_chill_rank3)
-        self.assertTrue(any(aura.spell_id == self.winters_chill_rank3 and aura.proc[1] == 60
-                            for aura in self.char.spell_handler.active_auras))
+        self.char.combat_handler.apply_spell_effect(self.winters_chill_rank3)
+        self.assertTrue(any(aura.spell_id == self.winters_chill_rank3 and aura.proc[2] == 60
+                            for aura in self.char.combat_handler.active_auras))
 
     def test_winters_chill_rank4(self):
-        self.char.spell_handler.apply_spell_effect(self.winters_chill_rank4)
-        self.assertTrue(any(aura.spell_id == self.winters_chill_rank4 and aura.proc[1] == 80
-                            for aura in self.char.spell_handler.active_auras))
+        self.char.combat_handler.apply_spell_effect(self.winters_chill_rank4)
+        self.assertTrue(any(aura.spell_id == self.winters_chill_rank4 and aura.proc[2] == 80
+                            for aura in self.char.combat_handler.active_auras))
 
     def test_winters_chill_rank5(self):
-        self.char.spell_handler.apply_spell_effect(self.winters_chill_rank5)
-        self.assertTrue(any(aura.spell_id == self.winters_chill_rank5 and aura.proc[1] == 100
-                            for aura in self.char.spell_handler.active_auras))
+        self.char.combat_handler.apply_spell_effect(self.winters_chill_rank5)
+        self.assertTrue(any(aura.spell_id == self.winters_chill_rank5 and aura.proc[2] == 100
+                            for aura in self.char.combat_handler.active_auras))
 
     def test_winters_chill_application(self):
-        self.char.spell_handler.apply_spell_effect(self.winters_chill_rank5)
+        self.char.combat_handler.apply_spell_effect(self.winters_chill_rank5)
 
-        self.char.spell_handler.apply_spell_effect(self.fireball_rank14)
-        self.assertFalse(any(aura.spell_id == 12579 for aura in self.char.spell_handler.enemy.active_auras))
+        self.char.combat_handler.apply_spell_effect(self.fireball_rank14)
+        self.assertFalse(any(aura.spell_id == 12579 for aura in self.char.combat_handler.enemy.active_auras))
 
         self.assertEqual(0.91, self.char.spell_crit_chance_spell(self.frostbolt_rank14))
         self.assertEqual(0.91, self.char.spell_crit_chance_spell(self.fireball_rank14))
 
-        self.char.spell_handler.apply_spell_effect(self.frostbolt_rank14)
-        self.assertTrue(any(aura.spell_id == 12579 for aura in self.char.spell_handler.enemy.active_auras))
+        self.char.combat_handler.apply_spell_effect(self.frostbolt_rank14)
+        self.assertTrue(any(aura.spell_id == 12579 for aura in self.char.combat_handler.enemy.active_auras))
 
         self.assertEqual(2.91, self.char.spell_crit_chance_spell(self.frostbolt_rank14))
         self.assertEqual(0.91, self.char.spell_crit_chance_spell(self.fireball_rank14))
@@ -638,31 +638,31 @@ class TestArcticWinds(unittest.TestCase):
         self.char.player_class = "Mage"
 
     def test_arctic_winds_rank1(self):
-        self.char.spell_handler.apply_spell_effect(self.arctic_winds_rank1)
+        self.char.combat_handler.apply_spell_effect(self.arctic_winds_rank1)
 
         self.assertEqual(1.01, self.char.spell_dmg_multiplier(self.frostbolt_rank14))
         self.assertEqual(1, self.char.spell_dmg_multiplier(self.fireball_rank14))
 
     def test_arctic_winds_rank2(self):
-        self.char.spell_handler.apply_spell_effect(self.arctic_winds_rank2)
+        self.char.combat_handler.apply_spell_effect(self.arctic_winds_rank2)
 
         self.assertEqual(1.02, self.char.spell_dmg_multiplier(self.frostbolt_rank14))
         self.assertEqual(1, self.char.spell_dmg_multiplier(self.fireball_rank14))
 
     def test_arctic_winds_rank3(self):
-        self.char.spell_handler.apply_spell_effect(self.arctic_winds_rank3)
+        self.char.combat_handler.apply_spell_effect(self.arctic_winds_rank3)
 
         self.assertEqual(1.03, self.char.spell_dmg_multiplier(self.frostbolt_rank14))
         self.assertEqual(1, self.char.spell_dmg_multiplier(self.fireball_rank14))
 
     def test_arctic_winds_rank4(self):
-        self.char.spell_handler.apply_spell_effect(self.arctic_winds_rank4)
+        self.char.combat_handler.apply_spell_effect(self.arctic_winds_rank4)
 
         self.assertEqual(1.04, self.char.spell_dmg_multiplier(self.frostbolt_rank14))
         self.assertEqual(1, self.char.spell_dmg_multiplier(self.fireball_rank14))
 
     def test_arctic_winds_rank5(self):
-        self.char.spell_handler.apply_spell_effect(self.arctic_winds_rank5)
+        self.char.combat_handler.apply_spell_effect(self.arctic_winds_rank5)
 
         self.assertEqual(1.05, self.char.spell_dmg_multiplier(self.frostbolt_rank14))
         self.assertEqual(1, self.char.spell_dmg_multiplier(self.fireball_rank14))
@@ -681,49 +681,49 @@ class TestEmpoweredFrostbolt(unittest.TestCase):
     def setUp(self) -> None:
         self.char = Char()
         self.char.player_class = "Mage"
-        self.char.spell_handler.enemy = Enemy()
+        self.char.combat_handler.enemy = Enemy()
 
     def test_empowered_frostbolt_rank1(self):
-        self.char.spell_handler.apply_spell_effect(self.empowered_frostbolt_rank1)
-        self.assertEqual(round(self.char.spell_handler.spell_power_coefficient(self.frostbolt_rank14) + 0.02, 3),
+        self.char.combat_handler.apply_spell_effect(self.empowered_frostbolt_rank1)
+        self.assertEqual(round(self.char.combat_handler.spell_power_coefficient(self.frostbolt_rank14) + 0.02, 3),
                          self.char.spell_power_coefficient(self.frostbolt_rank14))
-        self.assertEqual(self.char.spell_handler.spell_power_coefficient(self.fireball_rank14),
+        self.assertEqual(self.char.combat_handler.spell_power_coefficient(self.fireball_rank14),
                          self.char.spell_power_coefficient(self.fireball_rank14))
         self.assertEqual(1.91, self.char.spell_crit_chance_spell(self.frostbolt_rank14))
         self.assertEqual(0.91, self.char.spell_crit_chance_spell(self.fireball_rank14))
 
     def test_empowered_frostbolt_rank2(self):
-        self.char.spell_handler.apply_spell_effect(self.empowered_frostbolt_rank2)
-        self.assertEqual(round(self.char.spell_handler.spell_power_coefficient(self.frostbolt_rank14) + 0.04, 3),
+        self.char.combat_handler.apply_spell_effect(self.empowered_frostbolt_rank2)
+        self.assertEqual(round(self.char.combat_handler.spell_power_coefficient(self.frostbolt_rank14) + 0.04, 3),
                          self.char.spell_power_coefficient(self.frostbolt_rank14))
-        self.assertEqual(self.char.spell_handler.spell_power_coefficient(self.fireball_rank14),
+        self.assertEqual(self.char.combat_handler.spell_power_coefficient(self.fireball_rank14),
                          self.char.spell_power_coefficient(self.fireball_rank14))
         self.assertEqual(2.91, self.char.spell_crit_chance_spell(self.frostbolt_rank14))
         self.assertEqual(0.91, self.char.spell_crit_chance_spell(self.fireball_rank14))
 
     def test_empowered_frostbolt_rank3(self):
-        self.char.spell_handler.apply_spell_effect(self.empowered_frostbolt_rank3)
-        self.assertEqual(round(self.char.spell_handler.spell_power_coefficient(self.frostbolt_rank14) + 0.06, 3),
+        self.char.combat_handler.apply_spell_effect(self.empowered_frostbolt_rank3)
+        self.assertEqual(round(self.char.combat_handler.spell_power_coefficient(self.frostbolt_rank14) + 0.06, 3),
                          self.char.spell_power_coefficient(self.frostbolt_rank14))
-        self.assertEqual(self.char.spell_handler.spell_power_coefficient(self.fireball_rank14),
+        self.assertEqual(self.char.combat_handler.spell_power_coefficient(self.fireball_rank14),
                          self.char.spell_power_coefficient(self.fireball_rank14))
         self.assertEqual(3.91, self.char.spell_crit_chance_spell(self.frostbolt_rank14))
         self.assertEqual(0.91, self.char.spell_crit_chance_spell(self.fireball_rank14))
 
     def test_empowered_frostbolt_rank4(self):
-        self.char.spell_handler.apply_spell_effect(self.empowered_frostbolt_rank4)
-        self.assertEqual(round(self.char.spell_handler.spell_power_coefficient(self.frostbolt_rank14) + 0.08, 3),
+        self.char.combat_handler.apply_spell_effect(self.empowered_frostbolt_rank4)
+        self.assertEqual(round(self.char.combat_handler.spell_power_coefficient(self.frostbolt_rank14) + 0.08, 3),
                          self.char.spell_power_coefficient(self.frostbolt_rank14))
-        self.assertEqual(self.char.spell_handler.spell_power_coefficient(self.fireball_rank14),
+        self.assertEqual(self.char.combat_handler.spell_power_coefficient(self.fireball_rank14),
                          self.char.spell_power_coefficient(self.fireball_rank14))
         self.assertEqual(4.91, self.char.spell_crit_chance_spell(self.frostbolt_rank14))
         self.assertEqual(0.91, self.char.spell_crit_chance_spell(self.fireball_rank14))
 
     def test_empowered_frostbolt_rank5(self):
-        self.char.spell_handler.apply_spell_effect(self.empowered_frostbolt_rank5)
-        self.assertEqual(round(self.char.spell_handler.spell_power_coefficient(self.frostbolt_rank14) + 0.1, 3),
+        self.char.combat_handler.apply_spell_effect(self.empowered_frostbolt_rank5)
+        self.assertEqual(round(self.char.combat_handler.spell_power_coefficient(self.frostbolt_rank14) + 0.1, 3),
                          self.char.spell_power_coefficient(self.frostbolt_rank14))
-        self.assertEqual(self.char.spell_handler.spell_power_coefficient(self.fireball_rank14),
+        self.assertEqual(self.char.combat_handler.spell_power_coefficient(self.fireball_rank14),
                          self.char.spell_power_coefficient(self.fireball_rank14))
         self.assertEqual(5.91, self.char.spell_crit_chance_spell(self.frostbolt_rank14))
         self.assertEqual(0.91, self.char.spell_crit_chance_spell(self.fireball_rank14))

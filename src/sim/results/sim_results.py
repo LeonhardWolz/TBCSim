@@ -6,11 +6,11 @@ from src import enums
 
 import src.db.sqlite_db_connector as DB
 
-used_consumables_line_format = "    {:24s}|{:12s}|{:16s}"
-consumable_row_divider = "    ------------------------------------------------------"
+used_items_line_format = "    {:30s}|{:12s}|{:16s}"
+consumable_row_divider = "    ------------------------------------------------------------"
 
-misc_combat_action_line_format = "    {:24s}|{:12s}|{:16s}"
-misc_combat_action_row_divider = "    ------------------------------------------------------"
+misc_combat_action_line_format = "    {:30s}|{:12s}|{:16s}"
+misc_combat_action_row_divider = "    ------------------------------------------------------------"
 
 off_combat_action_line_format = "    {:34s}|{:8s}|{:8s}|{:8s}|{:10s}|{:10s}|{:8s}|" \
                                 "{:10s}|{:10s}|{:10s}|{:12s}|{:10s}|{:12s}|{:16s}"
@@ -236,18 +236,7 @@ class SimResult:
 
     def __str__(self):
         str_repr = "\n    TBC Combat Simulation from: {}\n\n".format(self.start_time.strftime("%Y-%m-%d %H:%M:%S"))
-        str_repr += "    ------------ Equipped Items ------------\n\n"
 
-        for i in range(0, 20):
-            if i in enums.inventory_slot:
-                str_repr += "    {:9s}: ".format(enums.inventory_slot[i])
-                if i in self.equipped_items.keys():
-                    str_repr += str(self.equipped_items.get(i)) + "\n"
-                else:
-                    str_repr += "----\n"
-                str_repr += "    ---------------------------------------------------\n"
-
-        str_repr += "\n"
         str_repr += "    ------------ Action Order ------------\n\n"
 
         str_repr += "    Simtime | Combat Action\n"
@@ -256,10 +245,10 @@ class SimResult:
             str_repr += f"\n    {action[0] / 1000:7.3f} | {action[1]}"
 
         str_repr += "\n"
-        str_repr += "\n    ------------ Consumable Breakdown ------------\n\n"
-        str_repr += used_consumables_line_format.format("Consumable Name",
-                                                        "Total Uses",
-                                                        "Mana restored")
+        str_repr += "\n    --------------- Item Combat Action Breakdown ---------------\n\n"
+        str_repr += used_items_line_format.format("Item Name",
+                                                  "Total Uses",
+                                                  "Mana restored")
         str_repr += "\n"
         for consumable in self.used_consumables.values():
             str_repr += consumable_row_divider + "\n"
@@ -267,7 +256,7 @@ class SimResult:
         str_repr += consumable_row_divider + "\n"
 
         str_repr += "\n"
-        str_repr += "\n    ------------ Misc Combat Action Breakdown ------------\n\n"
+        str_repr += "\n    --------------- Misc Combat Action Breakdown ---------------\n\n"
         str_repr += misc_combat_action_line_format.format("Combat Action Name",
                                                           "Total Uses",
                                                           "Misc Effect")
@@ -390,8 +379,7 @@ class EquippedItem:
                     str_repr += "Socket Empty"
         if self.socket_bonus != 0:
             socket_bonus_name = DB.get_enchant(self.socket_bonus)[DB.enchant_column_info["m_name_lang_1"]]
-            str_repr += "\n\t\tSocket Bonus {}: \t".format("Active" if self.socket_bonus_met else "Inactive") \
-                        + socket_bonus_name
+            str_repr += f"\n\t\tSocket Bonus {'Active' if self.socket_bonus_met else 'Inactive'}: \t{socket_bonus_name}"
         return str_repr
 
 
@@ -403,6 +391,6 @@ class UsedConsumable:
     mana_restored: int = 0
 
     def __str__(self):
-        return used_consumables_line_format.format(self.name,
-                                                   str(self.uses),
-                                                   str(self.mana_restored))
+        return used_items_line_format.format(self.name,
+                                             str(self.uses),
+                                             str(self.mana_restored))

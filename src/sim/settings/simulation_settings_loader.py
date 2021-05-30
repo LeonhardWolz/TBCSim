@@ -40,7 +40,7 @@ class SimulationSettingsLoader(object):
 
         self.char.current_health = self.char.total_health
         self.char.current_mana = self.char.total_mana
-        self.char.spell_handler.enemy = self.enemy
+        self.char.combat_handler.enemy = self.enemy
 
     def load_sim_settings(self, sim_settings):
         self.simSettings.sim_type = sim_settings["sim_type"] \
@@ -99,44 +99,45 @@ class SimulationSettingsLoader(object):
 
     def load_racials(self):
         if self.char.race == "Human":
-            self.char.spell_handler.apply_spell_effect(20598)
+            self.char.combat_handler.apply_spell_effect(20598)
         elif self.char.race == "Orc":
             pass
         elif self.char.race == "Dwarf":
-            self.char.spell_handler.apply_spell_effect(20595)
-            self.char.spell_handler.apply_spell_effect(20596)
+            self.char.combat_handler.apply_spell_effect(20595)
+            self.char.combat_handler.apply_spell_effect(20596)
         elif self.char.race == "Nightelf":
-            self.char.spell_handler.apply_spell_effect(20583)
+            self.char.combat_handler.apply_spell_effect(20583)
         elif self.char.race == "Undead":
-            self.char.spell_handler.apply_spell_effect(20579)
+            self.char.combat_handler.apply_spell_effect(20579)
         elif self.char.race == "Tauren":
-            self.char.spell_handler.apply_spell_effect(20551)
-            self.char.spell_handler.apply_spell_effect(20550)
+            self.char.combat_handler.apply_spell_effect(20551)
+            self.char.combat_handler.apply_spell_effect(20550)
         elif self.char.race == "Gnome":
-            self.char.spell_handler.apply_spell_effect(20592)
-            self.char.spell_handler.apply_spell_effect(20591)
+            self.char.combat_handler.apply_spell_effect(20592)
+            self.char.combat_handler.apply_spell_effect(20591)
         elif self.char.race == "Troll":
             self.char.boost_spells.append(20554)
         elif self.char.race == "Bloodelf":
-            self.char.spell_handler.apply_spell_effect(822)
+            self.char.combat_handler.apply_spell_effect(822)
         elif self.char.race == "Draenei":
-            self.char.spell_handler.apply_spell_effect(6562)
-            self.char.spell_handler.apply_spell_effect(28878)
-            self.char.spell_handler.apply_spell_effect(20579)
+            self.char.combat_handler.apply_spell_effect(6562)
+            self.char.combat_handler.apply_spell_effect(28878)
+            self.char.combat_handler.apply_spell_effect(20579)
 
     def load_consumables(self, char_settings):
         for consumable_id in char_settings["passive_consumables"]:
+            self.char.passive_consumables.append(consumable_id)
             item_info = DB.get_item(consumable_id)
             for i in range(1, 4):
                 spell_id = item_info[DB.item_column_info["spellid_" + str(i)]]
                 if spell_id != 0:
                     # bufffood triggers spell
-                    triggered_spell_id = self.char.spell_handler.spell_get_triggered_spell(spell_id)
+                    triggered_spell_id = self.char.combat_handler.spell_get_triggered_spell(spell_id)
                     try:
                         if triggered_spell_id != 0:
-                            self.char.spell_handler.apply_spell_effect(triggered_spell_id)
+                            self.char.combat_handler.apply_spell_effect(triggered_spell_id)
                         else:
-                            self.char.spell_handler.apply_spell_effect(spell_id)
+                            self.char.combat_handler.apply_spell_effect(spell_id)
                     except NotImplementedWarning as e:
                         self.sim_results.errors.append(str(e))
 
@@ -149,27 +150,32 @@ class SimulationSettingsLoader(object):
             self.char.damage_spells.append(spell_id)
 
         for spell_id in char_settings["passive_spells"]:
-            self.char.spell_handler.apply_spell_effect(spell_id)
+            self.char.passive_spells.append(spell_id)
+            self.char.combat_handler.apply_spell_effect(spell_id)
 
         if self.char.player_class == "Mage":
             for spell_id in self.mage_mana_spells:
                 self.char.mana_spells.append(spell_id)
 
     def load_talents(self, settings):
-        if "talent_calc_link" in settings:
+        if "talent_calc_link" in settings and "tbc.wowhead" in settings["talent_calc_link"]:
             self.sim_results.talents = settings["talent_calc_link"]
-            talent_string = re.findall("([0-9]+)", settings["talent_calc_link"])
-            for x, group in enumerate(talent_string):
+            talent_string = re.findall("/([0-9-]+)", settings["talent_calc_link"])
+            talent_strings = talent_string[0].split("-")
+
+            for x, group in enumerate(talent_strings):
                 talent_tab_id = DB.get_talent_tab_id(enums.PlayerClass[self.char.player_class].value, x)
                 for index, talent_rank in enumerate(group):
                     if talent_rank != "0":
                         talent_id = DB.get_talent_id(talent_tab_id, index, talent_rank)
                         self.load_talent(talent_id)
+        else:
+            self.sim_results.talents = "None"
 
     def load_talent(self, talent_id):
         talent_info = DB.get_spell(talent_id)
         if talent_info[DB.spell_column_info["Attributes"]] & 0x00000040:
-            self.char.spell_handler.apply_spell_effect(talent_id)
+            self.char.combat_handler.apply_spell_effect(talent_id)
         elif 2 in [talent_info[DB.spell_column_info["Effect1"]],  # TODO also add pure dots to dmg spells
                    talent_info[DB.spell_column_info["Effect2"]],
                    talent_info[DB.spell_column_info["Effect3"]]]:
@@ -196,7 +202,7 @@ class SimulationSettingsLoader(object):
             set_pieces = len(item_set_info[1])
             for i in range(1, 9):
                 if set_pieces >= item_set_data[DB.item_set_column_info["pieces_" + str(i)]] != 0:
-                    self.char.spell_handler.apply_spell_effect(
+                    self.char.combat_handler.apply_spell_effect(
                         item_set_data[DB.item_set_column_info["bonus_" + str(i)]])
 
     def load_character_items(self, gear_settings):
@@ -289,7 +295,7 @@ class SimulationSettingsLoader(object):
             # 3: apply spell
             elif enchantment_info[DB.enchant_column_info["m_effect" + str(effect_slot)]] == 3:
                 try:
-                    self.char.spell_handler.apply_spell_effect(
+                    self.char.combat_handler.apply_spell_effect(
                         enchantment_info[DB.enchant_column_info["m_effectArg" + str(effect_slot)]])
                 except NotImplementedWarning as e:
                     self.sim_results.errors.append(str(e))
@@ -308,7 +314,8 @@ class SimulationSettingsLoader(object):
             elif enchantment_info[DB.enchant_column_info["m_effect" + str(effect_slot)]] == 6:
                 pass
 
-    def enchant_effect_strength(self, enchantment, effect_slot):
+    @staticmethod
+    def enchant_effect_strength(enchantment, effect_slot):
         return random.randint(enchantment[DB.enchant_column_info["m_effectPointsMin" + str(effect_slot)]],
                               enchantment[DB.enchant_column_info["m_effectPointsMax" + str(effect_slot)]])
 
@@ -327,12 +334,22 @@ class SimulationSettingsLoader(object):
 
         for i in range(1, 6):
             spell_id = item_from_db[DB.item_column_info["spellid_" + str(i)]]
-            spell_trigger = item_from_db[DB.item_column_info["spelltrigger_" + str(i)]]
-            if spell_id != 0 and spell_trigger == 1:
-                try:
-                    self.char.spell_handler.apply_spell_effect(spell_id)
-                except NotImplementedWarning as e:
-                    self.sim_results.errors.append(str(e))
+            if spell_id != 0:
+                spell_trigger = item_from_db[DB.item_column_info["spelltrigger_" + str(i)]]
+
+                # Item Spell Trigger "on use"
+                if spell_trigger == 0:
+                    self.char.active_consumables[item_from_db[0]] = 0
+                # Item Spell Trigger "on equip"
+                elif spell_trigger == 1:
+                    try:
+                        self.char.combat_handler.apply_spell_effect(spell_id)
+                    except NotImplementedWarning as e:
+                        self.sim_results.errors.append(str(e))
+                # Item Spell Trigger "on hit"
+                elif spell_trigger == 2:
+                    # TODO: Implement
+                    pass
 
         for i in range(1, 4):
             socket_color = item_from_db[DB.item_column_info["socketColor_" + str(i)]]

@@ -17,33 +17,32 @@ class MageCAR(CombatActionRater):
             mana_spell_rating += 1
         return mana_spell_rating
 
-    def get_consumable_rating(self, item_id):
+    def get_item_rating(self, item_id):
         consumable_rating = 0
         item_info = DB.get_item(item_id)
         for i in range(1, 6):
-            item_spell = DB.get_spell(
-                item_info[DB.item_column_info["spellid_" + str(i)]])
-            if item_spell:
+            item_spell = DB.get_spell(item_info[DB.item_column_info["spellid_" + str(i)]])
+            if item_spell and item_info[DB.item_column_info["spelltrigger_" + str(i)]] == 0:
+                # mana restoration items
                 if item_id in (5513, 5514, 8007, 8008, 22044, 22832):
                     for effect_slot in range(1, 4):
-                        max_value = item_spell[
-                                        DB.spell_column_info["EffectBasePoints" + str(effect_slot)]] + \
-                                    (item_spell[
-                                         DB.spell_column_info["EffectBaseDice" + str(effect_slot)]] *
-                                     item_spell[
-                                         DB.spell_column_info["EffectDieSides" + str(effect_slot)]])
+                        max_value = item_spell[DB.spell_column_info["EffectBasePoints" + str(effect_slot)]] + \
+                                    (item_spell[DB.spell_column_info["EffectBaseDice" + str(effect_slot)]] *
+                                     item_spell[DB.spell_column_info["EffectDieSides" + str(effect_slot)]])
                         if max_value != 0:
                             consumable_rating += -0.8 + max_value / self.player.char.total_mana + \
                                                  (self.player.char.total_mana - self.player.char.current_mana) \
                                                  / self.player.char.total_mana
-                elif item_id in (22839,):
+                # damage boost items
+                else:
                     if self.player.char.current_mana / self.player.char.total_mana > 0.35:
-                        consumable_rating += -0.5 + self.player.char.current_mana / self.player.char.total_mana
+                        consumable_rating += -0.5 \
+                                             + self.player.char.current_mana / self.player.char.total_mana
 
         return consumable_rating
 
     def get_boost_spell_rating(self, spell_id):
-        spell_rating = self.get_boost_spell_base_rating()
+        spell_rating = self.get_boost_base_rating()
 
         return spell_rating
 
