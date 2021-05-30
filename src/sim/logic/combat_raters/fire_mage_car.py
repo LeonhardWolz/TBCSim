@@ -5,12 +5,13 @@ import src.db.sqlite_db_connector as DB
 
 
 class FireMageCAR(MageCAR):
-    def get_consumable_rating(self, item_id):
+    def get_item_rating(self, item_id):
         consumable_rating = 0
         item_info = DB.get_item(item_id)
         for i in range(1, 6):
             item_spell = DB.get_spell(item_info[DB.item_column_info["spellid_" + str(i)]])
-            if item_spell:
+            if item_spell and item_info[DB.item_column_info["spelltrigger_" + str(i)]] == 0:
+                # mana restoration items
                 if item_id in (5513, 5514, 8007, 8008, 22044, 22832):
                     for effect_slot in range(1, 4):
                         max_value = item_spell[DB.spell_column_info["EffectBasePoints" + str(effect_slot)]] + \
@@ -20,23 +21,24 @@ class FireMageCAR(MageCAR):
                             consumable_rating += -0.8 + max_value / self.player.char.total_mana + \
                                                  (self.player.char.total_mana - self.player.char.current_mana) \
                                                  / self.player.char.total_mana
-                elif item_id in (22839,):
-                    if self.player.char.current_mana / self.player.char.total_mana > 0.35:
-                        consumable_rating += -0.8 \
-                                             + self.player.char.current_mana / self.player.char.total_mana \
-                                             + self.scorch_modifier()
+                # damage boost items
+                else:
+                    consumable_rating += self.get_boost_base_rating()
 
         return consumable_rating
 
     def get_boost_spell_rating(self, spell_id):
-        return super().get_boost_spell_base_rating() + self.scorch_modifier()
+        return self.get_boost_base_rating()
+
+    def get_boost_base_rating(self):
+        return super().get_boost_base_rating() + self.scorch_modifier()
 
     def scorch_modifier(self):
-        aura = [aura for aura in self.player.char.spell_handler.enemy.active_auras if aura.spell_id == 22959]
+        aura = [aura for aura in self.player.char.combat_handler.enemy.active_auras if aura.spell_id == 22959]
         if not aura or aura[0].curr_stacks != 5:
-            return -0.3
+            return -0.6 - 0.1 * (0 if not aura else 5 - aura[0].curr_stacks)
         else:
-            return 0.4
+            return 0.3
 
     def get_offensive_spell_rating(self, spell_id):
         spell_info = DB.get_spell(spell_id)
@@ -76,7 +78,7 @@ class FireMageCAR(MageCAR):
 
         # scorch rating modification
         if spell_info[DB.spell_column_info["SpellFamilyFlags"]] & 16:
-            aura = [aura for aura in self.player.char.spell_handler.enemy.active_auras if aura.spell_id == 22959]
+            aura = [aura for aura in self.player.char.combat_handler.enemy.active_auras if aura.spell_id == 22959]
 
             if not aura or aura[0].curr_stacks != 5:
                 # Apply 5 stacks of improved scorch

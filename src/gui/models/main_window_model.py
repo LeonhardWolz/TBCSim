@@ -48,6 +48,8 @@ class MainWindowModel(QObject):
 
     def populate_results(self):
         self.results_text.emit(str(self.sim_worker.sim_cum_results))
+        # self.results_text.emit(str(self.sim_worker.sim_cum_results) + "\n" +
+        #                        str(self.sim_worker.sim_cum_results.results[0].full_combat_log))
         self.last_results = self.sim_worker.sim_cum_results
 
     def new_sim_settings(self):
@@ -112,7 +114,7 @@ class SimWorker(QObject):
                                        + "% - Simulation Complete")
 
         self.model.sim_button_enabled.emit(True)
-        # print("done")
+
         self.finished.emit()
-        # self.sim_cum_results.write_result_files()
-        # print(self.sim_cum_results)
+
+        # print(self.sim_cum_results.results[0].full_combat_log)

@@ -13,10 +13,6 @@ class CombatActionRater(object):
         if misc_combat_action is not None:
             return misc_combat_action
 
-        boost_spell_action = self.get_boost_spell_action()
-        if boost_spell_action is not None:
-            return boost_spell_action
-
         damage_spell_action = self.get_damage_spell_action()
         if damage_spell_action is not None:
             return damage_spell_action
@@ -29,15 +25,23 @@ class CombatActionRater(object):
     def get_misc_combat_action(self):
         misc_combat_actions_to_consider = []
         for spell_id in self.player.char.mana_spells:
-            if not self.player.char.spell_handler.spell_on_cooldown(spell_id):
+            if not self.player.char.combat_handler.spell_on_cooldown(spell_id):
                 misc_combat_actions_to_consider.append({"combat_action": [CombatAction.Cast_Spell, spell_id],
                                                         "combat_rating": self.get_mana_spell_rating(spell_id)})
+
         for item_id in self.player.char.active_consumables.keys():
-            if not self.player.char.spell_handler.item_on_cooldown(item_id):
+            if not self.player.char.combat_handler.item_on_cooldown(item_id):
                 misc_combat_actions_to_consider.append({"combat_action": [CombatAction.Consume_Item, item_id],
-                                                        "combat_rating": self.get_consumable_rating(item_id)})
+                                                        "combat_rating": self.get_item_rating(item_id)})
+        for spell_id in self.player.char.boost_spells:
+            if not self.player.char.combat_handler.spell_on_cooldown(spell_id) and \
+                    self.player.char.has_mana_to_cast_spell(spell_id):
+                misc_combat_actions_to_consider.append({"combat_action": [CombatAction.Cast_Spell, spell_id],
+                                                        "combat_rating": self.get_boost_spell_rating(spell_id)})
 
         misc_combat_actions_to_consider.sort(key=lambda x: x["combat_rating"])
+
+        #print(self.player.env.now, [(x["combat_action"], x["combat_rating"]) for x in misc_combat_actions_to_consider])
 
         if misc_combat_actions_to_consider:
             misc_combat_action = misc_combat_actions_to_consider.pop()
@@ -46,34 +50,17 @@ class CombatActionRater(object):
 
         return None
 
-    def get_boost_spell_action(self):
-        boost_spells_to_consider = []
-        for spell_id in self.player.char.boost_spells:
-            if not self.player.char.spell_handler.spell_on_cooldown(
-                    spell_id) and self.player.char.has_mana_to_cast_spell(spell_id):
-                boost_spells_to_consider.append({"spell_id": spell_id,
-                                                 "spell_rating": self.get_boost_spell_rating(spell_id)})
-
-        boost_spells_to_consider.sort(key=lambda x: x["spell_rating"])
-
-        if boost_spells_to_consider:
-            spell_to_consider = boost_spells_to_consider.pop()
-            if spell_to_consider["spell_rating"] >= 0:
-                return [CombatAction.Cast_Spell, spell_to_consider["spell_id"]]
-
-        return None
-
     def get_damage_spell_action(self):
         damage_spells_to_consider = []
         for spell_id in self.player.char.damage_spells:
-            if not self.player.char.spell_handler.spell_on_cooldown(
-                    spell_id) and self.player.char.has_mana_to_cast_spell(spell_id):
+            if not self.player.char.combat_handler.spell_on_cooldown(spell_id) \
+                    and self.player.char.has_mana_to_cast_spell(spell_id):
                 damage_spells_to_consider.append({"spell_id": spell_id,
                                                   "spell_rating": self.get_offensive_spell_rating(spell_id)})
 
         damage_spells_to_consider.sort(key=lambda x: x["spell_rating"])
 
-        # print([(x["spell_id"], x["spell_rating"]) for x in damage_spells_to_consider])
+        #print(self.player.env.now, [(x["spell_id"], x["spell_rating"]) for x in damage_spells_to_consider])
 
         if damage_spells_to_consider:
             spell_to_consider = damage_spells_to_consider.pop()
@@ -88,14 +75,14 @@ class CombatActionRater(object):
     def get_mana_spell_rating(self, spell_id):
         raise NotImplementedError
 
-    def get_consumable_rating(self, item_id):
+    def get_item_rating(self, item_id):
         raise NotImplementedError
 
     def get_boost_spell_rating(self, spell_id):
         raise NotImplementedError
 
-    def get_boost_spell_base_rating(self):
-        spell_rating = -1
+    def get_boost_base_rating(self):
+        spell_rating = -0.6
         spell_rating += (self.player.char.current_mana / self.player.char.total_mana)
 
         if self.player.env.now / self.player.results.sim_length > 0.65:
@@ -108,12 +95,13 @@ class CombatActionRater(object):
 
     def get_direct_spell_damage(self, effect_slot, spell_id, spell_info):
         """Calculates avg direct spell damage, including critical hits and any triggered effects"""
-        mindamage, maxdamage = self.player.char.spell_handler.get_effect_strength(spell_info, effect_slot)
+        mindamage, maxdamage = self.player.char.combat_handler.get_effect_strength(spell_info, effect_slot)
         spell_base_damage = round(mindamage + maxdamage / 2)
+
         spell_spell_power = self.player.char.spell_spell_power(spell_id)
         spell_power_coefficient = self.player.char.spell_power_coefficient(spell_id, proc_auras=False)
         spell_damage_multiplier = self.player.char.spell_dmg_multiplier(spell_id, proc_auras=False) \
-                                  * self.player.char.spell_handler.enemy_damage_taken_mod(spell_id)
+                                  * self.player.char.combat_handler.enemy_damage_taken_mod(spell_id)
         spell_crit_damage_multiplier = self.player.char.spell_crit_dmg_multiplier(spell_id, proc_auras=False)
         spell_crit_chance_spell = self.player.char.spell_crit_chance_spell(spell_id, proc_auras=False)
 
@@ -121,23 +109,25 @@ class CombatActionRater(object):
         spell_damage = (spell_base_damage + spell_spell_power * spell_power_coefficient) * spell_damage_multiplier
 
         # non crit damage + per spell avg crit damage
-        spell_crit_damage = spell_damage * spell_crit_damage_multiplier * spell_crit_chance_spell / 100
+        spell_crit_damage = spell_damage * spell_crit_damage_multiplier * (spell_crit_chance_spell / 100)
+
+        # print(spell_id, round(spell_damage), round(spell_crit_damage), spell_crit_damage_multiplier, spell_crit_chance_spell)
 
         # add avg ignite dmg
         if DB.get_spell_school(spell_id) & 4:
-            for aura in [aura for aura in self.player.char.spell_handler.active_auras if
+            for aura in [aura for aura in self.player.char.combat_handler.active_auras if
                          aura.spell_id in [11119, 11120, 12846, 12847, 12848]]:
                 spell_crit_damage += spell_crit_damage * (enums.ignite_dmg_pct[aura.spell_id] / 100)
         return spell_damage + spell_crit_damage
 
     def get_dot_spell_damage(self, effect_slot, spell_id, spell_info):
-        mindamage, maxdamage = self.player.char.spell_handler.get_effect_strength(spell_info, effect_slot)
+        mindamage, maxdamage = self.player.char.combat_handler.get_effect_strength(spell_info, effect_slot)
         spell_base_damage = round(mindamage + maxdamage / 2)
         spell_base_damage = spell_base_damage * \
                             enums.duration_index[spell_info[DB.spell_column_info["DurationIndex"]]] / \
                             spell_info[DB.spell_column_info["EffectAmplitude" + str(effect_slot)]]
         spell_damage_multiplier = self.player.char.spell_dmg_multiplier(spell_id, proc_auras=False) \
-                                  * self.player.char.spell_handler.enemy_damage_taken_mod(spell_info[0])
+                                  * self.player.char.combat_handler.enemy_damage_taken_mod(spell_info[0])
 
         return round(spell_base_damage * spell_damage_multiplier)
 
@@ -152,8 +142,8 @@ class CombatActionRater(object):
                 triggered_spell_total_damage += self.get_direct_spell_damage(triggered_spell_slot,
                                                                              triggered_spell_id,
                                                                              triggered_spell_info)
-        channel_duration, channel_interval = self.player.char.spell_handler.periodic_effect_behaviour(spell_info,
-                                                                                                      effect_slot)
+        channel_duration, channel_interval = self.player.char.combat_handler.periodic_effect_behaviour(spell_info,
+                                                                                                       effect_slot)
 
         return triggered_spell_total_damage * channel_duration / channel_interval + 1
 

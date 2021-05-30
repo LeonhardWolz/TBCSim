@@ -42,15 +42,15 @@ class SelectFromListDialog(QDialog):
     def set_dict_signal(self, signal):
         signal.connect(self.list_content)
 
-    def accept(self) -> None:
+    def accept(self):
         for item in self.list.selectedItems():
             self.on_accept_func(item.object_id)
         super(SelectFromListDialog, self).accept()
 
-    def exec_(self) -> int:
+    def exec_(self):
         self.input.setText("")
         self.input.setFocus()
-        return super(SelectFromListDialog, self).exec_()
+        super(SelectFromListDialog, self).exec_()
 
     @pyqtSlot(dict)
     def list_content(self, dictionary):

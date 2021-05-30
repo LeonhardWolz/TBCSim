@@ -4,16 +4,17 @@ import src.db.sqlite_db_connector as DB
 from src.enums import CombatAction
 from src.sim.logic.combat_raters.fire_mage_car import FireMageCAR
 from src.sim.logic.combat_raters.mage_car import MageCAR
+from src.sim.logic.combat_raters.arcane_mage_car import ArcaneMageCAR
 
 combat_action_raters = {
     "Default": MageCAR,
-    "FireMageCAR": FireMageCAR
+    "FireMageCAR": FireMageCAR,
+    "ArcaneMageCAR": ArcaneMageCAR
 }
 
 
 class Player(object):
     time_padding = 1
-    max_spell_damage = 0
 
     def __init__(self, env, char, results, rater):
         self.env = env
@@ -27,8 +28,8 @@ class Player(object):
     def rotation(self):
         self.results.logg("{:8s} {}".format("Simtime", "Current Action"))
         while True:
-            self.char.spell_handler.remove_expired_auras()
-            self.char.spell_handler.recover_cooldowns()
+            self.char.combat_handler.remove_expired_auras()
+            self.char.combat_handler.recover_cooldowns()
             while self.env.now < self.char.gcd_end_time:
                 yield self.env.timeout(1)
 
@@ -42,7 +43,7 @@ class Player(object):
             elif combat_action[0] == CombatAction.Wand_Attack:
                 yield self.env.process(self.wand_attack())
             elif combat_action[0] == CombatAction.Consume_Item:
-                self.consume_item(combat_action[1])
+                self.char.combat_handler.use_item(combat_action[1])
 
             yield self.env.timeout(self.time_padding)
 
@@ -100,8 +101,8 @@ class Player(object):
                                     self.env.now)
 
         self.char.cast_mana_spell(spell_id)
-        self.char.spell_handler.spell_start_cooldown(spell_id)
-        self.env.process(self.char.spell_handler.apply_spell_effect_delay(spell_id))
+        self.char.combat_handler.spell_start_cooldown(spell_id)
+        self.env.process(self.char.combat_handler.apply_spell_effect_delay(spell_id))
 
         if spell_from_db[DB.spell_column_info["AttributesEx"]] & 4 or \
                 spell_from_db[DB.spell_column_info["AttributesEx"]] & 64:
@@ -113,26 +114,8 @@ class Player(object):
         self.results.wand_attack_used(self.char.gear[18].item_data[0],
                                       self.char.gear[18].item_data[DB.item_column_info["name"]],
                                       self.env.now)
-        self.char.spell_handler.process_wand_attack()
+        self.char.combat_handler.process_wand_attack()
 
     def start_gcd(self, spell_id):
         self.char.gcd_end_time = self.env.now + self.char.get_spell_gcd(spell_id)
 
-    def consume_item(self, item_id):
-        item_info = DB.get_item(item_id)
-        self.results.item_used(item_id,
-                               item_info[DB.item_column_info["name"]],
-                               self.env.now)
-        self.logg("Used " + item_info[DB.item_column_info["name"]])
-        for i in range(1, 6):
-            item_spell_id = item_info[DB.item_column_info["spellid_" + str(i)]]
-            if item_spell_id:
-                self.char.spell_handler.apply_spell_effect(item_spell_id, item_id)
-                self.char.spell_handler.item_start_cooldown(item_id)
-
-                self.char.active_consumables[item_id] += 1
-                # remove some active items after charges used eg. mana gems
-                if item_info[DB.item_column_info["spellcharges_" + str(i)]] \
-                        + self.char.active_consumables[item_id] == 0 \
-                        and item_info[DB.item_column_info["spellcategory_" + str(i)]] == 1153:
-                    del self.char.active_consumables[item_id]

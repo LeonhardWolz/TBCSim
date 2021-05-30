@@ -18,7 +18,7 @@ class Aura:
     curr_stacks: int = 1
     stack_limit: int = 1
     proc_counter: int = 0
-    proc: List = field(default_factory=lambda: [0, 0, 0])
+    proc: List = field(default_factory=lambda: [0, 0, 0, 0])
     attributes: List = field(default_factory=lambda: [0, 0, 0, 0, 0, 0, 0])
 
     def procced(self):

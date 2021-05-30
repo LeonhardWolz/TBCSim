@@ -12,7 +12,6 @@ BASE_STAT_QUERY = "select 	* " \
                   "player_levelstats.class = {} and " \
                   "player_levelstats.race = {}"
 
-
 item_column_info = {}
 spell_column_info = {}
 item_set_column_info = {}
@@ -113,7 +112,7 @@ def get_spell_school(spell_id):
         logging.critical("DB Error during spell school mask retrieval: {}".format(ex))
 
 
-@lru_cache(maxsize=None)
+@lru_cache
 def get_spell_family(spell_id):
     cursor = conn.cursor()
     try:
@@ -121,6 +120,17 @@ def get_spell_family(spell_id):
         return cursor.fetchone()[0]
     except sqlite3.Error as ex:
         logging.critical("DB Error during spell family mask retrieval: {}".format(ex))
+
+
+@lru_cache
+def get_spell_proc_info(spell_id):
+    cursor = conn.cursor()
+    try:
+        cursor.execute("SELECT SchoolMask, SpellFamilyName, procFlags, procEx, ppmRate, CustomChance, Cooldown "
+                       "FROM spell_proc_event WHERE entry={}".format(spell_id))
+        return cursor.fetchone()
+    except sqlite3.Error as ex:
+        logging.critical("DB Error during spell proc event retrieval: {}".format(ex))
 
 
 @lru_cache
@@ -313,7 +323,7 @@ def get_gui_enchantments_dict(item_class, item_subclass_mask=0, inventory_type_m
     query = "SELECT m_ID as Id, SpellName as Name, m_name_lang_1 as Description FROM " \
             "(SELECT Id, m_ID, EffectMiscValue1, SpellName, m_name_lang_1 " \
             "FROM spell_template, dbc_spellitemenchantment " \
-            f"WHERE Effect1=53 and Rank1!=\"QASpell\" and m_ID=EffectMiscValue1 {my_where_statement}) as Enchants"
+            f"WHERE Effect1=53 and m_ID=EffectMiscValue1 {my_where_statement}) as Enchants"
 
     try:
         cursor.execute(query)

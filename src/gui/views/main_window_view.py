@@ -29,7 +29,7 @@ class MainWindowView(QMainWindow):
 
         self.setWindowTitle('WoW TBC Combat Simulation')
         self.setWindowIcon(QIcon("../data/icons/arcane_intellect.jpg"))
-        self.resize(1750, 920)
+        self.resize(1800, 920)
         self._center()
 
         self._create_menu_bar()

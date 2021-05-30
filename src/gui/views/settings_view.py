@@ -65,6 +65,7 @@ class SettingsView(QWidget):
                                    "The rating system is different for different specs.")
         self.sim_rater_combo_box = QComboBox()
         self.sim_rater_combo_box.addItem("FireMageCAR")
+        self.sim_rater_combo_box.addItem("ArcaneMageCAR")
 
         sim_settings_grid_layout.addWidget(sim_rater_label, 3, 0)
         sim_settings_grid_layout.addWidget(self.sim_rater_combo_box, 3, 1)
