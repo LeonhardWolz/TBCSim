@@ -111,7 +111,34 @@ class CombatHandler:
                 modified_aura = True
 
         if not modified_aura:
-            self.active_auras.append(self.get_aura(spell_info, effect_slot))
+            aura = self.get_aura(spell_info, effect_slot)
+            if aura.duration_index == 21 and aura.stack_limit == 0 and aura.proc[3] == 0:
+
+                # modify threat generation
+                if aura.aura_id == 10:
+                    pass
+                # spell power mod
+                elif aura.aura_id == 13:
+                    self.char.modify_spell_power(aura.value, aura.misc_value)
+                # resistance mod
+                elif aura.aura_id == 22:
+                    pass
+                # stat flat mod
+                elif aura.aura_id == 29:
+                    self.char.modify_main_stat(aura.misc_value, aura.value)
+                # modify run speed
+                elif aura.aura_id == 31:
+                    pass
+                # reduce targets resistances
+                elif aura.aura_id == 123:
+                    pass
+                # healing power increase
+                elif aura.aura_id == 135:
+                    pass
+                else:
+                    self.active_auras.append(aura)
+            else:
+                self.active_auras.append(aura)
 
     def apply_aura_to_enemy(self, spell_info, effect_slot):
         modified_aura = False

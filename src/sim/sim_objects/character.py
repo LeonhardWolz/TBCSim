@@ -82,20 +82,20 @@ class Character:
         return False if self.five_second_casting_counter == 0 else True
 
     @property
-    def total_agility(self):
-        return round((self.agility + self.get_stat_mod(1)) * self.get_pct_stat_mod(1))
-
-    @property
     def total_strength(self):
         return round((self.strength + self.get_stat_mod(0)) * self.get_pct_stat_mod(0))
 
     @property
-    def total_intellect(self):
-        return round((self.intellect + self.get_stat_mod(3)) * self.get_pct_stat_mod(3))
+    def total_agility(self):
+        return round((self.agility + self.get_stat_mod(1)) * self.get_pct_stat_mod(1))
 
     @property
     def total_stamina(self):
         return round((self.stamina + self.get_stat_mod(2)) * self.get_pct_stat_mod(2))
+
+    @property
+    def total_intellect(self):
+        return round((self.intellect + self.get_stat_mod(3)) * self.get_pct_stat_mod(3))
 
     @property
     def total_spirit(self):
@@ -189,6 +189,24 @@ class Character:
                     self.combat_handler.proc_aura_charge(aura)
         return stat_mod
 
+    def modify_main_stat(self, stat, value):
+        if stat == -1:
+            self.strength += value
+            self.agility += value
+            self.stamina += value
+            self.intellect += value
+            self.spirit += value
+        if stat == 0:
+            self.strength += value
+        if stat == 1:
+            self.agility += value
+        if stat == 2:
+            self.stamina += value
+        if stat == 3:
+            self.intellect += value
+        if stat == 4:
+            self.spirit += value
+
     def modify_stat(self, stat_type, value):
         if stat_type == 0:
             self.mana += value
@@ -212,6 +230,20 @@ class Character:
             self.spell_haste_rating += value
         else:
             raise NotImplementedWarning("Stat modification not implemented for stat_type: " + str(stat_type))
+
+    def modify_spell_power(self, value, school_mask):
+        if school_mask & 2:
+            self.holy_power += value
+        if school_mask & 4:
+            self.fire_power += value
+        if school_mask & 8:
+            self.nature_power += value
+        if school_mask & 16:
+            self.frost_power += value
+        if school_mask & 32:
+            self.shadow_power += value
+        if school_mask & 64:
+            self.arcane_power += value
 
     def school_power_from_auras(self, spell_school, proc_auras=True):
         school_power = 0
