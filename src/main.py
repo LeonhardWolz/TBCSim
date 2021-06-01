@@ -5,7 +5,7 @@ from PyQt5.QtGui import QIcon, QFontDatabase
 from PyQt5.QtWidgets import QApplication
 
 from src.gui.models.main_window_model import MainWindowModel
-from src.gui.models.settings_model import SettingsModel
+from src.gui.models.sim_settings_model import SimSettingsModel
 from src.gui.views.main_window_view import MainWindowView
 
 app_id = u"tbc-dmg-simulation"
@@ -20,7 +20,7 @@ def main():
 
     QFontDatabase.addApplicationFont("../data/fonts/RobotoMono-Medium.ttf")
 
-    settings_model = SettingsModel()
+    settings_model = SimSettingsModel()
     m_window_model = MainWindowModel(settings_model)
     m_window_view = MainWindowView(m_window_model)
     m_window_view.show()

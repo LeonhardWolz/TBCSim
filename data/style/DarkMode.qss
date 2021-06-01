@@ -302,8 +302,8 @@ QTabBar::tab
     border-top-left-radius: 3px;
     border-top-right-radius: 3px;
     min-width: 80px;
-    margin-left: 1px;    
-    padding: 2px
+    margin-left: 3px;
+    padding: 3px 4px 2px 4px;
 }
 
 QTabBar::tab:selected, QTabBar::tab:hover

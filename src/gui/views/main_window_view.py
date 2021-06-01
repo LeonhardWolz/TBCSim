@@ -4,8 +4,9 @@ from PyQt5.QtWidgets import (QWidget, QMainWindow, QPushButton, QHBoxLayout, QVB
                              QTabWidget, QProgressBar, QTextBrowser, QScrollArea, QMenuBar, QMenu, QAction, QFileDialog,
                              QMessageBox, QDesktopWidget)
 
+from src.gui.views.character_settings_view import CharacterSettingsView
 from src.gui.views.results_view import ResultsView
-from src.gui.views.settings_view import SettingsView
+from src.gui.views.sim_settings_view import SimSettingsView
 
 
 class MainWindowView(QMainWindow):
@@ -26,6 +27,7 @@ class MainWindowView(QMainWindow):
     def __init__(self, mw_model):
         super(QMainWindow, self).__init__()
         self.model = mw_model
+        self.character_tabs = []
 
         self.setWindowTitle('WoW TBC Combat Simulation')
         self.setWindowIcon(QIcon("../data/icons/arcane_intellect.jpg"))
@@ -93,22 +95,30 @@ class MainWindowView(QMainWindow):
         main_layout = QVBoxLayout()
         main_layout.setContentsMargins(0, 4, 0, 0)
 
-        tabs = QTabWidget()
-        tabs.addTab(self._settings_tab(), "Settings")
-        tabs.addTab(ResultsView(self.model), "Simulation")
+        self.tabs = QTabWidget()
+        self.tabs.addTab(self._simulation_settings_tab(), "Simulation Settings")
+        #self.tabs.addTab(self._character_settings_tab(self.model.settings_model.character_settings[0]), "Character Settings")
+        self.tabs.addTab(ResultsView(self.model), "Simulation")
 
-        main_layout.addWidget(tabs)
+        main_layout.addWidget(self.tabs)
 
         central_widget.setLayout(main_layout)
 
         self.setCentralWidget(central_widget)
 
-    def _settings_tab(self):
+    def _simulation_settings_tab(self):
         settings_scroll_area = QScrollArea()
         settings_scroll_area.setWidgetResizable(True)
-        settings_scroll_area.setWidget(SettingsView(self.model.settings_model))
+        settings_scroll_area.setWidget(SimSettingsView(self.model.settings_model))
 
         return settings_scroll_area
+
+    def _character_settings_tab(self, model):
+        character_settings_scroll_area = QScrollArea()
+        character_settings_scroll_area.setWidgetResizable(True)
+        character_settings_scroll_area.setWidget(CharacterSettingsView(model))
+
+        return character_settings_scroll_area
 
     def _connect_signals(self):
         self.new_action.triggered.connect(self.model.new_sim_settings)
@@ -119,6 +129,18 @@ class MainWindowView(QMainWindow):
         self.help_action.triggered.connect(self.open_help)
 
         self.exit_action.triggered.connect(self.close)
+
+        self.model.settings_model.character_settings_signal.connect(self._load_character_tabs)
+
+    @pyqtSlot(list)
+    def _load_character_tabs(self, value):
+        for character_tab in self.character_tabs:
+            self.tabs.removeTab(self.tabs.indexOf(character_tab))
+        self.character_tabs = []
+        for x, char_settings in enumerate(value):
+            tab = self._character_settings_tab(char_settings)
+            self.character_tabs.append(tab)
+            self.tabs.insertTab(1, tab, "Character Settings " + str(x+1))
 
     def _load_sim_settings(self):
         dialog = QFileDialog(self)
@@ -172,4 +194,3 @@ class MainWindowView(QMainWindow):
             close_event.accept()
         else:
             close_event.ignore()
-

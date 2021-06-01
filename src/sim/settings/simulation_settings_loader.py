@@ -20,7 +20,7 @@ class SimulationSettingsLoader(object):
     mage_mana_spells = (12051,)
 
     def __init__(self, settings_dict):
-        self.char = Character()
+        self.char = []
         self.enemy = Enemy()
         self.simSettings = SimSettings()
         self.sim_results = SimCumResult()
@@ -32,15 +32,17 @@ class SimulationSettingsLoader(object):
         # load sim settings
         self.load_sim_settings(settings_dict["simulation"])
 
-        # load character settings
-        self.load_character_settings(settings_dict["character"])
-
         # load enemy settings
         self.load_enemy_settings(settings_dict["enemy"])
 
-        self.char.current_health = self.char.total_health
-        self.char.current_mana = self.char.total_mana
-        self.char.combat_handler.enemy = self.enemy
+        for x, char_dict in enumerate(settings_dict["character"].values()):
+            self.char.append(Character())
+            # load character settings
+            self.load_character_settings(x, char_dict)
+
+            self.char[x].current_health = self.char[x].total_health
+            self.char[x].current_mana = self.char[x].total_mana
+            self.char[x].combat_handler.enemy = self.enemy
 
     def load_sim_settings(self, sim_settings):
         self.simSettings.sim_type = sim_settings["sim_type"] \
@@ -73,123 +75,123 @@ class SimulationSettingsLoader(object):
         self.enemy.level = enemy_settings["level"]
         self.enemy.boss = enemy_settings["boss"]
 
-    def load_character_settings(self, char_settings):
+    def load_character_settings(self, char_index, char_settings):
         # load base stats for race and class specified in settings
         base_stats = DB.get_base_stats(enums.PlayerClass[char_settings["class"]].value,
                                        enums.Race[char_settings["race"]].value)
 
-        self.char.modify_stat(1, base_stats[2])
-        self.char.modify_stat(0, base_stats[3])
-        self.char.modify_stat(4, base_stats[7])
-        self.char.modify_stat(3, base_stats[8])
-        self.char.modify_stat(7, base_stats[9])
-        self.char.modify_stat(5, base_stats[10])
-        self.char.modify_stat(6, base_stats[11])
+        self.char[char_index].modify_stat(1, base_stats[2])
+        self.char[char_index].modify_stat(0, base_stats[3])
+        self.char[char_index].modify_stat(4, base_stats[7])
+        self.char[char_index].modify_stat(3, base_stats[8])
+        self.char[char_index].modify_stat(7, base_stats[9])
+        self.char[char_index].modify_stat(5, base_stats[10])
+        self.char[char_index].modify_stat(6, base_stats[11])
 
-        self.char.race = char_settings["race"]
-        self.char.player_class = char_settings["class"]
+        self.char[char_index].race = char_settings["race"]
+        self.char[char_index].player_class = char_settings["class"]
 
-        self.load_racials()
-        self.load_spells(char_settings)
+        self.load_racials(char_index)
+        self.load_spells(char_index, char_settings)
 
-        self.load_consumables(char_settings)
+        self.load_consumables(char_index, char_settings)
 
-        self.load_character_items(char_settings["gear"])
-        self.load_talents(char_settings)
+        self.load_character_items(char_index, char_settings["gear"])
+        self.load_talents(char_index, char_settings)
 
-    def load_racials(self):
-        if self.char.race == "Human":
-            self.char.combat_handler.apply_spell_effect(20598)
-        elif self.char.race == "Orc":
+    def load_racials(self, char_index):
+        if self.char[char_index].race == "Human":
+            self.char[char_index].combat_handler.apply_spell_effect(20598)
+        elif self.char[char_index].race == "Orc":
             pass
-        elif self.char.race == "Dwarf":
-            self.char.combat_handler.apply_spell_effect(20595)
-            self.char.combat_handler.apply_spell_effect(20596)
-        elif self.char.race == "Nightelf":
-            self.char.combat_handler.apply_spell_effect(20583)
-        elif self.char.race == "Undead":
-            self.char.combat_handler.apply_spell_effect(20579)
-        elif self.char.race == "Tauren":
-            self.char.combat_handler.apply_spell_effect(20551)
-            self.char.combat_handler.apply_spell_effect(20550)
-        elif self.char.race == "Gnome":
-            self.char.combat_handler.apply_spell_effect(20592)
-            self.char.combat_handler.apply_spell_effect(20591)
-        elif self.char.race == "Troll":
-            self.char.boost_spells.append(20554)
-        elif self.char.race == "Bloodelf":
-            self.char.combat_handler.apply_spell_effect(822)
-        elif self.char.race == "Draenei":
-            self.char.combat_handler.apply_spell_effect(6562)
-            self.char.combat_handler.apply_spell_effect(28878)
-            self.char.combat_handler.apply_spell_effect(20579)
+        elif self.char[char_index].race == "Dwarf":
+            self.char[char_index].combat_handler.apply_spell_effect(20595)
+            self.char[char_index].combat_handler.apply_spell_effect(20596)
+        elif self.char[char_index].race == "Nightelf":
+            self.char[char_index].combat_handler.apply_spell_effect(20583)
+        elif self.char[char_index].race == "Undead":
+            self.char[char_index].combat_handler.apply_spell_effect(20579)
+        elif self.char[char_index].race == "Tauren":
+            self.char[char_index].combat_handler.apply_spell_effect(20551)
+            self.char[char_index].combat_handler.apply_spell_effect(20550)
+        elif self.char[char_index].race == "Gnome":
+            self.char[char_index].combat_handler.apply_spell_effect(20592)
+            self.char[char_index].combat_handler.apply_spell_effect(20591)
+        elif self.char[char_index].race == "Troll":
+            self.char[char_index].boost_spells.append(20554)
+        elif self.char[char_index].race == "Bloodelf":
+            self.char[char_index].combat_handler.apply_spell_effect(822)
+        elif self.char[char_index].race == "Draenei":
+            self.char[char_index].combat_handler.apply_spell_effect(6562)
+            self.char[char_index].combat_handler.apply_spell_effect(28878)
+            self.char[char_index].combat_handler.apply_spell_effect(20579)
 
-    def load_consumables(self, char_settings):
+    def load_consumables(self, char_index, char_settings):
         for consumable_id in char_settings["passive_consumables"]:
-            self.char.passive_consumables.append(consumable_id)
+            self.char[char_index].passive_consumables.append(consumable_id)
             item_info = DB.get_item(consumable_id)
             for i in range(1, 4):
                 spell_id = item_info[DB.item_column_info["spellid_" + str(i)]]
                 if spell_id != 0:
                     # bufffood triggers spell
-                    triggered_spell_id = self.char.combat_handler.spell_get_triggered_spell(spell_id)
+                    triggered_spell_id = self.char[char_index].combat_handler.spell_get_triggered_spell(spell_id)
                     try:
                         if triggered_spell_id != 0:
-                            self.char.combat_handler.apply_spell_effect(triggered_spell_id)
+                            self.char[char_index].combat_handler.apply_spell_effect(triggered_spell_id)
                         else:
-                            self.char.combat_handler.apply_spell_effect(spell_id)
+                            self.char[char_index].combat_handler.apply_spell_effect(spell_id)
                     except NotImplementedWarning as e:
                         self.sim_results.errors.append(str(e))
 
         if char_settings["active_consumables"]:
             for consumable_id in char_settings["active_consumables"]:
-                self.char.active_consumables[consumable_id] = 0
+                self.char[char_index].active_consumables[consumable_id] = 0
 
-    def load_spells(self, char_settings):
+    def load_spells(self, char_index, char_settings):
         for spell_id in char_settings["active_spells"]:
-            self.char.damage_spells.append(spell_id)
+            self.char[char_index].damage_spells.append(spell_id)
 
         for spell_id in char_settings["passive_spells"]:
-            self.char.passive_spells.append(spell_id)
-            self.char.combat_handler.apply_spell_effect(spell_id)
+            self.char[char_index].passive_spells.append(spell_id)
+            self.char[char_index].combat_handler.apply_spell_effect(spell_id)
 
-        if self.char.player_class == "Mage":
+        if self.char[char_index].player_class == "Mage":
             for spell_id in self.mage_mana_spells:
-                self.char.mana_spells.append(spell_id)
+                self.char[char_index].mana_spells.append(spell_id)
 
-    def load_talents(self, settings):
+    def load_talents(self, char_index, settings):
         if "talent_calc_link" in settings and "tbc.wowhead" in settings["talent_calc_link"]:
-            self.sim_results.talents = settings["talent_calc_link"]
+            self.char[char_index].talents = settings["talent_calc_link"]
             talent_string = re.findall("/([0-9-]+)", settings["talent_calc_link"])
             talent_strings = talent_string[0].split("-")
 
             for x, group in enumerate(talent_strings):
-                talent_tab_id = DB.get_talent_tab_id(enums.PlayerClass[self.char.player_class].value, x)
+                talent_tab_id = DB.get_talent_tab_id(enums.PlayerClass[self.char[char_index].player_class].value, x)
                 for index, talent_rank in enumerate(group):
                     if talent_rank != "0":
                         talent_id = DB.get_talent_id(talent_tab_id, index, talent_rank)
-                        self.load_talent(talent_id)
+                        self.load_talent(char_index, talent_id)
         else:
-            self.sim_results.talents = "None"
+            self.char[char_index].talents = "None"
 
-    def load_talent(self, talent_id):
+    def load_talent(self, char_index, talent_id):
         talent_info = DB.get_spell(talent_id)
         if talent_info[DB.spell_column_info["Attributes"]] & 0x00000040:
-            self.char.combat_handler.apply_spell_effect(talent_id)
+            self.char[char_index].combat_handler.apply_spell_effect(talent_id)
         elif 2 in [talent_info[DB.spell_column_info["Effect1"]],  # TODO also add pure dots to dmg spells
                    talent_info[DB.spell_column_info["Effect2"]],
                    talent_info[DB.spell_column_info["Effect3"]]]:
-            self.char.damage_spells.append(talent_id)
+            self.char[char_index].damage_spells.append(talent_id)
         elif talent_id in self.mage_boost_spells:
-            self.char.boost_spells.append(talent_id)
+            self.char[char_index].boost_spells.append(talent_id)
         elif talent_id in self.mage_mana_spells:
-            self.char.mana_spells.append(talent_id)
+            self.char[char_index].mana_spells.append(talent_id)
         else:
-            self.char.defensive_spells.append(talent_id)
+            self.char[char_index].defensive_spells.append(talent_id)
 
-    def load_item_sets(self):
+    def load_item_sets(self, char_index):
         item_set_items = {}
-        for item in self.char.gear.values():
+        for item in self.char[char_index].gear.values():
             if item.item_data[DB.item_column_info["itemset"]] != 0:
                 item_set_id = item.item_data[DB.item_column_info["itemset"]]
                 if item_set_id in item_set_items.keys():
@@ -202,52 +204,52 @@ class SimulationSettingsLoader(object):
             set_pieces = len(item_set_info[1])
             for i in range(1, 9):
                 if set_pieces >= item_set_data[DB.item_set_column_info["pieces_" + str(i)]] != 0:
-                    self.char.combat_handler.apply_spell_effect(
+                    self.char[char_index].combat_handler.apply_spell_effect(
                         item_set_data[DB.item_set_column_info["bonus_" + str(i)]])
 
-    def load_character_items(self, gear_settings):
+    def load_character_items(self, char_index, gear_settings):
         meta_gems_to_check = []
         for item in gear_settings.items():
             if item[1] is not None:
                 item_from_db = DB.get_item(int(item[1]["item_id"]))
 
                 if item_from_db is not None:
-                    self.load_character_item(item[0], item_from_db)
+                    self.load_character_item(char_index, item[0], item_from_db)
                 else:
                     ValueError("Item " + str(item[1]["item_id"]) + " in Inventory Slot " + str(item[0]) + " not found")
 
                 if "enchant" in item[1]:
                     enchantment = DB.get_enchant(item[1]["enchant"])
-                    self.char.gear[item[0]].enchantment = enchantment[
+                    self.char[char_index].gear[item[0]].enchantment = enchantment[
                         DB.enchant_column_info["m_name_lang_1"]]
-                    self.apply_enchantment(enchantment)
+                    self.apply_enchantment(char_index, enchantment)
 
                 if "gems" in item[1]:
                     for gem_socket in item[1]["gems"]:
                         gem_item_info = DB.get_item(item[1]["gems"][gem_socket])
                         gem_info = DB.get_gem(gem_item_info[DB.item_column_info["GemProperties"]])
                         gem_enchant_info = DB.get_enchant(gem_info[1])
-                        item_socket = self.char.gear[item[0]].sockets[gem_socket - 1]
+                        item_socket = self.char[char_index].gear[item[0]].sockets[gem_socket - 1]
                         item_socket[1] = gem_info[4]
                         item_socket[2] = gem_item_info[DB.item_column_info["name"]]
                         item_socket[3] = gem_enchant_info[DB.enchant_column_info["m_name_lang_1"]]
                         if item_socket[1] & 1:
                             meta_gems_to_check.append([item_socket, gem_enchant_info])
                         else:
-                            self.apply_enchantment(gem_enchant_info)
-                    self.check_gem_socket_bonus(item[0])
-        self.load_item_sets()
-        self.check_meta_gem_conditions(meta_gems_to_check)
+                            self.apply_enchantment(char_index, gem_enchant_info)
+                    self.check_gem_socket_bonus(char_index, item[0])
+        self.load_item_sets(char_index)
+        self.check_meta_gem_conditions(char_index, meta_gems_to_check)
 
-    def check_meta_gem_conditions(self, meta_gems):
+    def check_meta_gem_conditions(self, char_index, meta_gems):
         for gem_to_check in meta_gems:
             if self.meta_gem_condition(gem_to_check[1][DB.enchant_column_info["m_condition_id"]]):
-                self.apply_enchantment(gem_to_check[1])
+                self.apply_enchantment(char_index, gem_to_check[1])
                 gem_to_check[0][4] = True
             else:
                 gem_to_check[0][4] = False
 
-    def meta_gem_condition(self, condition_id):
+    def meta_gem_condition(self, char_index, condition_id):
         condition_info = DB.get_enchant_condition(condition_id)
         gem_conditions = []
         for i in range(1, 6):
@@ -259,7 +261,7 @@ class SimulationSettingsLoader(object):
 
         for gem_condition in gem_conditions:
             typecounter = 0
-            for item in self.char.gear.values():
+            for item in self.char[char_index].gear.values():
                 for socket in item.sockets:
                     if socket[1] and socket[1] & gem_condition[0]:
                         typecounter += 1
@@ -275,16 +277,16 @@ class SimulationSettingsLoader(object):
                     return False
         return True
 
-    def check_gem_socket_bonus(self, inventory_slot):
+    def check_gem_socket_bonus(self, char_index, inventory_slot):
         sockets_match = True
-        for socket in self.char.gear[inventory_slot].sockets:
+        for socket in self.char[char_index].gear[inventory_slot].sockets:
             if not socket[0] or not socket[1] or not socket[0] & socket[1]:
                 sockets_match = False
-        self.char.gear[inventory_slot].socket_bonus_met = sockets_match
+        self.char[char_index].gear[inventory_slot].socket_bonus_met = sockets_match
         if sockets_match:
-            self.apply_enchantment(DB.get_enchant(self.char.gear[inventory_slot].socket_bonus))
+            self.apply_enchantment(char_index, DB.get_enchant(self.char[char_index].gear[inventory_slot].socket_bonus))
 
-    def apply_enchantment(self, enchantment_info):
+    def apply_enchantment(self, char_index, enchantment_info):
         for effect_slot in range(1, 4):
             # 1: combat spell
             if enchantment_info[DB.enchant_column_info["m_effect" + str(effect_slot)]] == 1:
@@ -295,7 +297,7 @@ class SimulationSettingsLoader(object):
             # 3: apply spell
             elif enchantment_info[DB.enchant_column_info["m_effect" + str(effect_slot)]] == 3:
                 try:
-                    self.char.combat_handler.apply_spell_effect(
+                    self.char[char_index].combat_handler.apply_spell_effect(
                         enchantment_info[DB.enchant_column_info["m_effectArg" + str(effect_slot)]])
                 except NotImplementedWarning as e:
                     self.sim_results.errors.append(str(e))
@@ -305,7 +307,7 @@ class SimulationSettingsLoader(object):
             # 5: stat modification
             elif enchantment_info[DB.enchant_column_info["m_effect" + str(effect_slot)]] == 5:
                 try:
-                    self.char.modify_stat(
+                    self.char[char_index].modify_stat(
                         enchantment_info[DB.enchant_column_info["m_effectArg" + str(effect_slot)]],
                         self.enchant_effect_strength(enchantment_info, effect_slot))
                 except NotImplementedWarning as e:
@@ -319,16 +321,16 @@ class SimulationSettingsLoader(object):
         return random.randint(enchantment[DB.enchant_column_info["m_effectPointsMin" + str(effect_slot)]],
                               enchantment[DB.enchant_column_info["m_effectPointsMax" + str(effect_slot)]])
 
-    def load_character_item(self, inventory_slot, item_from_db):
-        self.char.gear[inventory_slot] = EquippedItem(name=item_from_db[DB.item_column_info["name"]],
-                                                      item_data=item_from_db)
+    def load_character_item(self, char_index, inventory_slot, item_from_db):
+        self.char[char_index].gear[inventory_slot] = EquippedItem(name=item_from_db[DB.item_column_info["name"]],
+                                                                  item_data=item_from_db)
 
         for i in range(1, 11):
             stat_id = item_from_db[DB.item_column_info["stat_type" + str(i)]]
             stat_value = item_from_db[DB.item_column_info["stat_value" + str(i)]]
             if stat_value != 0:
                 try:
-                    self.char.modify_stat(stat_id, stat_value)
+                    self.char[char_index].modify_stat(stat_id, stat_value)
                 except NotImplementedWarning as e:
                     self.sim_results.errors.append(str(e))
 
@@ -339,11 +341,11 @@ class SimulationSettingsLoader(object):
 
                 # Item Spell Trigger "on use"
                 if spell_trigger == 0:
-                    self.char.active_consumables[item_from_db[0]] = 0
+                    self.char[char_index].active_consumables[item_from_db[0]] = 0
                 # Item Spell Trigger "on equip"
                 elif spell_trigger == 1:
                     try:
-                        self.char.combat_handler.apply_spell_effect(spell_id)
+                        self.char[char_index].combat_handler.apply_spell_effect(spell_id)
                     except NotImplementedWarning as e:
                         self.sim_results.errors.append(str(e))
                 # Item Spell Trigger "on hit"
@@ -354,15 +356,15 @@ class SimulationSettingsLoader(object):
         for i in range(1, 4):
             socket_color = item_from_db[DB.item_column_info["socketColor_" + str(i)]]
             if socket_color:
-                self.char.gear[inventory_slot].sockets.append([socket_color, None, None, None, None])
+                self.char[char_index].gear[inventory_slot].sockets.append([socket_color, None, None, None, None])
 
-        self.char.gear[inventory_slot].socket_bonus = item_from_db[DB.item_column_info["socketBonus"]]
+        self.char[char_index].gear[inventory_slot].socket_bonus = item_from_db[DB.item_column_info["socketBonus"]]
 
     def get_sim_results(self):
         return self.sim_results
 
-    def get_settings(self):
-        return copy.deepcopy(self.simSettings), copy.deepcopy(self.char)
+    def get_char_settings(self):
+        return copy.deepcopy(self.char)
 
     def get_sim_settings(self):
         return copy.deepcopy(self.simSettings)

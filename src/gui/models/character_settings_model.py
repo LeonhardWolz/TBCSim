@@ -7,24 +7,7 @@ from src import enums
 import src.db.sqlite_db_connector as DB
 
 
-class SettingsModel(QObject):
-    # Sim Settings
-    sim_type_signal = pyqtSignal(str)
-    sim_duration_signal = pyqtSignal(int)
-    sim_iterations_signal = pyqtSignal(int)
-    sim_combat_rater_signal = pyqtSignal(str)
-
-    # Enemy Settings
-    enemy_is_boss_signal = pyqtSignal(bool)
-    enemy_level_signal = pyqtSignal(int)
-    enemy_armor_signal = pyqtSignal(int)
-    enemy_holy_res_signal = pyqtSignal(int)
-    enemy_frost_res_signal = pyqtSignal(int)
-    enemy_fire_res_signal = pyqtSignal(int)
-    enemy_nature_res_signal = pyqtSignal(int)
-    enemy_shadow_res_signal = pyqtSignal(int)
-    enemy_arcane_res_signal = pyqtSignal(int)
-
+class CharacterSettingsModel(QObject):
     # Character Settings
     player_race_signal = pyqtSignal(str)
     player_class_signal = pyqtSignal(str)
@@ -65,20 +48,6 @@ class SettingsModel(QObject):
 
     def __init__(self):
         super().__init__()
-        self.sim_type = "dps"
-        self.sim_duration = 300
-        self.sim_iterations = 500
-        self.sim_combat_rater = "FireMageCAR"
-
-        self.enemy_is_boss = True
-        self.enemy_level = 73
-        self.enemy_armor = 0
-        self.enemy_holy_res = 0
-        self.enemy_frost_res = 0
-        self.enemy_fire_res = 0
-        self.enemy_nature_res = 0
-        self.enemy_shadow_res = 0
-        self.enemy_arcane_res = 0
 
         self.player_race = "Troll"
         self.player_class = "Mage"
@@ -121,21 +90,6 @@ class SettingsModel(QObject):
                                   19: self.tabard_gear_dict_signal}
 
     def set_default(self):
-        self.sim_type = "dps"
-        self.sim_duration = 300
-        self.sim_iterations = 500
-        self.sim_combat_rater = "FireMageCAR"
-
-        self.enemy_is_boss = True
-        self.enemy_level = 73
-        self.enemy_armor = 0
-        self.enemy_holy_res = 0
-        self.enemy_frost_res = 0
-        self.enemy_fire_res = 0
-        self.enemy_nature_res = 0
-        self.enemy_shadow_res = 0
-        self.enemy_arcane_res = 0
-
         self.player_race = "Troll"
         self.player_class = "Mage"
         self.player_talents_string = ""
@@ -153,174 +107,6 @@ class SettingsModel(QObject):
         self.consumable_dict = DB.get_gui_consumable_dict()
         self.gem_dict = DB.get_gui_gem_dict()
         self.enchantment_dict = {}
-
-    @property
-    def sim_type(self):
-        return self._sim_type
-
-    @sim_type.setter
-    def sim_type(self, value):
-        self._sim_type = value
-        self.sim_type_signal.emit(self._sim_type)
-
-    def set_sim_type(self, value):
-        self._sim_type = value
-
-    @property
-    def sim_duration(self):
-        return self._sim_duration
-
-    @sim_duration.setter
-    def sim_duration(self, value):
-        self._sim_duration = value
-        self.sim_duration_signal.emit(self._sim_duration)
-
-    def set_sim_duration(self, value):
-        int_value = 0
-        try:
-            int_value = int(value)
-        except ValueError:
-            int_value = 0
-        finally:
-            self._sim_duration = int_value
-
-    @property
-    def sim_iterations(self):
-        return self._sim_iterations
-
-    @sim_iterations.setter
-    def sim_iterations(self, value):
-        self._sim_iterations = value
-        self.sim_iterations_signal.emit(self._sim_iterations)
-
-    def set_sim_iterations(self, value):
-        int_value = 0
-        try:
-            int_value = int(value)
-        except ValueError:
-            int_value = 0
-        finally:
-            self._sim_iterations = int_value
-
-    @property
-    def sim_combat_rater(self):
-        return self._sim_combat_rater
-
-    @sim_combat_rater.setter
-    def sim_combat_rater(self, value):
-        self._sim_combat_rater = value
-        self.sim_combat_rater_signal.emit(self._sim_combat_rater)
-
-    def set_sim_combat_rater(self, value):
-        self._sim_combat_rater = value
-
-    @property
-    def enemy_is_boss(self):
-        return self._enemy_is_boss
-
-    @enemy_is_boss.setter
-    def enemy_is_boss(self, value):
-        self._enemy_is_boss = value
-        self.enemy_is_boss_signal.emit(self._enemy_is_boss)
-
-    def set_enemy_is_boss(self, value):
-        self._enemy_is_boss = value
-
-    @property
-    def enemy_level(self):
-        return self._enemy_level
-
-    @enemy_level.setter
-    def enemy_level(self, value):
-        self._enemy_level = value
-        self.enemy_level_signal.emit(self._enemy_level)
-
-    def set_enemy_level(self, value):
-        self._enemy_level = value
-
-    @property
-    def enemy_armor(self):
-        return self._enemy_armor
-
-    @enemy_armor.setter
-    def enemy_armor(self, value):
-        self._enemy_armor = value
-        self.enemy_armor_signal.emit(self._enemy_armor)
-
-    def set_enemy_armor(self, value):
-        self._enemy_armor = int(value)
-
-    @property
-    def enemy_holy_res(self):
-        return self._enemy_holy_res
-
-    @enemy_holy_res.setter
-    def enemy_holy_res(self, value):
-        self._enemy_holy_res = value
-        self.enemy_holy_res_signal.emit(self._enemy_holy_res)
-
-    def set_enemy_holy_res(self, value):
-        self._enemy_holy_res = int(value)
-
-    @property
-    def enemy_frost_res(self):
-        return self._enemy_frost_res
-
-    @enemy_frost_res.setter
-    def enemy_frost_res(self, value):
-        self._enemy_frost_res = value
-        self.enemy_frost_res_signal.emit(self._enemy_frost_res)
-
-    def set_enemy_frost_res(self, value):
-        self._enemy_frost_res = int(value)
-
-    @property
-    def enemy_fire_res(self):
-        return self._enemy_fire_res
-
-    @enemy_fire_res.setter
-    def enemy_fire_res(self, value):
-        self._enemy_fire_res = value
-        self.enemy_fire_res_signal.emit(self._enemy_fire_res)
-
-    def set_enemy_fire_res(self, value):
-        self._enemy_fire_res = int(value)
-
-    @property
-    def enemy_nature_res(self):
-        return self._enemy_nature_res
-
-    @enemy_nature_res.setter
-    def enemy_nature_res(self, value):
-        self._enemy_nature_res = value
-        self.enemy_nature_res_signal.emit(self._enemy_nature_res)
-
-    def set_enemy_nature_res(self, value):
-        self._enemy_nature_res = int(value)
-
-    @property
-    def enemy_shadow_res(self):
-        return self._enemy_shadow_res
-
-    @enemy_shadow_res.setter
-    def enemy_shadow_res(self, value):
-        self._enemy_shadow_res = value
-        self.enemy_shadow_res_signal.emit(self._enemy_shadow_res)
-
-    def set_enemy_shadow_res(self, value):
-        self._enemy_shadow_res = int(value)
-
-    @property
-    def enemy_arcane_res(self):
-        return self._enemy_arcane_res
-
-    @enemy_arcane_res.setter
-    def enemy_arcane_res(self, value):
-        self._enemy_arcane_res = value
-        self.enemy_arcane_res_signal.emit(self._enemy_arcane_res)
-
-    def set_enemy_arcane_res(self, value):
-        self._enemy_arcane_res = int(value)
 
     @property
     def player_race(self):
@@ -559,113 +345,59 @@ class SettingsModel(QObject):
         self.equipped_gear_signal.emit(self._equipped_gear)
 
     @property
-    def settings_dict(self):
-        settings_dict = {
-            "character": {"race": self.player_race,
-                          "class": self.player_class,
-                          "active_spells": list(self.active_spells.keys()),
-                          "passive_spells": list(self.passive_spells.keys()),
-                          "passive_consumables": list(self.passive_consumables.keys()),
-                          "active_consumables": list(self.active_consumables.keys()),
-                          "gear": self.get_equipped_gear_as_dict_for_yaml(),
-                          "talent_calc_link": str(self.player_talents_string)},
-            "enemy": {"boss": self.enemy_is_boss,
-                      "level": self.enemy_level,
-                      "attributes": {"armor": self.enemy_armor,
-                                     "holy_resistance": self.enemy_holy_res,
-                                     "frost_resistance": self.enemy_frost_res,
-                                     "fire_resistance": self.enemy_fire_res,
-                                     "nature_resistance": self.enemy_nature_res,
-                                     "arcane_resistance": self.enemy_arcane_res,
-                                     "shadow_resistance": self.enemy_shadow_res}},
-            "simulation": {"sim_type": self.sim_type,
-                           "sim_duration": self.sim_duration,
-                           "sim_iterations": self.sim_iterations,
-                           "sim_combat_rater": self.sim_combat_rater,
-                           "full_log_for_best": True}}
+    def character_settings_dict(self):
+        character_settings_dict = {"race": self.player_race,
+                                   "class": self.player_class,
+                                   "active_spells": list(self.active_spells.keys()),
+                                   "passive_spells": list(self.passive_spells.keys()),
+                                   "passive_consumables": list(self.passive_consumables.keys()),
+                                   "active_consumables": list(self.active_consumables.keys()),
+                                   "gear": self.get_equipped_gear_as_dict_for_yaml(),
+                                   "talent_calc_link": str(self.player_talents_string)}
 
-        return settings_dict
+        return character_settings_dict
 
-    def load_from_dict(self, settings_dict):
-        if "character" in settings_dict:
-            if "race" in settings_dict["character"]:
-                self.player_race = settings_dict["character"]["race"]
+    def load_from_dict(self, character_settings_dict):
+        if "race" in character_settings_dict:
+            self.player_race = character_settings_dict["race"]
 
-            if "class" in settings_dict["character"]:
-                self.player_class = settings_dict["character"]["class"]
+        if "class" in character_settings_dict:
+            self.player_class = character_settings_dict["class"]
 
-            if "active_spells" in settings_dict["character"]:
-                for spell in settings_dict["character"]["active_spells"]:
-                    self.add_active_spell(spell)
+        if "active_spells" in character_settings_dict:
+            self.active_spells = {}
+            for spell in character_settings_dict["active_spells"]:
+                self.add_active_spell(spell)
 
-            if "passive_spells" in settings_dict["character"]:
-                for spell in settings_dict["character"]["passive_spells"]:
-                    self.add_passive_spell(spell)
+        if "passive_spells" in character_settings_dict:
+            self.passive_spells = {}
+            for spell in character_settings_dict["passive_spells"]:
+                self.add_passive_spell(spell)
 
-            if "active_consumables" in settings_dict["character"]:
-                for consumable in settings_dict["character"]["active_consumables"]:
-                    self.add_active_consumable(consumable)
+        if "active_consumables" in character_settings_dict:
+            self.active_consumables = {}
+            for consumable in character_settings_dict["active_consumables"]:
+                self.add_active_consumable(consumable)
 
-            if "passive_consumables" in settings_dict["character"]:
-                for consumable in settings_dict["character"]["passive_consumables"]:
-                    self.add_passive_consumable(consumable)
+        if "passive_consumables" in character_settings_dict:
+            self.passive_consumables = {}
+            for consumable in character_settings_dict["passive_consumables"]:
+                self.add_passive_consumable(consumable)
 
-            if "gear" in settings_dict["character"]:
-                for item in settings_dict["character"]["gear"].items():
-                    if item[1] is not None:
-                        self.set_gear_slot(item[0], item[1]["item_id"])
+        if "gear" in character_settings_dict:
+            for item in character_settings_dict["gear"].items():
+                if item[1] is not None:
+                    self.set_gear_slot(item[0], item[1]["item_id"])
 
-                        if "enchant" in item[1]:
-                            self.set_gear_enchantment(item[0], item[1]["enchant"])
+                    if "enchant" in item[1]:
+                        self.set_gear_enchantment(item[0], item[1]["enchant"])
 
-                        if "gems" in item[1]:
-                            for socket in item[1]["gems"].items():
-                                self.set_socket_gem(item[0], socket[0] - 1, socket[1])
+                    if "gems" in item[1]:
+                        for socket in item[1]["gems"].items():
+                            self.set_socket_gem(item[0], socket[0] - 1, socket[1])
 
-            if "talent_calc_link" in settings_dict["character"]:
-                self.player_talents_string = settings_dict["character"]["talent_calc_link"]
-
-        if "enemy" in settings_dict:
-            if "boss" in settings_dict["enemy"]:
-                self.enemy_is_boss = settings_dict["enemy"]["boss"]
-
-            if "level" in settings_dict["enemy"]:
-                self.enemy_level = settings_dict["enemy"]["level"]
-
-            if "attributes" in settings_dict["enemy"]:
-                if "armor" in settings_dict["enemy"]["attributes"]:
-                    self.enemy_armor = settings_dict["enemy"]["attributes"]["armor"]
-
-                if "holy_resistance" in settings_dict["enemy"]["attributes"]:
-                    self.enemy_holy_res = settings_dict["enemy"]["attributes"]["holy_resistance"]
-
-                if "frost_resistance" in settings_dict["enemy"]["attributes"]:
-                    self.enemy_frost_res = settings_dict["enemy"]["attributes"]["frost_resistance"]
-
-                if "fire_resistance" in settings_dict["enemy"]["attributes"]:
-                    self.enemy_fire_res = settings_dict["enemy"]["attributes"]["fire_resistance"]
-
-                if "nature_resistance" in settings_dict["enemy"]["attributes"]:
-                    self.enemy_nature_res = settings_dict["enemy"]["attributes"]["nature_resistance"]
-
-                if "arcane_resistance" in settings_dict["enemy"]["attributes"]:
-                    self.enemy_arcane_res = settings_dict["enemy"]["attributes"]["arcane_resistance"]
-
-                if "shadow_resistance" in settings_dict["enemy"]["attributes"]:
-                    self.enemy_shadow_res = settings_dict["enemy"]["attributes"]["shadow_resistance"]
-
-        if "simulation" in settings_dict:
-            if "sim_type" in settings_dict["simulation"]:
-                self.sim_type = settings_dict["simulation"]["sim_type"]
-
-            if "sim_duration" in settings_dict["simulation"]:
-                self.sim_duration = settings_dict["simulation"]["sim_duration"]
-
-            if "sim_iterations" in settings_dict["simulation"]:
-                self.sim_iterations = settings_dict["simulation"]["sim_iterations"]
-
-            if "sim_combat_rater" in settings_dict["simulation"]:
-                self.sim_combat_rater = settings_dict["simulation"]["sim_combat_rater"]
+        if "talent_calc_link" in character_settings_dict:
+            self.player_talents_string = character_settings_dict["talent_calc_link"]
 
 
 @dataclass

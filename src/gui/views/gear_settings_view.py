@@ -10,9 +10,9 @@ from src.gui.widgets.select_from_list_dialog import SelectFromListDialog
 
 
 class GearView(QWidget):
-    def __init__(self, settings_model):
+    def __init__(self, character_settings_model):
         super().__init__()
-        self.settings_model = settings_model
+        self.character_settings_model = character_settings_model
         self.gear_slots = {}
         self.gear_slot_buttons = {}
         self.gear_slot_edit_dialog = {}
@@ -42,8 +42,8 @@ class GearView(QWidget):
         ch_settings_gear_layout.addWidget(QHLine())
         ch_settings_gear_layout.addLayout(gear_items_layout)
 
-        item_slots = len(settings_model.equipped_gear)
-        for i, gear_slot_entry in enumerate(settings_model.equipped_gear.items()):
+        item_slots = len(character_settings_model.equipped_gear)
+        for i, gear_slot_entry in enumerate(character_settings_model.equipped_gear.items()):
             gear_slot = QHBoxLayout()
             gear_slot.setAlignment(Qt.AlignTop)
             gear_slot.setContentsMargins(0, 0, 0, 0)
@@ -64,7 +64,7 @@ class GearView(QWidget):
             gear_lvbox_layout.addWidget(gear_slot_label)
             gear_lvbox_layout.addWidget(self.gear_slot_buttons[i])
 
-            self.gear_slots[i] = GearItem(self.settings_model, gear_slot_entry[0])
+            self.gear_slots[i] = GearItem(self.character_settings_model, gear_slot_entry[0])
 
             gear_slot.addLayout(gear_lvbox_layout)
             gear_slot.addWidget(self.gear_slots[i])
@@ -78,18 +78,19 @@ class GearView(QWidget):
             current_layout_side.addLayout(gear_slot)
             current_layout_side.addWidget(QHLine())
 
-            self.gear_slot_edit_dialog[i] = SelectGearItemDialog(self.settings_model, gear_slot_entry[0])
+            self.gear_slot_edit_dialog[i] = SelectGearItemDialog(self.character_settings_model, gear_slot_entry[0])
 
         self.connect_signals()
 
     def connect_signals(self):
         for index, edit_button in enumerate(self.gear_slot_buttons.values()):
             inventory_slot = self.gear_slot_edit_dialog[index].inventory_slot
-            self.gear_slot_edit_dialog[index].set_dict_signal(self.settings_model.edit_gear_signals[inventory_slot])
+            self.gear_slot_edit_dialog[index].set_dict_signal(
+                self.character_settings_model.edit_gear_signals[inventory_slot])
             edit_button.clicked.connect(partial(self.open_gear_dialog,
                                                 self.gear_slot_edit_dialog[index],
                                                 inventory_slot))
-        self.settings_model.equipped_gear_signal.connect(self.update_gear_items)
+        self.character_settings_model.equipped_gear_signal.connect(self.update_gear_items)
 
     @pyqtSlot(dict)
     def update_gear_items(self, equipped_items):
@@ -110,7 +111,7 @@ class GearView(QWidget):
 
     def open_gear_dialog(self, dialog, inv_slot):
         if dialog.list.count() == 0:
-            self.settings_model.emit_edit_gear_dict_slot(inv_slot)
+            self.character_settings_model.emit_edit_gear_dict_slot(inv_slot)
         dialog.exec_()
 
 

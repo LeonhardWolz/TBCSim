@@ -9,6 +9,7 @@ class Character:
     def __init__(self):
         self.race = 'default'
         self.player_class = 'default'
+        self.talents = ""
         self.combat_handler = CombatHandler(self)
         self.level = 70
         self.damage_spells = []

@@ -29,11 +29,12 @@ class MainWindowModel(QObject):
         self.progress.emit(0)
         self.sim_button_enabled.emit(True)
         self.results_text.emit("")
+        self.settings_model.set_default()
 
     @pyqtSlot(name="start_sim")
     def start_sim(self):
         self.sim_thread = QThread()
-        self.sim_worker = SimWorker(self, SimulationSettingsLoader(self.settings_model.settings_dict))
+        self.sim_worker = SimWorker(self, SimulationSettingsLoader(self.settings_model.sim_settings_dict))
 
         self.sim_worker.moveToThread(self.sim_thread)
         self.sim_thread.started.connect(self.sim_worker.run_simulations)
@@ -62,7 +63,7 @@ class MainWindowModel(QObject):
 
     def save_sim_settings(self, save_file_name):
         with open(fr"{save_file_name[0]}", "w") as file:
-            yaml.dump(self.settings_model.settings_dict, file)
+            yaml.dump(self.settings_model.sim_settings_dict, file)
 
     def save_sim_results(self, save_file_name):
         with open(fr"{save_file_name[0]}", "w") as file:
@@ -87,30 +88,39 @@ class SimWorker(QObject):
         self.model.results_text.emit("Simulating...")
 
         sim_start_time = time.perf_counter()
-        sim_results = []
         sim_settings = self.settings_loader.get_sim_settings()
 
-        with concurrent.futures.ProcessPoolExecutor() as executor:
-            for sim_num in range(sim_settings.sim_iterations):
-                settings, char = self.settings_loader.get_settings()
-                sim_results.append(executor.submit(Sim.start_simulation, settings, char, sim_num))
+        if sim_settings.sim_type == "dps":
+            total_iterations = sim_settings.sim_iterations
+        elif sim_settings.sim_type == "compare":
+            total_iterations = sim_settings.sim_iterations * 2
+        else:
+            total_iterations = sim_settings.sim_iterations
 
-            for _ in concurrent.futures.as_completed(sim_results):
-                self.completed_sims += 1
-                self.model.progress.emit(int((self.completed_sims / sim_settings.sim_iterations) * 100))
-                self.model.progress_label.emit(str(self.completed_sims) + "/" + str(sim_settings.sim_iterations) + " "
-                                               + "%0.2f" % ((self.completed_sims / sim_settings.sim_iterations) * 100)
-                                               + "%")
+        for x, char in enumerate(self.settings_loader.get_char_settings()):
+            sim_results = []
+            with concurrent.futures.ProcessPoolExecutor() as executor:
+                for sim_num in range(sim_settings.sim_iterations):
+                    settings = self.settings_loader.get_sim_settings()
+                    sim_results.append(executor.submit(Sim.start_simulation, settings, char, sim_num))
+
+                for _ in concurrent.futures.as_completed(sim_results):
+                    self.completed_sims += 1
+                    self.model.progress.emit(int((self.completed_sims / total_iterations) * 100))
+                    self.model.progress_label.emit(str(self.completed_sims) + "/" + str(total_iterations) + " "
+                                                   + "%0.2f" % ((self.completed_sims / total_iterations) * 100)
+                                                   + "%")
+
+            self.sim_cum_results.results.append([res.result() for res in sim_results])
 
         sim_end_time = time.perf_counter()
 
         self.sim_cum_results.settings = sim_settings
-        self.sim_cum_results.results = [res.result() for res in sim_results]
         self.sim_cum_results.start_time = datetime.now()
         self.sim_cum_results.run_time = round(sim_end_time - sim_start_time, 2)
 
-        self.model.progress_label.emit(str(self.completed_sims) + "/" + str(sim_settings.sim_iterations) + " "
-                                       + "%0.2f" % ((self.completed_sims / sim_settings.sim_iterations) * 100)
+        self.model.progress_label.emit(str(self.completed_sims) + "/" + str(total_iterations) + " "
+                                       + "%0.2f" % ((self.completed_sims / total_iterations) * 100)
                                        + "% - Simulation Complete")
 
         self.model.sim_button_enabled.emit(True)
