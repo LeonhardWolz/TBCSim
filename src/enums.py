@@ -1,11 +1,11 @@
 import enum
 
 inventory_slot = {
-    0: "Ammo",
+    #0: "Ammo",
     1: "Head",
     2: "Neck",
     3: "Shoulder",
-    4: "Body",
+    #4: "Body",
     5: "Chest",
     6: "Waist",
     7: "Legs",
@@ -20,7 +20,30 @@ inventory_slot = {
     16: "Mainhand",
     17: "Offhand",
     18: "Ranged",
-    19: "Tabard"
+    #19: "Tabard"
+}
+
+inv_type_in_slot = {
+    0: (24,),
+    1: (1,),
+    2: (2,),
+    3: (3,),
+    4: (4,),
+    5: (5, 20),
+    6: (6,),
+    7: (7,),
+    8: (8,),
+    9: (9,),
+    10: (10,),
+    11: (11,),
+    12: (11,),
+    13: (12,),
+    14: (12,),
+    15: (16,),
+    16: (13, 17, 21),
+    17: (13, 14, 17, 22, 23),
+    18: (15, 25, 26, 28),
+    19: (19,)
 }
 cast_time = {
     1: 0,
@@ -225,3 +248,27 @@ class CombatAction(enum.Enum):
     Idle = 0
     Cast_Spell = 1
     Wand_Attack = 2
+    Consume_Item = 3
+
+
+socket_color_name = {
+    1: "Meta",
+    2: "Red",
+    4: "Yellow",
+    8: "Blue"
+}
+
+ignite_dmg_pct = {
+    11119: 8,
+    11120: 16,
+    12846: 24,
+    12847: 32,
+    12848: 40
+}
+
+socket_bitmask = {
+    1: 1,
+    2: 2,
+    3: 4,
+    4: 8
+}
