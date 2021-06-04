@@ -7,6 +7,7 @@ from src.sim.sim_objects.aura import Aura
 from src.sim.sim_objects.channelled_spell import ChannelledSpell
 from src.sim.sim_objects.dot_spell import DotSpell
 import src.db.sqlite_db_connector as DB
+from src.sim.sim_objects.periodic_trigger_aura import PeriodicTriggerAura
 
 
 class CombatHandler:
@@ -55,7 +56,7 @@ class CombatHandler:
                 # Apply Dummy Aura to character
                 self.apply_aura_to_character(spell_info, j)
 
-            elif spell_info[DB.spell_column_info["Effect" + str(j)]] == 6:
+            elif spell_info[DB.spell_column_info["Effect" + str(j)]] in (6, 35):
 
                 # Dont apply fire power + piercing ice aura with item type mask
                 if spell_info[DB.spell_column_info["EffectItemType" + str(j)]] == 0 or \
@@ -86,11 +87,14 @@ class CombatHandler:
     def apply_passive_auras(self, spell_info, effect_slot):
         if (spell_info[DB.spell_column_info["AttributesEx"]] & 4 or
             spell_info[DB.spell_column_info["AttributesEx"]] & 64) and \
-                spell_info[DB.spell_column_info["EffectApplyAuraName" + str(effect_slot)]] in [21, 23]:
+                spell_info[DB.spell_column_info["EffectApplyAuraName" + str(effect_slot)]] == 21:
             self.process_channelled_spell(spell_info, effect_slot)
 
-        elif spell_info[DB.spell_column_info["EffectImplicitTargetA" + str(effect_slot)]] in [1, 21]:
+        elif spell_info[DB.spell_column_info["EffectImplicitTargetA" + str(effect_slot)]] in [1, 18, 21, 22]:
             self.apply_aura_to_character(spell_info, effect_slot)
+
+        elif spell_info[DB.spell_column_info["EffectImplicitTargetA" + str(effect_slot)]] in [23]:
+            self.apply_periodic_trigger_spell(spell_info, effect_slot)
 
         elif spell_info[DB.spell_column_info["EffectImplicitTargetA" + str(effect_slot)]] in [6, 25]:
             if spell_info[DB.spell_column_info["EffectApplyAuraName" + str(effect_slot)]] == 3:
@@ -159,6 +163,18 @@ class CombatHandler:
                 for aura in self.char.combat_handler.active_auras:
                     if aura.spell_id in [11071, 12496, 12497] and aura.value > random.randint(0, 100):
                         self.apply_spell_effect(aura.trigger_spell)
+
+    def apply_periodic_trigger_spell(self, spell_info, effect_slot):
+        trigger_spell_id = spell_info[DB.spell_column_info["EffectTriggerSpell" + str(effect_slot)]]
+
+        aura_duration, trigger_interval = self.periodic_effect_behaviour(spell_info, effect_slot)
+        periodic_trigger_aura = PeriodicTriggerAura(self.env,
+                                                    self,
+                                                    trigger_spell_id,
+                                                    trigger_interval,
+                                                    aura_duration)
+
+        self.env.process(periodic_trigger_aura.processing())
 
     def get_aura(self, spell_info, effect_slot):
         minvalue, maxvalue = self.get_effect_strength(spell_info, effect_slot)
