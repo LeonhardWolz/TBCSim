@@ -243,7 +243,7 @@ class SimulationSettingsLoader(object):
 
     def check_meta_gem_conditions(self, char_index, meta_gems):
         for gem_to_check in meta_gems:
-            if self.meta_gem_condition(gem_to_check[1][DB.enchant_column_info["m_condition_id"]]):
+            if self.meta_gem_condition(char_index, gem_to_check[1][DB.enchant_column_info["m_condition_id"]]):
                 self.apply_enchantment(char_index, gem_to_check[1])
                 gem_to_check[0][4] = True
             else:

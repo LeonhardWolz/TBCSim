@@ -24,6 +24,8 @@ class TestArcaneBlast(unittest.TestCase):
     def test_arcane_blast_debuff_application(self):
         self.char.combat_handler.apply_spell_effect(self.arcane_blast_rank1)
         self.assertTrue(self.arcane_blast_debuff in [aura.spell_id for aura in self.char.combat_handler.active_auras])
+        self.assertTrue(1, [aura.curr_stacks for aura in self.char.combat_handler.active_auras
+                            if aura.spell_id == self.arcane_blast_debuff])
 
     def test_arcane_blast_debuff_effect(self):
         self.assertEqual(2500, self.char.spell_cast_time(self.arcane_blast_rank1, proc_auras=False))

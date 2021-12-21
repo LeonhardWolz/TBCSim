@@ -63,8 +63,8 @@ class CombatHandler:
                         spell_id not in [11124, 12378, 12398, 12399, 12400, 11151, 12952, 12953, 12954, 12957]:
                     self.apply_passive_auras(spell_info, j)
 
-            elif spell_info[DB.spell_column_info["Effect" + str(j)]] == 64 and \
-                    spell_info[DB.spell_column_info["EffectImplicitTargetA" + str(j)]] == 1:
+            elif spell_info[DB.spell_column_info["Effect" + str(j)]] == 64:  # and \
+                # spell_info[DB.spell_column_info["EffectImplicitTargetA" + str(j)]] == 1:
 
                 # Trigger Spell on character
                 self.apply_spell_effect(spell_info[DB.spell_column_info["EffectTriggerSpell" + str(j)]])
@@ -209,14 +209,15 @@ class CombatHandler:
         trigger_spell = spell_info[DB.spell_column_info["EffectTriggerSpell" + str(effect_slot)]]
 
         spell_proc_info = DB.get_spell_proc_info(spell_info[0])
-        proc_flags = spell_info[DB.spell_column_info["ProcFlags"]] \
-            if not spell_proc_info or spell_proc_info[2] == 0 else spell_proc_info[2]
-        proc_flags_ex = 0 if not spell_proc_info or spell_proc_info[3] == 0 else spell_proc_info[3]
+        proc_flags = spell_info[DB.spell_column_info["ProcFlags"]] if not spell_proc_info else spell_proc_info[2]
+        proc_flags_ex = 0 if not spell_proc_info else spell_proc_info[3]
+        proc_cooldown = 0 if not spell_proc_info else spell_proc_info[6]
 
         proc = [proc_flags,
                 proc_flags_ex,
                 spell_info[DB.spell_column_info["ProcChance"]],
-                spell_info[DB.spell_column_info["ProcCharges"]]]
+                spell_info[DB.spell_column_info["ProcCharges"]],
+                proc_cooldown]
         attributes = [spell_info[DB.spell_column_info["Attributes"]],
                       spell_info[DB.spell_column_info["AttributesEx"]],
                       spell_info[DB.spell_column_info["AttributesEx2"]],
@@ -486,9 +487,9 @@ class CombatHandler:
         return str(self.env.now / 1000)
 
     def remove_expired_auras(self):
-        # TODO: Auras that stack up dont lose stacks when the first stack would expire, since a new stack changes
-        #  the application time so it doesn't get removed here
         for aura in self.active_auras:
+            if aura.spell_id in (33370, 33297, 33953):
+                print(self.env.now, aura)
             if aura.duration_index != 0 and \
                     self.env.now - aura.create_time > enums.duration_index[aura.duration_index] != -1:
                 self.active_auras.remove(aura)
@@ -606,8 +607,12 @@ class CombatHandler:
     def get_procable_auras(self, proc_flags=0, proc_flags_ex=0):
         procced_auras = []
         for aura in self.active_auras:
-            if (aura.proc[0] & proc_flags and aura.proc[1] == 0 or aura.proc[1] & proc_flags_ex) or\
-                    (aura.proc[2] == 101 and (proc_flags_ex & 1 or proc_flags_ex & 2)):
+            # if ((aura.proc[0] & proc_flags and aura.proc[1] == 0) or
+            #         (aura.proc[0] == 0 and aura.proc[1] & proc_flags_ex) or aura.proc[2] == 101):
+            if (aura.proc[0] & proc_flags and aura.proc[1] == 0) or \
+                    (aura.proc[0] == 0 and aura.proc[1] & proc_flags_ex) or \
+                    (aura.proc[2] == 101 and (proc_flags_ex & 1 or proc_flags_ex & 2)) or \
+                    (aura.proc[2] == 100 and (proc_flags_ex not in (1, 2))):
                 procced_auras.append(aura)
         return procced_auras
 
@@ -621,7 +626,6 @@ class CombatHandler:
 
     def get_recovery_time_mod(self, spell_id):
         recovery_time_mod = 0
-        # for aura in self.get_character_mod_auras(spell_id):
         for aura in self.active_auras:
             if self.aura_applies_to_spell(aura, spell_id) and \
                     (aura.aura_id == 107 and aura.misc_value == 11 and
